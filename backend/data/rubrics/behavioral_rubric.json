@@ -1,0 +1,190 @@
+{
+  "rubric_version": "1.0",
+  "description": "STAR/CARL behavioral interview scoring criteria with Amazon LP mapping.",
+  "star_scoring": {
+    "situation": {
+      "max_score": 2,
+      "criteria": {
+        "0": "Vague or missing context. No specific project, team, or timeframe. 'So there was this one time...' with no grounding.",
+        "1": "Some context provided. Names a project or team but missing key details (when, what was at stake, who was involved).",
+        "2": "Specific and grounded. Names the project, team, timeframe, stakes, and relevant constraints. Paints a clear picture."
+      },
+      "evaluation_notes": "Look for: named projects, specific dates or timeframes, team size, business context, stakes. Deduct for: 'at my last company' with no specifics, hypothetical scenarios presented as real experience."
+    },
+    "action": {
+      "max_score": 3,
+      "criteria": {
+        "0": "No clear action. Describes what happened to them, not what they did. All passive voice or 'we' statements.",
+        "1": "Some actions described but mostly 'we did X'. Cannot distinguish individual contribution from team effort.",
+        "2": "Clear 'I' statements with specific actions. Describes what they personally did, why, and the reasoning behind decisions.",
+        "3": "Detailed 'I' actions with decision rationale, alternatives considered, and adaptation when initial approach didn't work. Clear ownership throughout."
+      },
+      "evaluation_notes": "I-vs-we ratio target: >60% 'I' statements for senior roles, >50% for mid. Track exact ratio. Look for: decision points, alternatives considered, adaptation. Deduct for: credit taking without specifics, vague 'managed' or 'led' without concrete actions.",
+      "i_vs_we_thresholds": {
+        "junior": 0.40,
+        "mid": 0.50,
+        "senior": 0.60,
+        "staff": 0.70
+      }
+    },
+    "result": {
+      "max_score": 3,
+      "criteria": {
+        "0": "No measurable outcome. 'It worked out' or 'it was a success' with no evidence.",
+        "1": "Qualitative outcome described. 'The team was happy' or 'the project shipped' but no numbers.",
+        "2": "Quantified outcome with metrics. 'Reduced MTTD from 45 min to 12 min' or 'resolved the incident in 3 hours with zero data loss'.",
+        "3": "Quantified outcome with business impact AND personal learning. Connects the result to broader organizational impact. Articulates what they'd do differently."
+      },
+      "evaluation_notes": "Look for: specific numbers, percentages, time savings, cost impact, customer impact, before/after comparisons. Bonus for: learning stated without prompting, systemic impact beyond the immediate task."
+    },
+    "depth_under_pressure": {
+      "max_score": 2,
+      "criteria": {
+        "0": "Quality degrades significantly under follow-up probing. Contradicts earlier statements. Reveals memorized answer, not real experience.",
+        "1": "Maintains consistency under probing. Answers follow-ups adequately but doesn't add new depth. Stable but not impressive.",
+        "2": "Quality improves under probing. Adds detail, nuance, and reflection when pushed. Follow-up answers reveal deeper understanding than initial response."
+      },
+      "evaluation_notes": "This is the key differentiator between real experience and prepared stories. Real experience gets richer under probing. Fabricated stories get thinner. Look for: new details emerging, consistent timeline, emotional authenticity, self-awareness."
+    }
+  },
+  "total_score": {
+    "max": 10,
+    "interpretation": {
+      "1-3": "Weak behavioral response. Missing STAR elements, vague, or likely fabricated.",
+      "4-5": "Adequate. Has the structure but lacks depth, specificity, or clear individual contribution.",
+      "6-7": "Strong. Clear STAR structure with specific actions and measurable results. Shows real experience.",
+      "8-9": "Excellent. Deep, specific, reflective. Demonstrates leadership and learning. Holds up under pressure.",
+      "10": "Exceptional. All elements strong, reveals genuine character and growth. Would be a standout in any interview loop."
+    }
+  },
+  "amazon_leadership_principles": {
+    "description": "Amazon's 16 Leadership Principles used in Bar Raiser interviews. Each behavioral question maps to 1-3 LPs.",
+    "principles": [
+      {
+        "id": "customer_obsession",
+        "name": "Customer Obsession",
+        "description": "Leaders start with the customer and work backwards.",
+        "interview_signals": ["mentions customer/user impact", "frames decisions through customer lens", "measures success by customer outcomes"],
+        "red_flags": ["never mentions customers", "only internal metrics", "technology-first thinking"]
+      },
+      {
+        "id": "ownership",
+        "name": "Ownership",
+        "description": "Leaders think long-term and don't sacrifice long-term value for short-term results. They act on behalf of the entire company.",
+        "interview_signals": ["takes responsibility for failures", "goes beyond job scope", "considers long-term implications"],
+        "red_flags": ["blame others", "'not my job' mentality", "only short-term thinking"]
+      },
+      {
+        "id": "invent_and_simplify",
+        "name": "Invent and Simplify",
+        "description": "Leaders expect and require innovation and invention from their teams.",
+        "interview_signals": ["simplifies complex problems", "creates novel solutions", "challenges status quo"],
+        "red_flags": ["only follows existing processes", "adds unnecessary complexity", "no innovation examples"]
+      },
+      {
+        "id": "are_right_a_lot",
+        "name": "Are Right, A Lot",
+        "description": "Leaders have strong judgment and good instincts. They seek diverse perspectives.",
+        "interview_signals": ["data-driven decisions", "seeks input before deciding", "acknowledges when wrong"],
+        "red_flags": ["decisions without data", "ignores other perspectives", "never wrong"]
+      },
+      {
+        "id": "learn_and_be_curious",
+        "name": "Learn and Be Curious",
+        "description": "Leaders are never done learning and always seek to improve themselves.",
+        "interview_signals": ["pursues new knowledge", "applies learnings from failures", "explores outside comfort zone"],
+        "red_flags": ["no learning examples", "stuck in same approach", "dismisses new ideas"]
+      },
+      {
+        "id": "hire_and_develop_the_best",
+        "name": "Hire and Develop the Best",
+        "description": "Leaders raise the performance bar with every hire and promotion.",
+        "interview_signals": ["mentors others", "gives hard feedback", "develops team capabilities"],
+        "red_flags": ["no mentoring", "hoards knowledge", "threatened by talent"]
+      },
+      {
+        "id": "insist_on_the_highest_standards",
+        "name": "Insist on the Highest Standards",
+        "description": "Leaders have relentlessly high standards. They continually raise the bar.",
+        "interview_signals": ["specific quality standards", "doesn't accept mediocre", "raises bar for self and team"],
+        "red_flags": ["accepts 'good enough'", "no quality examples", "lowers standards under pressure"]
+      },
+      {
+        "id": "think_big",
+        "name": "Think Big",
+        "description": "Leaders create and communicate a bold direction that inspires results.",
+        "interview_signals": ["proposes ambitious goals", "thinks beyond immediate task", "connects work to bigger picture"],
+        "red_flags": ["only tactical thinking", "no vision", "plays it safe always"]
+      },
+      {
+        "id": "bias_for_action",
+        "name": "Bias for Action",
+        "description": "Speed matters in business. Many decisions are reversible and do not need extensive study.",
+        "interview_signals": ["acts without perfect information", "moves fast on reversible decisions", "bias toward doing over analyzing"],
+        "red_flags": ["analysis paralysis", "waits for consensus", "afraid to make mistakes"]
+      },
+      {
+        "id": "frugality",
+        "name": "Frugality",
+        "description": "Accomplish more with less.",
+        "interview_signals": ["creative resource use", "does more with less", "challenges unnecessary spending"],
+        "red_flags": ["throws money at problems", "no resource awareness", "wasteful approaches"]
+      },
+      {
+        "id": "earn_trust",
+        "name": "Earn Trust",
+        "description": "Leaders listen attentively, speak candidly, and treat others respectfully.",
+        "interview_signals": ["admits mistakes", "gives hard feedback directly", "builds relationships through transparency"],
+        "red_flags": ["avoids hard conversations", "not transparent", "breaks commitments"]
+      },
+      {
+        "id": "dive_deep",
+        "name": "Dive Deep",
+        "description": "Leaders operate at all levels, stay connected to the details, and are skeptical when metrics and anecdote differ.",
+        "interview_signals": ["knows technical details", "questions data anomalies", "doesn't rely on summaries alone"],
+        "red_flags": ["only high-level", "trusts reports without verification", "can't explain details"]
+      },
+      {
+        "id": "have_backbone_disagree_and_commit",
+        "name": "Have Backbone; Disagree and Commit",
+        "description": "Leaders respectfully challenge decisions when they disagree, then commit wholly once a decision is made.",
+        "interview_signals": ["disagrees with data", "commits after decision", "doesn't give up too easily"],
+        "red_flags": ["agrees with everything", "passive aggressive after disagreement", "won't commit"]
+      },
+      {
+        "id": "deliver_results",
+        "name": "Deliver Results",
+        "description": "Leaders focus on the key inputs for their business and deliver them with the right quality and in a timely fashion.",
+        "interview_signals": ["quantified outcomes", "delivered on time", "overcame obstacles to deliver"],
+        "red_flags": ["no measurable results", "always blocked by others", "excuses for non-delivery"]
+      },
+      {
+        "id": "strive_to_be_earths_best_employer",
+        "name": "Strive to be Earth's Best Employer",
+        "description": "Leaders work every day to create a safer, more productive, higher performing, more diverse, and more just work environment.",
+        "interview_signals": ["creates safe team environment", "invests in team development", "considers diverse perspectives"],
+        "red_flags": ["toxic management", "ignores team health", "no diversity awareness"]
+      },
+      {
+        "id": "success_and_scale_bring_broad_responsibility",
+        "name": "Success and Scale Bring Broad Responsibility",
+        "description": "Leaders create more than they consume and always leave things better than how they found them.",
+        "interview_signals": ["considers broader impact", "improves processes for others", "leaves things better"],
+        "red_flags": ["only self-interested", "no consideration of broader impact", "leaves messes for others"]
+      }
+    ]
+  },
+  "custom_framework_template": {
+    "description": "Template for custom behavioral frameworks beyond Amazon LPs.",
+    "framework_name": "",
+    "principles": [
+      {
+        "id": "",
+        "name": "",
+        "description": "",
+        "interview_signals": [],
+        "red_flags": []
+      }
+    ]
+  }
+}

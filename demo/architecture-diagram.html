@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberLoop - Architecture Diagram</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 24px 60px;
+  }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #f0f6fc;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: #8b949e;
+    margin-bottom: 40px;
+    font-weight: 400;
+  }
+
+  .diagram {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* ---------- LAYER BOXES ---------- */
+  .layer {
+    width: 100%;
+    border-radius: 12px;
+    padding: 20px 24px;
+    position: relative;
+    background: #161b22;
+  }
+  .layer-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .layer-label .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* --- Browser layer --- */
+  .browser {
+    border: 1.5px solid #4285F4;
+    box-shadow: 0 0 24px rgba(66,133,244,0.08);
+  }
+  .browser .layer-label { color: #4285F4; }
+  .browser .dot { background: #4285F4; }
+
+  .browser-tech {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #8b949e;
+    margin-bottom: 14px;
+  }
+  .browser-tech span { color: #58a6ff; }
+
+  .pages {
+    display: grid;
+    grid-template-columns: 1fr 2.4fr 1fr;
+    gap: 12px;
+  }
+  .page-box {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .page-box h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f0f6fc;
+    margin-bottom: 6px;
+  }
+  .page-box .features {
+    font-size: 11px;
+    color: #8b949e;
+    line-height: 1.6;
+  }
+  .page-box .features .icon {
+    display: inline-block;
+    margin-right: 2px;
+    font-style: normal;
+  }
+  .page-box.live {
+    border-color: #4285F4;
+    box-shadow: 0 0 12px rgba(66,133,244,0.06);
+  }
+
+  /* --- Arrow connectors --- */
+  .arrow-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    position: relative;
+    width: 100%;
+  }
+  .arrow-line {
+    width: 2px;
+    height: 32px;
+    background: linear-gradient(180deg, #4285F4, #34A853);
+    position: relative;
+  }
+  .arrow-line::before, .arrow-line::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .arrow-line::before {
+    top: -5px;
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 6px solid #4285F4;
+  }
+  .arrow-line::after {
+    bottom: -5px;
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #34A853;
+  }
+  .arrow-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: #8b949e;
+    background: #0d1117;
+    padding: 3px 12px;
+    border-radius: 4px;
+    border: 1px solid #21262d;
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+  .arrow-label .bidi {
+    color: #58a6ff;
+  }
+
+  /* --- Middle row: backend + cloud --- */
+  .middle-row {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    width: 100%;
+  }
+
+  /* Backend layer */
+  .backend {
+    border: 1.5px solid #34A853;
+    box-shadow: 0 0 24px rgba(52,168,83,0.08);
+  }
+  .backend .layer-label { color: #34A853; }
+  .backend .dot { background: #34A853; }
+
+  .backend-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .backend-box {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .backend-box h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f0f6fc;
+    margin-bottom: 8px;
+  }
+  .backend-box ul {
+    list-style: none;
+    padding: 0;
+  }
+  .backend-box ul li {
+    font-size: 11.5px;
+    color: #8b949e;
+    padding: 2px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .backend-box ul li::before {
+    content: '';
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #34A853;
+    flex-shrink: 0;
+  }
+  .agent-box h3 { display: flex; align-items: center; gap: 6px; }
+  .agent-box .badge {
+    font-size: 9px;
+    font-weight: 600;
+    background: rgba(52,168,83,0.15);
+    color: #34A853;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .tool-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: #7ee787 !important;
+  }
+
+  /* Cloud / Gemini column */
+  .cloud-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .gemini-box {
+    border-radius: 12px;
+    padding: 18px 20px;
+    background: #161b22;
+    position: relative;
+  }
+  .gemini-flash {
+    border: 1.5px solid #8E24AA;
+    box-shadow: 0 0 20px rgba(142,36,170,0.1);
+  }
+  .gemini-pro {
+    border: 1.5px solid #AB47BC;
+    box-shadow: 0 0 20px rgba(171,71,188,0.08);
+  }
+  .gemini-box .layer-label { margin-bottom: 10px; }
+  .gemini-flash .layer-label { color: #CE93D8; }
+  .gemini-flash .dot { background: #8E24AA; }
+  .gemini-pro .layer-label { color: #CE93D8; }
+  .gemini-pro .dot { background: #AB47BC; }
+  .gemini-box .features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .gemini-box .tag {
+    font-size: 10.5px;
+    background: rgba(142,36,170,0.12);
+    color: #CE93D8;
+    padding: 3px 9px;
+    border-radius: 4px;
+    border: 1px solid rgba(142,36,170,0.2);
+    white-space: nowrap;
+  }
+
+  /* Connector arrows between backend and cloud */
+  .middle-row { position: relative; }
+  .side-arrow {
+    display: none; /* handled via visual proximity */
+  }
+
+  /* Horizontal arrow between backend and gemini */
+  .h-arrow-overlay {
+    position: absolute;
+    right: 348px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+  }
+  .h-arrow-line {
+    width: 0;
+    height: 0;
+  }
+
+  /* --- Bottom arrow --- */
+  .arrow-down-sm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+  }
+  .arrow-down-sm .arrow-line {
+    height: 24px;
+    background: linear-gradient(180deg, #34A853, #EA8600);
+  }
+  .arrow-down-sm .arrow-line::before {
+    display: none;
+  }
+  .arrow-down-sm .arrow-line::after {
+    border-top-color: #EA8600;
+  }
+
+  /* --- Storage layer --- */
+  .storage-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    width: 100%;
+  }
+  .storage-box {
+    border-radius: 12px;
+    padding: 18px 20px;
+    background: #161b22;
+  }
+  .storage-box .layer-label { margin-bottom: 10px; }
+  .storage-box .items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .storage-box .tag {
+    font-size: 10.5px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .firestore {
+    border: 1.5px solid #EA8600;
+    box-shadow: 0 0 20px rgba(234,134,0,0.08);
+  }
+  .firestore .layer-label { color: #FFA726; }
+  .firestore .dot { background: #EA8600; }
+  .firestore .tag {
+    background: rgba(234,134,0,0.12);
+    color: #FFB74D;
+    border: 1px solid rgba(234,134,0,0.2);
+  }
+
+  .cloudstorage {
+    border: 1.5px solid #5F6368;
+    box-shadow: 0 0 20px rgba(95,99,104,0.08);
+  }
+  .cloudstorage .layer-label { color: #9AA0A6; }
+  .cloudstorage .dot { background: #5F6368; }
+  .cloudstorage .tag {
+    background: rgba(95,99,104,0.15);
+    color: #9AA0A6;
+    border: 1px solid rgba(95,99,104,0.25);
+  }
+
+  .secrets {
+    border: 1.5px solid #EA4335;
+    box-shadow: 0 0 20px rgba(234,67,53,0.08);
+  }
+  .secrets .layer-label { color: #EF5350; }
+  .secrets .dot { background: #EA4335; }
+  .secrets .tag {
+    background: rgba(234,67,53,0.12);
+    color: #EF9A9A;
+    border: 1px solid rgba(234,67,53,0.2);
+  }
+
+  /* SVG arrows overlay */
+  .svg-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* Connector line between backend and Gemini boxes */
+  .connector-wrapper {
+    position: relative;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .middle-row { grid-template-columns: 1fr; }
+    .pages { grid-template-columns: 1fr; }
+    .storage-row { grid-template-columns: 1fr; }
+    .backend-inner { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>CyberLoop</h1>
+<p class="subtitle">AI-Powered Technical Interview Platform &mdash; System Architecture</p>
+
+<div class="diagram">
+
+  <!-- ============ BROWSER LAYER ============ -->
+  <div class="layer browser">
+    <div class="layer-label">
+      <span class="dot"></span>
+      User's Browser
+    </div>
+    <div class="browser-tech">
+      <span>React 18</span> + <span>Vite</span> + <span>TailwindCSS</span>
+    </div>
+    <div class="pages">
+      <div class="page-box">
+        <h3>Setup Page</h3>
+        <div class="features">
+          Interview mode<br>
+          Difficulty config<br>
+          Resume upload
+        </div>
+      </div>
+      <div class="page-box live">
+        <h3>Live Interview</h3>
+        <div class="features">
+          <i class="icon">&#127908;</i> Microphone &nbsp;&bull;&nbsp;
+          Monaco Editor &nbsp;&bull;&nbsp;
+          Run Code &nbsp;&bull;&nbsp;
+          Screen Share
+        </div>
+      </div>
+      <div class="page-box">
+        <h3>Report Card</h3>
+        <div class="features">
+          Scores &amp; radar chart<br>
+          Transcript review<br>
+          Missed concepts
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ARROW: Browser -> Backend ============ -->
+  <div class="arrow-connector">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">
+      <span class="bidi">&#8593;&#8595;</span> WebSocket &mdash; PCM16 audio + JSON
+    </div>
+  </div>
+
+  <!-- ============ MIDDLE ROW ============ -->
+  <div class="middle-row">
+
+    <!-- Backend -->
+    <div class="layer backend">
+      <div class="layer-label">
+        <span class="dot"></span>
+        FastAPI Backend &mdash; Cloud Run
+      </div>
+      <div class="backend-inner">
+        <div class="backend-box">
+          <h3>Session Handler</h3>
+          <ul>
+            <li>WebSocket management</li>
+            <li>Audio routing</li>
+            <li>Code execution sandbox</li>
+            <li>Transcript dedup</li>
+          </ul>
+        </div>
+        <div class="backend-box agent-box">
+          <h3>
+            Interview Agent
+            <span class="badge">Google ADK</span>
+          </h3>
+          <ul>
+            <li><span class="tool-tag">evaluate_and_continue()</span></li>
+            <li><span class="tool-tag">get_next_question()</span></li>
+            <li><span class="tool-tag">end_interview()</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cloud / Gemini Column -->
+    <div class="cloud-col">
+      <div class="gemini-box gemini-flash">
+        <div class="layer-label">
+          <span class="dot"></span>
+          Gemini 2.5 Flash
+        </div>
+        <div class="features">
+          <span class="tag">Native Audio</span>
+          <span class="tag">Live API bidi</span>
+          <span class="tag">Vision</span>
+          <span class="tag">Function Calling</span>
+          <span class="tag">Context Compression</span>
+        </div>
+      </div>
+      <div class="gemini-box gemini-pro">
+        <div class="layer-label">
+          <span class="dot"></span>
+          Gemini 2.5 Pro
+        </div>
+        <div class="features">
+          <span class="tag">Report Analysis</span>
+          <span class="tag">Mode-specific Scoring</span>
+          <span class="tag">Missed Concepts</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ ARROW: Backend -> Storage ============ -->
+  <div class="arrow-down-sm">
+    <div class="arrow-line"></div>
+  </div>
+
+  <!-- ============ STORAGE LAYER ============ -->
+  <div class="storage-row">
+
+    <div class="storage-box firestore">
+      <div class="layer-label">
+        <span class="dot"></span>
+        Cloud Firestore
+      </div>
+      <div class="items">
+        <span class="tag">Sessions</span>
+        <span class="tag">Scores</span>
+        <span class="tag">Reports</span>
+        <span class="tag">Transcript</span>
+      </div>
+    </div>
+
+    <div class="storage-box cloudstorage">
+      <div class="layer-label">
+        <span class="dot"></span>
+        Cloud Storage
+      </div>
+      <div class="items">
+        <span class="tag">Question Trees (6)</span>
+        <span class="tag">Calibration</span>
+        <span class="tag">Rubrics</span>
+      </div>
+    </div>
+
+    <div class="storage-box secrets">
+      <div class="layer-label">
+        <span class="dot"></span>
+        Secret Manager
+      </div>
+      <div class="items">
+        <span class="tag">API Keys</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ============ SVG ARROW OVERLAYS ============ -->
+<svg style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:5;">
+  <defs>
+    <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#34A853" />
+    </marker>
+    <marker id="arrow-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#8E24AA" />
+    </marker>
+    <marker id="arrow-purple-rev" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <polygon points="8 0, 0 3, 8 6" fill="#8E24AA" />
+    </marker>
+  </defs>
+</svg>
+
+</body>
+</html>

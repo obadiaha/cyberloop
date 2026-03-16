@@ -1,0 +1,618 @@
+{
+  "domain": "digital_forensics",
+  "display_name": "Digital Forensics (DFIR)",
+  "description": "Evaluates forensic investigation skills including evidence preservation, disk and memory analysis, timeline reconstruction, artifact analysis, and chain of custody.",
+  "mitre_references": [
+    "TA0001",
+    "TA0002",
+    "TA0003",
+    "TA0004",
+    "TA0005",
+    "TA0006",
+    "TA0008",
+    "TA0009",
+    "TA0010"
+  ],
+  "root_questions": [
+    {
+      "id": "df_001",
+      "text": "You've been handed a Windows 10 laptop suspected of being compromised. It's still powered on. Walk me through your acquisition process from the moment you touch it.",
+      "difficulty_weight": 1.25,
+      "level": 1,
+      "category": "evidence_preservation",
+      "expected_concepts": [
+        "photograph_screen",
+        "document_state",
+        "memory_acquisition_first",
+        "ftk_imager_or_winpmem",
+        "disk_imaging",
+        "write_blocker",
+        "hash_verification",
+        "chain_of_custody_form",
+        "order_of_volatility"
+      ],
+      "red_flags": [
+        "power_off_immediately",
+        "no_memory_capture",
+        "no_hash_verification",
+        "no_chain_of_custody",
+        "skip_documentation",
+        "powers_off_the_machine_first",
+        "no_memory_acquisition",
+        "skips_documentation_to_save_time",
+        "doesnt_photograph_screen_state",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "memory_acquisition_first",
+            "ftk_imager_or_winpmem",
+            "hash_verification"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You capture the memory dump. It's 32GB. You load it into Volatility 3. Walk me through the first 5 plugins you run and what you're looking for in each.",
+          "level": 2,
+          "expected_concepts": [
+            "pslist_pstree",
+            "netscan",
+            "malfind",
+            "handles",
+            "cmdline",
+            "dlllist",
+            "process_hollowing_indicators",
+            "hidden_processes",
+            "network_connections_to_c2",
+            "injected_code_sections"
+          ],
+          "red_flags": [
+            "dont_know_volatility",
+            "random_plugin_selection",
+            "no_methodology"
+          ],
+          "follow_up_on_miss": "Let me help narrow this down. When you run pstree and see a svchost.exe process with an unusual parent, what does that tell you?"
+        },
+        {
+          "trigger_concepts": [
+            "malfind",
+            "process_hollowing_indicators",
+            "injected_code_sections"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Malfind shows injected code in explorer.exe with PAGE_EXECUTE_READWRITE permissions. The MZ header is present in the injected region. What's your analysis? How do you extract this payload and what do you do with it?",
+          "level": 3,
+          "expected_concepts": [
+            "process_injection_analysis",
+            "dump_injected_region",
+            "pe_header_analysis",
+            "strings_extraction",
+            "yara_scan",
+            "submit_to_sandbox",
+            "map_to_mitre_t1055",
+            "correlate_with_network_activity",
+            "timeline_correlation"
+          ],
+          "red_flags": [
+            "ignore_injection",
+            "no_extraction",
+            "no_correlation"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "pe_header_analysis",
+            "yara_scan",
+            "timeline_correlation"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You've extracted the injected DLL, identified it as a Cobalt Strike beacon, and correlated it to network connections. Defense counsel just told you this evidence may be used in a criminal prosecution. What changes about how you handle the analysis from this point, and what would you have done differently from the start if you'd known?",
+          "level": 4,
+          "expected_concepts": [
+            "forensic_soundness",
+            "reproducible_analysis",
+            "tool_validation",
+            "expert_witness_preparation",
+            "daubert_standard",
+            "documentation_for_court",
+            "original_evidence_preservation",
+            "analysis_on_copies_only",
+            "peer_review",
+            "opposing_counsel_challenges"
+          ],
+          "red_flags": [
+            "no_legal_awareness",
+            "no_documentation_change",
+            "no_tool_validation"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests hands-on acquisition skills. The 'still powered on' detail is critical: it means memory acquisition FIRST. A strong answer follows order of volatility and names specific tools with confidence. A 5/5 addresses the tension: you need to work fast but document everything. They also photograph the screen before touching anything. A 3/5 knows the order but hesitates on specific tools or skips documentation.",
+      "strong_answer_markers": [
+        "Photographs the screen first",
+        "Memory acquisition before disk imaging",
+        "Names specific tools: FTK Imager, WinPMEM, AVML, dd",
+        "Hash verification at every step",
+        "Chain of custody form started immediately",
+        "Acknowledges the powered-on state changes the approach"
+      ]
+    },
+    {
+      "id": "df_002",
+      "text": "Explain how you build a forensic timeline from a Windows system. What artifact sources do you use and how do you correlate them?",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "timeline_analysis",
+      "expected_concepts": [
+        "mft",
+        "event_logs",
+        "prefetch",
+        "shimcache",
+        "amcache",
+        "usnjrnl",
+        "registry_timestamps",
+        "browser_history",
+        "log2timeline_plaso",
+        "supertimeline"
+      ],
+      "red_flags": [
+        "only_event_logs",
+        "no_tool_knowledge",
+        "no_correlation_method",
+        "single_artifact_source",
+        "relies_only_on_event_logs",
+        "cannot_name_timeline_generation_tools",
+        "no_filtering_strategy_for_large_timelines",
+        "treats_each_artifact_in_isolation",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "log2timeline_plaso",
+            "supertimeline",
+            "mft"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You've generated a supertimeline with 4 million events. How do you find the needle in this haystack? Walk me through your analysis approach for narrowing down to the relevant time window and activity.",
+          "level": 2,
+          "expected_concepts": [
+            "pivot_points",
+            "known_ioc_timestamps",
+            "filter_by_artifact_type",
+            "keyword_search",
+            "timeline_explorer",
+            "narrow_time_windows",
+            "statistical_analysis",
+            "frequency_analysis",
+            "rare_events"
+          ],
+          "red_flags": [
+            "read_all_4_million",
+            "no_filtering_strategy",
+            "no_pivot_points"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "pivot_points",
+            "filter_by_artifact_type",
+            "narrow_time_windows"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You've narrowed the timeline and found that the attacker used timestomping to modify $MFT timestamps on their malware to match legitimate system files. How do you detect this, and what artifacts survive timestomping?",
+          "level": 3,
+          "expected_concepts": [
+            "usnjrnl_survives_timestomping",
+            "mft_si_vs_fn_timestamps",
+            "standard_information_vs_filename",
+            "logfile_journal",
+            "timestamp_inconsistencies",
+            "prefetch_timestamps",
+            "shimcache_order",
+            "amcache_timestamps"
+          ],
+          "red_flags": [
+            "trust_mft_timestamps",
+            "no_awareness_of_timestomping",
+            "no_alternative_artifacts"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "usnjrnl_survives_timestomping",
+            "mft_si_vs_fn_timestamps",
+            "timestamp_inconsistencies"
+          ],
+          "trigger_type": "concept_match",
+          "question": "An opposing expert witness claims your timeline is unreliable because the system clock may have been manipulated, NTP wasn't configured, and timezone handling in your tools may have introduced errors. How do you defend the integrity of your timeline, and what are the actual limitations?",
+          "level": 4,
+          "expected_concepts": [
+            "clock_skew_analysis",
+            "ntp_log_review",
+            "timezone_normalization",
+            "tool_timezone_handling_validation",
+            "cross_source_timestamp_corroboration",
+            "external_timestamp_sources",
+            "network_device_logs",
+            "honest_limitation_acknowledgment",
+            "confidence_intervals"
+          ],
+          "red_flags": [
+            "dismiss_challenge",
+            "no_validation_method",
+            "overstate_certainty"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests practical timeline analysis skills. A strong answer names MULTIPLE artifact sources beyond event logs: MFT, prefetch, shimcache, amcache, USNJRNL, registry. A 5/5 knows log2timeline/plaso and discusses HOW to analyze a supertimeline (filtering strategy, pivot points). A 3/5 lists artifacts but hasn't processed a real supertimeline.",
+      "strong_answer_markers": [
+        "Names 5+ artifact sources from memory",
+        "Knows log2timeline/plaso for supertimeline generation",
+        "Has a strategy for analyzing large timelines (pivot points, filtering)",
+        "Understands artifact limitations (what each can/cannot prove)",
+        "Correlates multiple artifact types to establish facts"
+      ]
+    },
+    {
+      "id": "df_003",
+      "text": "What Windows registry artifacts are most valuable in a forensic investigation, and what can they tell you?",
+      "difficulty_weight": 0.75,
+      "level": 1,
+      "category": "artifact_analysis",
+      "expected_concepts": [
+        "ntuser_dat",
+        "system_hive",
+        "sam_hive",
+        "software_hive",
+        "run_keys",
+        "userassist",
+        "shellbags",
+        "recent_docs",
+        "mru_lists",
+        "typed_urls"
+      ],
+      "red_flags": [
+        "no_registry_knowledge",
+        "only_run_keys",
+        "cant_name_hives",
+        "only_knows_run_keys",
+        "cannot_name_specific_registry_hives",
+        "no_understanding_of_shellbags_or_userassist",
+        "treats_registry_as_just_a_configuration_store",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "shellbags",
+            "userassist",
+            "run_keys",
+            "ntuser_dat"
+          ],
+          "trigger_type": "concept_match",
+          "question": "An attacker used a USB drive to exfiltrate data. What registry artifacts and other forensic evidence would you examine to prove the USB was connected, when it was connected, and what was accessed?",
+          "level": 2,
+          "expected_concepts": [
+            "setupapi_log",
+            "usbstor_registry",
+            "mountpoints2",
+            "device_serial_number",
+            "first_last_connected_timestamps",
+            "user_associated_with_device",
+            "shellbags_for_browsing",
+            "lnk_files",
+            "jump_lists",
+            "volume_shadow_copies"
+          ],
+          "red_flags": [
+            "only_check_registry",
+            "no_timestamp_correlation",
+            "no_user_attribution"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "setupapi_log",
+            "usbstor_registry",
+            "lnk_files",
+            "jump_lists"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Good. Now the suspect formatted the USB drive and claims they never accessed any sensitive files. The drive is encrypted with BitLocker. How do you recover evidence of what files were on that USB, and can you prove which files were copied from the corporate network?",
+          "level": 3,
+          "expected_concepts": [
+            "lnk_file_analysis_for_deleted_files",
+            "jump_list_entries_survive_deletion",
+            "shellbags_retain_folder_structure",
+            "mft_carved_entries",
+            "bitlocker_recovery_key_search",
+            "memory_dump_for_bitlocker_keys",
+            "network_file_access_logs",
+            "dlp_logs",
+            "print_spooler_logs"
+          ],
+          "red_flags": [
+            "give_up_on_encrypted_drive",
+            "no_alternative_evidence_sources",
+            "single_artifact_reliance"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "lnk_file_analysis_for_deleted_files",
+            "shellbags_retain_folder_structure",
+            "bitlocker_recovery_key_search"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You're building a forensic analysis lab for your organization. You need to handle Windows, macOS, Linux, iOS, and Android devices. What's your lab architecture, tool stack, and how do you ensure your analysis is defensible in court?",
+          "level": 4,
+          "expected_concepts": [
+            "write_blocker_hardware",
+            "forensic_workstations",
+            "tool_validation_procedures",
+            "cellebrite_for_mobile",
+            "axiom_or_encase",
+            "isolated_network",
+            "evidence_storage_security",
+            "tool_version_documentation",
+            "sop_documentation",
+            "accreditation_standards",
+            "proficiency_testing"
+          ],
+          "red_flags": [
+            "consumer_tools_only",
+            "no_validation",
+            "no_sop",
+            "no_physical_security"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests registry forensics depth. A strong answer names specific hives AND keys with investigative context (what each tells you). A 5/5 connects registry artifacts to user behavior reconstruction: what was accessed, when, and by whom. A 3/5 names common hives but can't explain investigative significance.",
+      "strong_answer_markers": [
+        "Names specific hives: NTUSER.DAT, SYSTEM, SAM, SOFTWARE",
+        "Knows investigative value: ShellBags (folder access), UserAssist (program execution)",
+        "Connects registry artifacts to investigation questions",
+        "Mentions MRU lists, typed URLs, recent docs",
+        "Understands registry timestamps and their forensic value"
+      ]
+    },
+    {
+      "id": "df_004",
+      "text": "Walk me through how you'd investigate a suspected ransomware infection. The ransom note appeared 20 minutes ago.",
+      "difficulty_weight": 1.25,
+      "level": 1,
+      "category": "ransomware_forensics",
+      "expected_concepts": [
+        "scope_assessment",
+        "identify_ransomware_variant",
+        "encryption_status",
+        "backup_check",
+        "patient_zero_identification",
+        "lateral_movement_check",
+        "contain_before_eradicate"
+      ],
+      "red_flags": [
+        "pay_ransom_immediately",
+        "reimage_everything",
+        "no_scoping",
+        "no_evidence_preservation",
+        "focuses_on_ransom_note_content",
+        "pays_ransom_as_first_option",
+        "reimages_everything_destroying_evidence",
+        "no_patient_zero_investigation",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "identify_ransomware_variant",
+            "patient_zero_identification",
+            "contain_before_eradicate"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You identify the ransomware as LockBit 3.0. Your EDR shows the initial access was through a compromised VPN account 5 days ago. The attacker moved laterally to 3 servers before deploying ransomware. Walk me through the forensic artifacts that let you reconstruct their entire path.",
+          "level": 2,
+          "expected_concepts": [
+            "vpn_authentication_logs",
+            "event_4624_4625",
+            "rdp_bitmap_cache",
+            "psexec_artifacts",
+            "lateral_movement_artifacts",
+            "scheduled_tasks",
+            "wmi_persistence",
+            "group_policy_modification",
+            "prefetch_for_tools_used"
+          ],
+          "red_flags": [
+            "no_lateral_movement_tracking",
+            "only_check_encrypted_machines",
+            "skip_initial_access"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "rdp_bitmap_cache",
+            "lateral_movement_artifacts",
+            "group_policy_modification"
+          ],
+          "trigger_type": "concept_match",
+          "question": "During your investigation, you discover the attacker exfiltrated 200GB of data to a cloud storage service before deploying ransomware. This is double extortion. The legal team needs to know exactly what data was taken for breach notification purposes. How do you determine this?",
+          "level": 3,
+          "expected_concepts": [
+            "proxy_logs_for_upload",
+            "endpoint_dlp_logs",
+            "file_access_audit_logs",
+            "cloud_api_logs",
+            "network_flow_data",
+            "bandwidth_analysis",
+            "staging_directory_analysis",
+            "rclone_or_megasync_artifacts",
+            "browser_history_for_cloud_storage"
+          ],
+          "red_flags": [
+            "cant_determine_exfiltrated_data",
+            "no_network_analysis",
+            "guess_without_evidence"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "staging_directory_analysis",
+            "rclone_or_megasync_artifacts",
+            "proxy_logs_for_upload"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Post-incident, the CISO wants a full forensic report for the insurance company, legal counsel, and regulators. Each audience needs different information. How do you structure the deliverables, what goes in each report, and what do you intentionally leave out of the public-facing notification?",
+          "level": 4,
+          "expected_concepts": [
+            "audience_specific_reporting",
+            "technical_report_vs_executive_summary",
+            "legal_privilege_considerations",
+            "regulatory_requirements",
+            "insurance_claim_documentation",
+            "breach_notification_requirements",
+            "minimize_liability_exposure",
+            "attorney_work_product_doctrine",
+            "forensic_report_vs_legal_brief"
+          ],
+          "red_flags": [
+            "one_report_for_all",
+            "no_legal_awareness",
+            "overshare_in_public_report"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests real-world IR forensics under time pressure. Ransomware is time-critical: encryption may still be running. A strong answer shows urgency calibration: scope first, then contain, THEN investigate. A 5/5 identifies patient zero and reconstructs the full attack path. A 3/5 focuses on the ransom note and encrypted files without scoping.",
+      "strong_answer_markers": [
+        "Scopes the blast radius before deep investigation",
+        "Identifies ransomware variant for decryptor availability",
+        "Tracks back to patient zero (initial access)",
+        "Checks backup integrity before considering recovery",
+        "Contains before eradicating (prevents further spread)"
+      ]
+    },
+    {
+      "id": "df_005",
+      "text": "Explain chain of custody. Why does it matter, and how have you maintained it in practice?",
+      "difficulty_weight": 0.75,
+      "level": 1,
+      "category": "chain_of_custody",
+      "expected_concepts": [
+        "documentation_of_handling",
+        "who_what_when",
+        "hash_integrity",
+        "physical_security",
+        "transfer_documentation",
+        "court_admissibility",
+        "tamper_evidence"
+      ],
+      "red_flags": [
+        "doesnt_understand_chain_of_custody",
+        "no_practical_experience",
+        "only_theoretical",
+        "only_theoretical_understanding",
+        "no_hash_verification_mentioned",
+        "doesnt_know_what_breaks_chain_of_custody",
+        "no_practical_experience_maintaining_it",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "documentation_of_handling",
+            "hash_integrity",
+            "transfer_documentation"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You're working an investigation with an external forensics firm. They're shipping a hard drive to your lab via FedEx. What controls do you require for the transfer, and what would invalidate the chain of custody?",
+          "level": 2,
+          "expected_concepts": [
+            "tamper_evident_bags",
+            "tracking_number",
+            "pre_shipment_hash",
+            "post_receipt_hash_verification",
+            "signed_transfer_form",
+            "secure_packaging",
+            "receipt_acknowledgment",
+            "chain_break_scenarios"
+          ],
+          "red_flags": [
+            "no_verification_on_receipt",
+            "accept_without_documentation",
+            "no_tamper_evidence"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "tamper_evident_bags",
+            "pre_shipment_hash",
+            "chain_break_scenarios"
+          ],
+          "trigger_type": "concept_match",
+          "question": "During trial preparation, the defense attorney discovers a 6-hour gap in your chain of custody log where the drive was in your lab but no one signed for it. How do you address this, and could this invalidate all your analysis?",
+          "level": 3,
+          "expected_concepts": [
+            "gap_remediation",
+            "physical_security_logs",
+            "camera_footage",
+            "access_control_logs",
+            "supplemental_affidavit",
+            "hash_comparison_before_and_after_gap",
+            "impact_assessment",
+            "judge_discretion",
+            "weight_vs_admissibility"
+          ],
+          "red_flags": [
+            "dismiss_concern",
+            "falsify_documentation",
+            "no_remediation_strategy"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "hash_comparison_before_and_after_gap",
+            "supplemental_affidavit",
+            "weight_vs_admissibility"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Chain of custody was designed for physical evidence. How does it apply to cloud-based evidence: AWS CloudTrail logs, Azure AD sign-in logs, O365 message traces? You can't put a cloud log in a tamper-evident bag. What's your framework for digital chain of custody in cloud environments?",
+          "level": 4,
+          "expected_concepts": [
+            "immutable_logging",
+            "log_integrity_verification",
+            "aws_cloudtrail_log_file_validation",
+            "write_once_storage",
+            "api_call_documentation",
+            "screenshot_plus_hash_methodology",
+            "cloud_provider_cooperation",
+            "legal_process_for_provider_data",
+            "ephemeral_evidence_challenge"
+          ],
+          "red_flags": [
+            "no_cloud_forensics_knowledge",
+            "treat_same_as_physical",
+            "no_integrity_verification"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests legal and procedural knowledge. Chain of custody is foundational. A strong answer gives PRACTICAL examples: specific forms, hash algorithms, storage procedures, and what breaks the chain. A 5/5 has maintained chain of custody in a real investigation and can describe the end-to-end process. A 3/5 defines it correctly but hasn't done it under real conditions.",
+      "strong_answer_markers": [
+        "Describes practical chain of custody from personal experience",
+        "Names specific steps: who, what, when documentation",
+        "Uses hash verification at transfer points",
+        "Understands what breaks chain of custody",
+        "Connects to court admissibility"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,229 @@
+{
+  "rubric_version": "1.0",
+  "description": "Per-domain scoring criteria with level indicators for technical interview evaluation.",
+  "scoring_scale": {
+    "min": 1,
+    "max": 10,
+    "levels": {
+      "junior": {
+        "score_range": [1, 3],
+        "label": "Junior / Entry-Level",
+        "general_markers": [
+          "Names tools and technologies correctly",
+          "Knows terminology and can define concepts",
+          "Explains what something does but not why or when",
+          "Follows documented procedures but cannot adapt",
+          "Gives textbook answers without practical nuance",
+          "Cannot articulate tradeoffs between approaches"
+        ]
+      },
+      "mid": {
+        "score_range": [4, 6],
+        "label": "Mid-Level",
+        "general_markers": [
+          "Applies concepts to specific scenarios",
+          "Explains why a particular approach is preferred",
+          "Considers false positives and operational impact",
+          "Has practical experience with real incidents or detections",
+          "Can adapt procedures to non-standard situations",
+          "Identifies some tradeoffs but may miss edge cases"
+        ]
+      },
+      "senior": {
+        "score_range": [7, 9],
+        "label": "Senior",
+        "general_markers": [
+          "Architects solutions with explicit tradeoff analysis",
+          "Considers attacker perspective and adversary adaptation",
+          "Designs for scale, maintainability, and team operations",
+          "Connects technical decisions to business impact",
+          "Proactively identifies risks not asked about",
+          "Demonstrates cross-domain awareness",
+          "Has led complex investigations or programs"
+        ]
+      },
+      "staff": {
+        "score_range": [10, 10],
+        "label": "Staff / Principal",
+        "general_markers": [
+          "Challenges the premise of the question",
+          "Reframes problems to find higher-leverage solutions",
+          "Demonstrates systemic and organizational thinking",
+          "Considers industry-wide implications",
+          "Identifies when standard approaches are insufficient",
+          "Proposes novel architectures or methodologies",
+          "Influences direction beyond their immediate team"
+        ]
+      }
+    }
+  },
+  "domain_criteria": {
+    "incident_response": {
+      "junior_indicators": [
+        "Can list IR phases (preparation, identification, containment, eradication, recovery, lessons learned)",
+        "Knows to preserve evidence before remediation",
+        "Names common IR tools (CrowdStrike, Splunk, etc.)",
+        "Understands concept of chain of custody",
+        "Can follow a basic IR playbook step by step"
+      ],
+      "mid_indicators": [
+        "Adapts triage approach based on alert type and asset criticality",
+        "Correlates data across multiple log sources during investigation",
+        "Makes informed containment decisions balancing risk and business impact",
+        "Communicates effectively with stakeholders during an incident",
+        "Understands lateral movement patterns and can trace attacker paths",
+        "Performs root cause analysis beyond 'the user clicked a link'"
+      ],
+      "senior_indicators": [
+        "Designs containment strategies for APT scenarios (coordinated, simultaneous)",
+        "Architects evidence collection at scale (automation, cloud forensics)",
+        "Quantifies data exposure and communicates to legal/executive teams",
+        "Considers regulatory implications (GDPR, breach notification timelines)",
+        "Leads cross-functional incident response across multiple teams",
+        "Builds IR metrics program (MTTD, MTTR, recurrence rate)",
+        "Designs post-incident review process that drives systemic change"
+      ],
+      "staff_indicators": [
+        "Challenges standard IR model assumptions (perimeter-based, reactive)",
+        "Architects assume-breach security models",
+        "Designs IR program for organizational resilience, not just incident resolution",
+        "Quantifies IR program ROI for board-level communication",
+        "Influences industry standards or community practices"
+      ]
+    },
+    "detection_engineering": {
+      "junior_indicators": [
+        "Can write a basic SIEM query (SPL, KQL)",
+        "Understands what a detection rule does",
+        "Names relevant data sources (Sysmon, Windows Event Logs, EDR)",
+        "Knows MITRE ATT&CK exists and can navigate it",
+        "Can identify common attack patterns at a high level"
+      ],
+      "mid_indicators": [
+        "Writes detection rules with appropriate specificity and context",
+        "Tunes rules to reduce false positive rates with data-driven approach",
+        "Maps detections to MITRE ATT&CK techniques (sub-technique level)",
+        "Tests detections using attack simulation tools (Atomic Red Team, CALDERA)",
+        "Understands data pipeline reliability and log source health",
+        "Can convert between detection formats (Sigma, SPL, KQL)"
+      ],
+      "senior_indicators": [
+        "Designs detection architecture beyond individual rules (layered, behavioral)",
+        "Implements detection-as-code with CI/CD pipeline",
+        "Builds coverage gap analysis driven by threat intelligence",
+        "Architects risk-based alerting with entity scoring",
+        "Considers detection decay and implements continuous validation",
+        "Evaluates cost per detection and makes data ingestion tradeoffs",
+        "Leads purple team exercises to validate detection coverage"
+      ],
+      "staff_indicators": [
+        "Challenges signature/IOC-based detection paradigm",
+        "Designs novel detection architectures (stream processing, edge detection)",
+        "Evaluates and influences the detection tool market direction",
+        "Builds detection engineering programs at organizational scale",
+        "Considers fundamental limitations of detection approaches",
+        "Influences industry standards (Sigma, OCSF)"
+      ]
+    },
+    "digital_forensics": {
+      "junior_indicators": [
+        "Understands order of volatility",
+        "Can perform basic disk imaging with write blocker",
+        "Knows common forensic tools (FTK, EnCase, Autopsy)",
+        "Understands chain of custody basics",
+        "Can examine basic Windows artifacts (Event Logs, Prefetch)"
+      ],
+      "mid_indicators": [
+        "Performs memory analysis with Volatility (knows key plugins)",
+        "Builds forensic timelines using multiple artifact sources (Plaso/log2timeline)",
+        "Analyzes Windows registry artifacts for user activity and persistence",
+        "Correlates filesystem, registry, and event log evidence",
+        "Handles USB device forensics (USBSTOR, SetupAPI, MountPoints2)",
+        "Documents analysis for formal reporting"
+      ],
+      "senior_indicators": [
+        "Detects anti-forensic techniques (timestomping, log clearing, secure deletion)",
+        "Performs advanced memory forensics (injected code extraction, rootkit detection)",
+        "Handles cloud forensics (AWS, Azure evidence collection)",
+        "Prepares evidence and analysis for legal proceedings",
+        "Architects forensic lab and evidence handling procedures",
+        "Trains junior analysts in forensic methodology",
+        "Designs automated evidence collection pipelines"
+      ],
+      "staff_indicators": [
+        "Expert witness capable (Daubert standard, cross-examination preparation)",
+        "Designs forensic architecture for enterprise scale",
+        "Addresses novel forensic challenges (container forensics, cloud-native)",
+        "Contributes to forensic tool development or methodology",
+        "Challenges assumptions about forensic soundness in modern environments"
+      ]
+    },
+    "soc_operations": {
+      "junior_indicators": [
+        "Can follow an alert triage playbook",
+        "Uses SIEM for basic query and investigation",
+        "Understands SOC tier model and escalation basics",
+        "Documents investigations in ticketing system",
+        "Can identify common alert types and initial response"
+      ],
+      "mid_indicators": [
+        "Triages alerts with context (asset, user, business impact)",
+        "Designs and improves SOAR playbooks for common alert types",
+        "Tracks and reports on SOC metrics (MTTD, MTTR, FP rate)",
+        "Handles shift handoff with structured process",
+        "Adapts investigation approach for novel or uncommon alerts",
+        "Mentors Tier 1 analysts"
+      ],
+      "senior_indicators": [
+        "Designs SOC operational frameworks (escalation, on-call, empowerment)",
+        "Architects automation strategy balancing speed and accuracy",
+        "Builds SOC metrics program with quality measurement (not just speed)",
+        "Evaluates and selects SOC tooling with TCO analysis",
+        "Designs remote-first or follow-the-sun SOC operations",
+        "Addresses analyst burnout and career progression systematically",
+        "Presents SOC value to executive leadership"
+      ],
+      "staff_indicators": [
+        "Challenges traditional SOC tier model",
+        "Designs authority and empowerment frameworks balancing speed and safety",
+        "Articulates SOC ROI and risk reduction quantification for board",
+        "Rethinks SOC career paths and industry retention patterns",
+        "Evaluates platform consolidation vs best-of-breed at strategic level"
+      ]
+    },
+    "threat_intelligence": {
+      "junior_indicators": [
+        "Can look up IOCs in threat intel platforms",
+        "Understands basic IOC types (IP, domain, hash, URL)",
+        "Knows what MITRE ATT&CK is and can look up techniques",
+        "Can read a threat intelligence report",
+        "Understands the intelligence cycle at a textbook level"
+      ],
+      "mid_indicators": [
+        "Enriches IOCs from multiple sources with confidence assessment",
+        "Maps threat actor TTPs to MITRE ATT&CK at sub-technique level",
+        "Creates actionable intelligence products for different audiences",
+        "Manages threat intel feeds with quality scoring",
+        "Integrates CTI into detection engineering workflow",
+        "Conducts basic infrastructure pivoting from IOCs"
+      ],
+      "senior_indicators": [
+        "Designs CTI program aligned to organizational intelligence requirements",
+        "Performs attribution analysis with methodology and confidence levels",
+        "Builds threat actor profiles that drive detection and hunting",
+        "Designs indicator confidence scoring models",
+        "Navigates false flag analysis in nation-state context",
+        "Measures and demonstrates CTI program value",
+        "Leads intelligence sharing with ISACs and peers"
+      ],
+      "staff_indicators": [
+        "Challenges IOC-based intelligence paradigm (pyramid of pain)",
+        "Designs TTP-focused intelligence program with strategic products",
+        "Evaluates industry-wide intelligence sharing challenges and proposes solutions",
+        "Defines when corporate CTI should and shouldn't attempt attribution",
+        "Shapes organizational security strategy through intelligence",
+        "Influences community intelligence practices and standards"
+      ]
+    }
+  }
+}

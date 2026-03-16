@@ -1,0 +1,257 @@
+{
+  "domain": "incident_response",
+  "questions": [
+    {
+      "id": "ir_001",
+      "text": "Walk me through how you would respond to an alert for unusual PowerShell activity on a developer workstation.",
+      "depth": 1,
+      "topic": "alert_triage",
+      "mitre_technique": "T1059.001",
+      "expected_concepts": {
+        "junior": ["knows PowerShell can be malicious", "would look at the alert details", "might check VirusTotal for related IOCs", "would escalate to senior analyst"],
+        "mid": ["asks for context: what made it unusual (encoded command, unusual parent process)", "checks Sysmon EID 1 for command line and parent process", "looks at 4688 events if Sysmon not available", "checks if developer role makes PowerShell legitimate", "looks for network connections after the PowerShell execution (EID 3)"],
+        "senior": ["scopes to determine if other machines had similar activity", "hunts for persistence mechanisms (EID 4698 scheduled tasks, registry run keys, EID 4697 services)", "extracts and decodes any base64-encoded commands", "looks for downloads or stager activity in network telemetry", "considers developer context: could this be a build script or pentest tool?"],
+        "staff": ["design question: should this alert even fire in a dev environment?", "policy discussion: dev workstation detection tuning vs. security visibility tradeoff", "asks about detection coverage gaps: what activity WOULDN'T be caught by this detection", "considers threat modeling: is the developer high-value target (privileged access, code signing keys)?"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "base64", "probe": "How would you decode it, and what specifically would you look for in the decoded content?"},
+        {"if_mentioned": "parent process", "probe": "What parent processes spawning PowerShell would concern you most and why?"},
+        {"if_missed": "persistence", "probe": "You've confirmed the PowerShell activity was malicious. What's your next investigation step beyond the initial execution?"},
+        {"if_strong": true, "escalate": "The decoded PowerShell is a Cobalt Strike stager. What's your immediate response priority list, and how do you decide the order?"},
+        {"if_weak": true, "simplify": "What specific log sources would you look at to understand what this PowerShell command actually did?"}
+      ],
+      "interviewer_notes": "Good candidates immediately ask what made the activity 'unusual' rather than launching into a generic response. Dev environment context is important: false positive consideration shows maturity. Strong candidates pivot to persistence immediately after confirming malicious execution."
+    },
+    {
+      "id": "ir_002",
+      "text": "You receive a report that a user clicked a phishing link and entered their credentials. How do you respond?",
+      "depth": 1,
+      "topic": "phishing_response",
+      "mitre_technique": "T1566.001",
+      "expected_concepts": {
+        "junior": ["reset the user's password", "notify the user", "check if the link is blocked", "look at email headers"],
+        "mid": ["immediately trigger account credential reset AND session revocation (not just password reset)", "investigate where the credentials may have been used - check 4624/4648 events and Azure AD sign-ins", "pull email header analysis: Reply-To, X-Originating-IP, SPF/DKIM/DMARC results", "check if other users received the same phishing email and clicked", "look for MFA bypass attempts or MFA fatigue"],
+        "senior": ["check if the phishing was targeted (spearphishing) vs. mass campaign", "investigate for post-compromise activity: OAuth app grants, mail forwarding rules, mailbox delegation", "scope the incident: who sent the email, are there follow-on emails, is this an ongoing campaign", "check for AiTM (Adversary-in-the-Middle) phishing that steals session cookies, bypassing MFA", "consider if credential was used for VPN or other critical systems"],
+        "staff": ["evaluate detection gap: why wasn't this phishing caught by email gateway", "discuss upstream remediation: takedown request, registrar notification, ISAC sharing", "assess policy gap: was MFA enforced? Was phishing training done? Are there compensating controls?", "drive lessons-learned process: what changes to email security posture would prevent recurrence"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "password reset", "probe": "Password reset alone isn't always sufficient - what else do you need to do with that account, and why?"},
+        {"if_mentioned": "other users", "probe": "How would you search your email platform to find all users who received this specific email?"},
+        {"if_missed": "OAuth grants", "probe": "The attacker had 4 hours of access. Beyond logging in, what else might they have done that would survive a password reset?"},
+        {"if_strong": true, "escalate": "Your analysis shows the phishing site was using AiTM to steal session tokens. The victim had MFA. How does your response change?"},
+        {"if_weak": true, "simplify": "What accounts does the attacker potentially have access to after stealing these credentials?"}
+      ],
+      "interviewer_notes": "The key differentiator at mid-level is recognizing that password reset alone is insufficient - session revocation and OAuth grant review are critical. Senior candidates will immediately think about AiTM and MFA bypass. Watch for candidates who say 'reset the password' and stop there."
+    },
+    {
+      "id": "ir_003",
+      "text": "How do you approach containment when you suspect a live, active intrusion on a critical production database server?",
+      "depth": 1,
+      "topic": "containment_strategy",
+      "mitre_technique": "TA0040",
+      "expected_concepts": {
+        "junior": ["would isolate the server from the network", "would notify the server team or manager", "understands containment is needed"],
+        "mid": ["identifies the tradeoff: isolation destroys evidence and causes business impact vs. leaving it running lets attacker continue", "collect volatile data before any containment action: running processes, network connections, memory", "considers partial containment: blocking specific ports, isolating from internet but not internal network", "documents actions with timestamps before executing", "involves stakeholders: business owner, IR lead, legal"],
+        "senior": ["can articulate the decision framework: what is the attacker doing right now vs. what business impact does isolation cause", "identifies whether the attacker has already achieved their objective (exfiltration) vs. still in progress", "considers the forensic risk of each containment action", "knows database server forensics: transaction logs, user sessions, query history", "designs containment that preserves evidence: network capture on the span port, memory dump before isolation"],
+        "staff": ["articulates the IR commander role: who makes the call on production impact", "designs the communication cascade: business owner, exec team, legal, potentially regulatory", "considers legal hold requirements before any containment that might destroy evidence", "speaks to documented containment decision with risk acceptance sign-off"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "isolate", "probe": "Before you isolate it, what volatile data would you collect, in what order, and why?"},
+        {"if_mentioned": "volatile data", "probe": "You have 90 seconds before the business forces you to pull the plug. What do you capture first and why?"},
+        {"if_missed": "stakeholders", "probe": "This server serves 10,000 customers and isolation means immediate downtime. How does that change your response?"},
+        {"if_strong": true, "escalate": "Memory capture failed due to the server's security configuration. How do you proceed with containment without memory evidence?"},
+        {"if_weak": true, "simplify": "What's the risk if you isolate immediately versus the risk if you don't isolate at all?"}
+      ],
+      "interviewer_notes": "This question tests judgment under pressure. The right answer is NOT 'isolate immediately.' Strong candidates demonstrate the tension between evidence preservation, business continuity, and threat containment. Watch for candidates who have a single default action regardless of context."
+    },
+    {
+      "id": "ir_004",
+      "text": "Describe how you would determine the scope of a potential ransomware incident in the first 30 minutes.",
+      "depth": 1,
+      "topic": "incident_scoping",
+      "mitre_technique": "T1486",
+      "expected_concepts": {
+        "junior": ["check how many systems are encrypted", "look at alerts in the SIEM", "notify the team", "try to stop the spread"],
+        "mid": ["use EDR to see which hosts have the ransomware process running", "identify patient zero: earliest occurrence of the ransomware binary or precursor activity", "check for lateral movement artifacts (4624 type 3, SMB access events 5140/5145)", "look for precursor activity: Cobalt Strike, credential dumping, reconnaissance that typically precedes ransomware"],
+        "senior": ["knows ransomware deployment is the final stage: the intrusion began days or weeks earlier", "hunts for the initial access vector and lateral movement artifacts before looking at encryption events", "checks domain controller event logs for mass AD enumeration or group policy changes (precursor to network-wide deployment)", "identifies the ransomware family from file extension and ransom note - different families have different precursor behavior", "scopes exfiltration: many ransomware groups steal data before encrypting - look for large outbound transfers"],
+        "staff": ["immediately mobilizes parallel workstreams: technical scoping, business impact assessment, communication tree", "establishes incident command structure within first 15 minutes", "makes initial assessment of whether to pay ransom vs. restore from backup (requires scope and backup integrity assessment)", "initiates external notification assessment: do we have a regulatory reporting obligation within a time window"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "patient zero", "probe": "How do you find patient zero when dozens of systems are encrypted simultaneously?"},
+        {"if_mentioned": "precursor activity", "probe": "What specific precursor activity should you look for that typically appears 24-72 hours before ransomware deployment?"},
+        {"if_missed": "exfiltration", "probe": "You've mapped the encrypted systems. What else might have happened during this intrusion that you haven't checked yet?"},
+        {"if_strong": true, "escalate": "Event logs have been cleared on most systems and the EDR was disabled 48 hours ago. How do you reconstruct the intrusion timeline now?"},
+        {"if_weak": true, "simplify": "Where do you start when you don't know how many systems are affected?"}
+      ],
+      "interviewer_notes": "Ransomware questions reveal IR maturity quickly. Junior candidates focus on the encryption event itself. Senior candidates know ransomware is the last stage and immediately look backwards in the timeline. Critical differentiator: mentioning exfiltration and the double-extortion model."
+    },
+    {
+      "id": "ir_005",
+      "text": "How do you write a post-incident review that actually leads to improvement rather than just documentation?",
+      "depth": 1,
+      "topic": "post_incident_review",
+      "mitre_technique": null,
+      "expected_concepts": {
+        "junior": ["knows PIR is part of the IR process", "would document what happened", "would update the runbook"],
+        "mid": ["blameless post-mortem approach: focus on process failures not individual failures", "documents timeline, root cause, detection gaps, and response gaps separately", "assigns specific owners and deadlines to action items, not vague 'improve X'", "tracks action items to completion in a follow-up review"],
+        "senior": ["starts from the detection gap: how long between attacker first access and first alert", "identifies systemic factors: understaffing, tooling gaps, process failures, training gaps", "proposes measurable improvements with timelines", "schedules follow-up review to verify action items were completed", "identifies what new detection rules should be built from this incident's TTPs"],
+        "staff": ["uses PIR findings to drive security program investment decisions", "presents quantified risk reduction from proposed improvements to leadership", "feeds PIR findings into red team priorities and detection engineering roadmap", "designs PIR process that improves over time, not just per-incident documentation"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "blameless", "probe": "How do you balance blameless culture with accountability when someone made a clear error?"},
+        {"if_mentioned": "detection gaps", "probe": "Give me a specific example of how you'd translate a detection gap finding into a concrete action item."},
+        {"if_missed": "new detections", "probe": "What should this incident produce for your detection engineering team?"},
+        {"if_strong": true, "escalate": "The same type of incident has happened three times. Your post-incident reviews produce action items but they're not getting done. What's the systemic problem and how do you fix it?"},
+        {"if_weak": true, "simplify": "What's the difference between a good post-incident review and one that just documents what happened?"}
+      ],
+      "interviewer_notes": "This question separates candidates who've actually run PIR processes from those who've only attended them. Look for: blameless culture, specific action item ownership, detection feedback loop, and follow-up verification. Red flag: 'we document what happened and update the runbook' with no mention of measurement or accountability."
+    },
+    {
+      "id": "ir_006",
+      "text": "Explain how you would investigate a suspected insider threat - a system administrator who may be exfiltrating data.",
+      "depth": 2,
+      "topic": "insider_threat",
+      "mitre_technique": "T1078",
+      "expected_concepts": {
+        "junior": ["would look at what files they accessed", "would check if they copied files to a USB", "would notify HR or management"],
+        "mid": ["looks at DLP alerts for unusual data movement", "reviews file access logs for sensitive directories (EID 4663)", "checks for unusual authentication times or locations", "understands the sensitivity of insider threat investigations: legal and HR coordination required before taking action", "looks at cloud storage syncing, email forwarding, USB activity"],
+        "senior": ["understands the legal process: HR, Legal, and potentially law enforcement involved before evidence collection", "collects evidence in a way that preserves chain of custody for potential legal proceedings", "looks at UEBA baselines: is this behavior anomalous compared to their own historical baseline", "examines staging behavior: compression, archiving tools (7-zip, WinRAR), large USB activity", "checks for covered tracks: deletion activity, log clearing, VPN usage to mask destinations"],
+        "staff": ["designs the insider threat investigation process from notification through legal referral", "knows how to conduct a covert investigation without tipping off the subject", "balances legal requirements with speed of evidence collection", "understands the difference between civil and criminal referral implications"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "HR", "probe": "At what point in the investigation do you involve HR vs. Legal vs. Law Enforcement, and why does the order matter?"},
+        {"if_mentioned": "DLP", "probe": "DLP shows large ZIP files created and deleted. How do you recover evidence of what was inside those archives?"},
+        {"if_missed": "covert investigation", "probe": "How do you investigate without the suspect knowing they're under investigation?"},
+        {"if_strong": true, "escalate": "Your investigation suggests the sysadmin used their AD admin rights to cover their tracks by deleting event logs. What evidence sources remain?"},
+        {"if_weak": true, "simplify": "Before you look at what they exfiltrated, what do you need to do first from a legal and procedural standpoint?"}
+      ],
+      "interviewer_notes": "Insider threat investigations reveal understanding of the legal and HR overlay that most technical investigations don't require. Strong candidates mention chain of custody and legal coordination immediately. Weak candidates go straight to technical analysis without any procedural awareness."
+    },
+    {
+      "id": "ir_007",
+      "text": "You discover that an attacker has had access to your environment for 90 days before detection. How does this change your response approach?",
+      "depth": 2,
+      "topic": "dwell_time",
+      "mitre_technique": "TA0003",
+      "expected_concepts": {
+        "junior": ["would look for everything they accessed in 90 days", "would change all passwords", "would rebuild affected systems"],
+        "mid": ["understands the attacker likely established multiple persistence mechanisms", "needs to find ALL footholds before beginning eradication - otherwise partial eradication fails", "looks for credential dumping artifacts: if they dumped AD credentials, all accounts are potentially compromised", "reviews for backdoored accounts, golden tickets, or unauthorized AD object modifications"],
+        "senior": ["90-day dwell time means full domain compromise is possible: AD structure, service accounts, GPOs all suspect", "must assume credentials are compromised across the enterprise before any eradication", "scopes carefully before acting: eradicating one backdoor when 10 remain is worse than doing nothing (alerts the attacker)", "considers Active Directory forest recovery as a possible option if AD is fully compromised", "reviews for supply chain compromise: did the attacker modify any code, configurations, or deployment pipelines?"],
+        "staff": ["manages the strategic decision: partial eradication vs. full environment rebuild", "communicates the scope and recovery timeline to leadership under significant uncertainty", "coordinates legal notification timeline: may have breached regulatory reporting windows", "manages the rebuild vs. recover decision across business continuity constraints"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "persistence", "probe": "How do you find ALL persistence mechanisms when you don't know what the attacker installed?"},
+        {"if_mentioned": "AD compromise", "probe": "What specifically would make you recommend an Active Directory forest recovery versus trying to clean in place?"},
+        {"if_missed": "credential compromise", "probe": "The attacker was in the environment for 90 days. What does that imply about the state of your credentials?"},
+        {"if_strong": true, "escalate": "During your investigation you find the attacker modified a critical internal tool's build pipeline. What does this change about your incident scope?"},
+        {"if_weak": true, "simplify": "Why is the 90-day timeframe specifically significant for your investigation scope?"}
+      ],
+      "interviewer_notes": "Dwell time questions test whether candidates understand the compounding effect of long-term access. The critical concept is: eradication cannot happen until full scope is known, and 90-day access almost certainly means credential compromise. Supply chain compromise awareness separates senior from mid-level."
+    },
+    {
+      "id": "ir_008",
+      "text": "Describe your experience with cloud incident response. How does responding to an incident in AWS differ from an on-premises investigation?",
+      "depth": 2,
+      "topic": "cloud_ir",
+      "mitre_technique": "T1078.004",
+      "expected_concepts": {
+        "junior": ["knows cloud means AWS, Azure, GCP", "would look at cloud logs", "understands it's different from on-prem"],
+        "mid": ["AWS CloudTrail as the primary audit log source", "CloudTrail covers management events but not data events by default - must be explicitly enabled", "IAM access keys are credentials just like passwords - compromised key means compromised identity", "EC2 metadata service abuse (SSRF to IMDSv1) as a common initial access vector", "GuardDuty findings as the alert source in AWS"],
+        "senior": ["understands the ephemeral nature of cloud resources: instances may be terminated before investigation", "knows how to capture EC2 forensic image: snapshot EBS volume, mount read-only in forensic environment", "identifies privilege escalation paths in IAM: assume-role chaining, privilege escalation via PassRole", "knows cloud-specific TTPs: S3 bucket enumeration (T1619), Lambda function abuse, container escape", "understands the shared responsibility model: what logs AWS provides vs. what you must configure yourself"],
+        "staff": ["designs cloud-native IR playbooks that account for ephemeral infrastructure", "implements cloud IR automation: AWS Security Hub findings triggering Lambda-based containment", "addresses cross-account and cross-region investigation complexity", "designs proactive cloud posture: CloudTrail to all regions, S3 access logging, VPC Flow Logs always-on"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "CloudTrail", "probe": "CloudTrail is enabled. What specific API calls would you search for to identify lateral movement within AWS?"},
+        {"if_mentioned": "IAM", "probe": "You found an IAM access key was compromised. Beyond disabling the key, what else do you investigate?"},
+        {"if_missed": "ephemeral", "probe": "The attacker's EC2 instance was terminated 2 hours ago. How do you get forensic evidence from it?"},
+        {"if_strong": true, "escalate": "Your investigation shows the attacker used Lambda function execution to exfiltrate data. There are no network logs for Lambda. How do you reconstruct what they exfiltrated?"},
+        {"if_weak": true, "simplify": "What is the cloud equivalent of event logs that you'd look at first during a cloud incident?"}
+      ],
+      "interviewer_notes": "Cloud IR is increasingly non-optional. The key differentiators: understanding that CloudTrail data events are not enabled by default (huge gap for S3 exfiltration detection), and understanding the IMDSv1 SSRF attack vector. Ephemeral resource forensics separates senior from mid."
+    },
+    {
+      "id": "ir_009",
+      "text": "How do you determine whether a suspicious process is malicious or just unusual behavior from a legitimate application?",
+      "depth": 2,
+      "topic": "false_positive_analysis",
+      "mitre_technique": "T1036",
+      "expected_concepts": {
+        "junior": ["check VirusTotal for the hash", "look at what the process is doing", "Google the process name"],
+        "mid": ["check parent-child process relationship: who launched it and does that make sense", "verify executable digital signature against signer, not just presence of signature", "compare full executable path against expected installation path", "check network connections: what is this process communicating with and is that expected", "look at the creation time of the executable relative to when the alert fired"],
+        "senior": ["uses behavior-based analysis: even legitimate executable can be abused (LOLBins)", "checks for masquerading: svchost.exe in a non-system32 location, explorer.exe with unusual parent", "compares process behavior against historical baseline: is this normal for this host/user combination", "examines memory: loaded DLLs, process hollowing indicators, anomalous memory regions", "considers the environmental context: would a developer workstation vs. server legitimately run this?"],
+        "staff": ["designs the false positive reduction process: how do you prevent this analysis from being repeated for every legitimate process", "advocates for application allowlisting in high-risk environments", "builds the analyst decision tree into the detection rule itself (reduce false positive at source)"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "VirusTotal", "probe": "Hash is clean on VirusTotal. Does that mean the process is legitimate? Why or why not?"},
+        {"if_mentioned": "parent process", "probe": "What parent processes should svchost.exe ONLY be spawned by, and what does a different parent tell you?"},
+        {"if_missed": "path", "probe": "The process name is 'svchost.exe'. What else beyond the name would you verify about this executable?"},
+        {"if_strong": true, "escalate": "The process has a valid Microsoft signature, runs from System32, and has a legitimate parent. But it's making unusual network connections. What's your hypothesis?"},
+        {"if_weak": true, "simplify": "Besides the file hash, what else about a running process could indicate it's malicious?"}
+      ],
+      "interviewer_notes": "LOLBin abuse is a critical modern attacker technique. Strong candidates go beyond hash lookups immediately. The svchost parent-process check (should only be spawned by services.exe) is a classic and strong candidates know it cold. Watch for over-reliance on VirusTotal."
+    },
+    {
+      "id": "ir_010",
+      "text": "Tell me about the most technically complex incident you've responded to. What made it hard and how did you work through it?",
+      "depth": 1,
+      "topic": "behavioral",
+      "mitre_technique": null,
+      "expected_concepts": {
+        "junior": ["can describe an incident they were part of, even peripherally", "identifies what was hard about it", "describes what they learned"],
+        "mid": ["describes a specific incident with technical detail: what tools were involved, what artifacts were analyzed, what was the finding", "articulates the specific challenge (attribution, scope, evasion technique)", "explains their contribution specifically vs. what the team did"],
+        "senior": ["describes an incident that required novel investigation approaches", "can explain how they overcame a specific technical barrier (anti-forensics, log gaps, cloud-native challenge)", "articulates lessons that changed how they approach investigations going forward"],
+        "staff": ["describes organizational and technical complexity: managing a team during a high-pressure incident, making decisions with incomplete information, communicating to stakeholders simultaneously"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "team", "probe": "What specifically did YOU do during that incident that was different from what others on the team did?"},
+        {"if_mentioned": "attacker", "probe": "What specifically about the attacker's technique made detection or investigation difficult?"},
+        {"if_missed": "lessons", "probe": "What would you do differently now that you've had time to reflect on it?"},
+        {"if_strong": true, "escalate": "You mentioned the attacker was sophisticated. What evidence made you conclude that vs. just an unusual behavior pattern?"},
+        {"if_weak": true, "simplify": "Even if the incident wasn't highly complex, what's one thing you learned from it that changed how you investigate?"}
+      ],
+      "interviewer_notes": "Behavioral question that calibrates everything else. Listen for: specificity (exact tools, artifacts, Event IDs they mention), whether they claim individual credit appropriately vs. attribute everything to the team, and whether they learned something that changed their practice. Vague answers ('we found the malware and removed it') indicate low actual involvement."
+    },
+    {
+      "id": "ir_011",
+      "text": "How do you handle evidence preservation and chain of custody for an incident that may result in legal proceedings?",
+      "depth": 2,
+      "topic": "legal_and_evidence",
+      "mitre_technique": null,
+      "expected_concepts": {
+        "junior": ["knows you need to document what you found", "understands hashing for integrity verification", "knows not to modify evidence"],
+        "mid": ["uses write blockers for disk acquisition", "hashes all evidence at collection with MD5 and SHA-256", "maintains evidence log: who collected what, when, using which tool, and stored where", "understands legal hold: preserving evidence beyond normal retention windows"],
+        "senior": ["differentiates between court-admissible evidence requirements vs. internal investigation standards", "knows the difference between forensically sound acquisition (bit-for-bit) and triage collection and when each is appropriate", "understands attorney-client privilege protection of investigation findings", "documents collection methodology so it can be independently reproduced by opposing counsel"],
+        "staff": ["designs the legal hold process in advance: who issues holds, what systems are covered, how compliance is verified", "manages relationship with outside counsel during investigation", "knows Daubert/Frye standards for forensic evidence admissibility in US courts"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "hash", "probe": "You hash the evidence at collection. When else during the investigation process do you verify the hash?"},
+        {"if_mentioned": "write blocker", "probe": "The incident involves a cloud server with no physical media. How do you achieve the equivalent of write-blocked acquisition in a cloud environment?"},
+        {"if_missed": "legal hold", "probe": "The incident may involve litigation. What specifically needs to happen to your evidence retention before you follow your normal IR process?"},
+        {"if_strong": true, "escalate": "Outside counsel has told you that your investigation findings are protected by attorney-client privilege. How does that affect what you document and how you share your findings?"},
+        {"if_weak": true, "simplify": "Why does it matter HOW you collect evidence if the content of the evidence is the same?"}
+      ],
+      "interviewer_notes": "Legal and evidence handling is often underdeveloped even in experienced IR practitioners. Mid-level should know write-blockers and hashing cold. Senior should understand legal hold and privilege. Staff should understand admissibility standards. The cloud acquisition question is excellent for testing adaptability."
+    },
+    {
+      "id": "ir_012",
+      "text": "You receive a threat intelligence report suggesting your organization is specifically targeted by a threat actor known to use living-off-the-land techniques. How do you operationalize that intelligence for your IR team?",
+      "depth": 3,
+      "topic": "threat_intel_ir_integration",
+      "mitre_technique": "T1218",
+      "expected_concepts": {
+        "junior": ["would share the report with the team", "would look for the IOCs mentioned in the report", "would add any new IOCs to blocking lists"],
+        "mid": ["translates threat actor TTPs from report to specific detection queries", "checks current detection coverage against the actor's known TTPs using ATT&CK mapping", "develops specific hunting queries for the mentioned LOLBins (certutil, mshta, regsvr32)", "updates runbooks with actor-specific response procedures"],
+        "senior": ["designs hunting operation specifically for the threat actor's TTPs", "identifies which of the actor's techniques their environment is most vulnerable to (gap analysis)", "updates detection rules to account for LOTL techniques that may not fire existing rules", "briefs SOC team with actor-specific indicators beyond IOCs: behavioral signatures"],
+        "staff": ["drives program response: detection updates + IR playbook updates + threat hunt + environment hardening all as parallel workstreams", "evaluates whether threat intelligence warrants executive notification or board-level briefing", "measures readiness: runs tabletop against the threat actor's known campaign lifecycle"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "IOCs", "probe": "This threat actor is known to rotate their infrastructure every 48 hours. IOCs from this report will be stale. What intelligence from the report is still useful?"},
+        {"if_mentioned": "detection coverage", "probe": "How would you specifically test whether your current detections would catch certutil.exe being used as a downloader?"},
+        {"if_missed": "hunting", "probe": "Beyond updating detections, what active step would you take in the first 24 hours after receiving this report?"},
+        {"if_strong": true, "escalate": "The threat actor's report mentions they have previously compromised organizations with similar profiles to yours. How do you determine if you might already be compromised?"},
+        {"if_weak": true, "simplify": "What's the difference between operationalizing threat intelligence and just reading a threat report?"}
+      ],
+      "interviewer_notes": "This question tests the CTI-IR integration that strong practitioners do naturally. The IOC staleness follow-up is critical - candidates who only operationalize IOCs haven't understood what makes LOTL techniques hard to detect. Strong answer: focus on behavioral TTPs, run a hunt, test existing detections."
+    }
+  ]
+}

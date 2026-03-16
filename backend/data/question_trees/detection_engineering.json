@@ -1,0 +1,976 @@
+{
+  "domain": "detection_engineering",
+  "display_name": "Detection Engineering",
+  "description": "Evaluates ability to design, implement, tune, and maintain detection rules across SIEM, EDR, and custom pipelines.",
+  "mitre_references": [
+    "TA0001",
+    "TA0002",
+    "TA0003",
+    "TA0004",
+    "TA0005",
+    "TA0006",
+    "TA0007",
+    "TA0008",
+    "TA0009",
+    "TA0010",
+    "TA0011"
+  ],
+  "root_questions": [
+    {
+      "id": "de_001",
+      "text": "Walk me through how you'd build a detection for credential dumping, specifically LSASS memory access. Start from data source selection to production deployment.",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "detection_development",
+      "expected_concepts": [
+        "sysmon_event_10",
+        "process_access",
+        "lsass_exe",
+        "mimikatz",
+        "data_source_selection",
+        "edr_telemetry",
+        "windows_event_logs",
+        "testing"
+      ],
+      "red_flags": [
+        "only_signature_based",
+        "no_testing",
+        "no_false_positive_consideration",
+        "skip_data_source",
+        "jumps_straight_to_writing_a_splunk_query",
+        "no_evasion_consideration",
+        "treats_detection_as_done_when_rule_fires",
+        "cannot_explain_why_lsass_is_a_target",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "sysmon_event_10",
+            "process_access",
+            "edr_telemetry"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Good. Now your Sysmon Event ID 10 rule for LSASS access is firing 2,000 times a day. 95% are false positives from legitimate tools like AV scanners and backup agents. How do you tune this without creating blind spots?",
+          "level": 2,
+          "expected_concepts": [
+            "callstack_analysis",
+            "granted_access_mask",
+            "exclusion_list_with_hash",
+            "source_process_validation",
+            "false_positive_documentation",
+            "allowlist_vs_blocklist",
+            "tune_by_access_rights_not_process_name",
+            "0x1010_vs_0x1FFFFF"
+          ],
+          "red_flags": [
+            "exclude_by_process_name_only",
+            "raise_threshold",
+            "disable_rule",
+            "no_documentation"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "callstack_analysis",
+            "granted_access_mask",
+            "0x1010_vs_0x1FFFFF"
+          ],
+          "trigger_type": "concept_match",
+          "question": "A red teamer just bypassed your LSASS detection by using a direct syscall to NtReadVirtualMemory, avoiding the Win32 API entirely. Your Sysmon rule never fires. How do you detect this, and what does this tell you about the limitations of your current detection architecture?",
+          "level": 3,
+          "expected_concepts": [
+            "kernel_level_telemetry",
+            "etw_provider",
+            "minifilter_driver",
+            "edr_kernel_callbacks",
+            "behavioral_detection_over_api_hooking",
+            "detect_the_outcome_not_the_tool",
+            "ntds_dit_access",
+            "credential_use_anomaly",
+            "defense_in_depth_detection"
+          ],
+          "red_flags": [
+            "add_another_sysmon_rule",
+            "only_userland_detection",
+            "no_architectural_thinking"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "kernel_level_telemetry",
+            "detect_the_outcome_not_the_tool",
+            "defense_in_depth_detection"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Let me challenge you. If attackers can always find new ways to dump credentials, is credential dumping detection fundamentally the wrong approach? What would you architect instead, and when would you argue to your CISO that the detection engineering investment should shift?",
+          "level": 4,
+          "expected_concepts": [
+            "credential_hygiene_over_detection",
+            "laps",
+            "credential_guard",
+            "tiered_admin_model",
+            "detect_credential_use_anomaly",
+            "honeycreds",
+            "deception_tokens",
+            "reduce_attack_surface",
+            "prevention_vs_detection_tradeoff",
+            "risk_based_prioritization"
+          ],
+          "red_flags": [
+            "more_detection_rules",
+            "no_prevention_consideration",
+            "no_strategic_thinking"
+          ]
+        }
+      ],
+      "scoring_guidance": "A strong answer starts with DATA SOURCE SELECTION before jumping to rule logic. Look for: which telemetry (Sysmon vs EDR vs Windows Security), specific Event IDs, WHY those sources, testing plan, FP consideration, deployment pipeline. A 5/5 discusses the detection lifecycle end-to-end and considers evasion from the start. A 3/5 names the right tools but describes a linear process without trade-off discussion.",
+      "strong_answer_markers": [
+        "Starts with data source selection before rule logic",
+        "Names specific Event IDs (Sysmon 10, Security 4688/4663)",
+        "Discusses access mask specifics (0x1010 vs 0x1FFFFF)",
+        "Mentions testing methodology before production deployment",
+        "Considers attacker evasion proactively",
+        "Describes the full lifecycle: build, test, tune, deploy, maintain"
+      ]
+    },
+    {
+      "id": "de_002",
+      "text": "How do you approach mapping your detection coverage to MITRE ATT&CK? What does your process look like from gap identification to prioritization?",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "coverage_mapping",
+      "expected_concepts": [
+        "attack_navigator",
+        "technique_mapping",
+        "data_source_inventory",
+        "gap_analysis",
+        "prioritization_by_threat_model",
+        "coverage_heatmap",
+        "detection_per_technique"
+      ],
+      "red_flags": [
+        "never_used_attack_framework",
+        "no_prioritization",
+        "try_to_cover_everything",
+        "no_threat_model",
+        "tries_to_cover_all_techniques_equally",
+        "uses_navigator_but_cannot_explain_prioritization",
+        "no_threat_model_input_to_coverage_decisions",
+        "confuses_having_a_rule_with_having_a_tested_detection",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "attack_navigator",
+            "gap_analysis",
+            "prioritization_by_threat_model"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You've built your ATT&CK coverage heatmap and identified 40 technique gaps. Your team can write maybe 2-3 quality detections per sprint. How do you decide which techniques to prioritize, and how do you communicate this to leadership?",
+          "level": 2,
+          "expected_concepts": [
+            "threat_intelligence_driven",
+            "industry_specific_threats",
+            "attack_chain_coverage",
+            "choke_points",
+            "technique_prevalence",
+            "data_availability",
+            "detection_feasibility",
+            "risk_scoring_matrix"
+          ],
+          "red_flags": [
+            "random_selection",
+            "start_with_ta0001",
+            "no_threat_intel_input",
+            "no_leadership_communication"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "choke_points",
+            "attack_chain_coverage",
+            "threat_intelligence_driven"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You mentioned choke points. A new CTI report says APT29 is actively targeting your industry using a novel supply chain attack (T1195.002) followed by a living-off-the-land attack chain. You have zero detections for 4 of the 7 techniques in their kill chain. Walk me through building a detection sprint around this intelligence.",
+          "level": 3,
+          "expected_concepts": [
+            "kill_chain_decomposition",
+            "detection_per_stage",
+            "data_source_gap_analysis",
+            "sigma_rules",
+            "purple_team_validation",
+            "detection_as_code",
+            "ci_cd_pipeline",
+            "unit_testing_detections",
+            "telemetry_requirements"
+          ],
+          "red_flags": [
+            "write_7_rules_at_once",
+            "no_validation",
+            "no_data_source_check"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "detection_as_code",
+            "purple_team_validation",
+            "ci_cd_pipeline"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You're building a detection engineering program from scratch at a company with 50,000 endpoints, a Splunk SIEM, CrowdStrike EDR, and a team of 3 detection engineers. Design the program: what's the operating model, what's the tech stack for detection-as-code, and how do you measure success after 12 months?",
+          "level": 4,
+          "expected_concepts": [
+            "detection_lifecycle",
+            "sigma_to_spl_pipeline",
+            "git_based_workflow",
+            "automated_testing",
+            "attack_simulation_platform",
+            "atomic_red_team",
+            "coverage_metrics",
+            "mttd_per_technique",
+            "false_positive_rate_tracking",
+            "detection_sla",
+            "team_structure",
+            "on_call_rotation"
+          ],
+          "red_flags": [
+            "no_automation",
+            "no_metrics",
+            "no_testing_framework",
+            "heroics_based_model"
+          ]
+        }
+      ],
+      "scoring_guidance": "This tests strategic thinking, not just ATT&CK Navigator knowledge. A strong answer discusses: threat-model-driven prioritization (not trying to cover everything), how to measure coverage quality (not just count), and practical gap analysis workflow. A 5/5 challenges the premise: 'full ATT&CK coverage is impossible and the wrong goal.' A 3/5 describes the mechanical process but lacks prioritization framework.",
+      "strong_answer_markers": [
+        "Prioritizes by threat model, not by ATT&CK technique number",
+        "Distinguishes between 'we have a rule' and 'we have a tested, validated detection'",
+        "Mentions coverage QUALITY metrics, not just coverage percentage",
+        "Discusses data source gaps as a prerequisite to detection gaps",
+        "Has a practical workflow: gap analysis -> prioritize -> build -> test -> measure"
+      ]
+    },
+    {
+      "id": "de_003",
+      "text": "Tell me about a detection rule you wrote that you're proud of. What did it detect, how did you build it, and what was the false positive rate?",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "practical_experience",
+      "expected_concepts": [
+        "specific_example",
+        "data_source",
+        "logic_explanation",
+        "tuning_process",
+        "false_positive_rate",
+        "true_positive_validation",
+        "production_metrics"
+      ],
+      "red_flags": [
+        "no_specific_example",
+        "never_written_a_rule",
+        "no_metrics",
+        "only_copied_from_internet",
+        "describes_a_detection_from_a_blog_post_not_personal_experience",
+        "cannot_explain_the_actual_logic_or_query",
+        "no_quantification_of_false_positive_rate",
+        "claims_zero_false_positives",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "specific_example",
+            "tuning_process",
+            "false_positive_rate"
+          ],
+          "trigger_type": "concept_match",
+          "question": "How did you validate that detection actually catches the attack it's designed for? Walk me through your testing methodology.",
+          "level": 2,
+          "expected_concepts": [
+            "atomic_red_team",
+            "attack_simulation",
+            "manual_recreation",
+            "unit_test",
+            "detection_test_framework",
+            "caldera",
+            "red_team_collaboration",
+            "replay_known_incidents"
+          ],
+          "red_flags": [
+            "wait_for_real_attack",
+            "no_testing",
+            "only_manual_check"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "atomic_red_team",
+            "detection_test_framework",
+            "attack_simulation"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Your detection has been in production for 6 months. How do you know it still works? What's your approach to detection validation and maintenance over time?",
+          "level": 3,
+          "expected_concepts": [
+            "continuous_validation",
+            "scheduled_attack_simulation",
+            "detection_health_checks",
+            "data_source_monitoring",
+            "log_pipeline_validation",
+            "detection_decay",
+            "schema_changes",
+            "infrastructure_changes_break_detections"
+          ],
+          "red_flags": [
+            "set_and_forget",
+            "no_monitoring",
+            "no_maintenance_plan"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "continuous_validation",
+            "detection_decay",
+            "data_source_monitoring"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Detection decay is a real problem. You have 400 detection rules and your team found that 30% silently stopped working after infrastructure changes. How do you architect a system that prevents this and ensures detection reliability at scale?",
+          "level": 4,
+          "expected_concepts": [
+            "detection_as_code_full_lifecycle",
+            "data_source_health_dashboard",
+            "automated_regression_testing",
+            "canary_events",
+            "synthetic_telemetry",
+            "detection_sla_with_engineering",
+            "log_pipeline_contracts",
+            "schema_registry"
+          ],
+          "red_flags": [
+            "manual_audit",
+            "accept_detection_rot",
+            "no_systemic_solution"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests practical experience vs theoretical knowledge. A strong answer has a SPECIFIC detection with concrete details: what it detects, exact logic (even pseudocode), what the FP rate was, how they measured it, and how it performed in production. A 5/5 describes the full journey: hypothesis -> build -> test -> tune -> production metrics. A 3/5 gives a real example but lacks quantification or testing details. Watch for: candidates who describe a detection they READ ABOUT vs one they BUILT.",
+      "strong_answer_markers": [
+        "Names a specific detection they personally built",
+        "Explains the logic (query, fields, conditions) not just the concept",
+        "Quantifies: FP rate, TP rate, alert volume, tuning iterations",
+        "Describes the tuning process and what changed",
+        "Mentions production metrics: how long it ran, what it caught"
+      ]
+    },
+    {
+      "id": "de_004",
+      "text": "Explain the difference between a good SIEM correlation rule and a bad one. Give me an example of each.",
+      "difficulty_weight": 0.75,
+      "level": 1,
+      "category": "siem_correlation",
+      "expected_concepts": [
+        "specificity",
+        "context_enrichment",
+        "threshold_logic",
+        "time_window",
+        "false_positive_consideration",
+        "actionable_alert",
+        "analyst_workflow"
+      ],
+      "red_flags": [
+        "no_examples",
+        "doesnt_know_correlation",
+        "only_single_event_rules",
+        "cannot_give_concrete_examples",
+        "thinks_more_alerts_equals_better_detection",
+        "no_consideration_of_analyst_workflow",
+        "good_example_is_just_a_single_event_match_with_threshold",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "specificity",
+            "context_enrichment",
+            "time_window"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You need to build a correlation rule that detects lateral movement using pass-the-hash across your Windows environment. You have Sysmon, Windows Security Events, and CrowdStrike EDR data in Splunk. Design the rule, including the correlation logic and time windows.",
+          "level": 2,
+          "expected_concepts": [
+            "event_4624_type_3",
+            "ntlm_vs_kerberos",
+            "source_destination_correlation",
+            "impossible_travel_for_accounts",
+            "service_account_behavior",
+            "edr_process_creation_context",
+            "spl_stats_by",
+            "time_window_15min"
+          ],
+          "red_flags": [
+            "single_event_only",
+            "no_correlation_logic",
+            "no_authentication_type_filter"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "ntlm_vs_kerberos",
+            "source_destination_correlation",
+            "edr_process_creation_context"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Your pass-the-hash detection is generating 50 alerts per day. SOC analysts are starting to ignore it. The true positive rate is about 2%. How do you redesign this to be operationally useful while not missing real attacks?",
+          "level": 3,
+          "expected_concepts": [
+            "risk_based_alerting",
+            "entity_scoring",
+            "context_stacking",
+            "asset_criticality",
+            "behavioral_baseline",
+            "alert_aggregation",
+            "composite_alert",
+            "reduced_volume_higher_fidelity"
+          ],
+          "red_flags": [
+            "just_tune_threshold",
+            "accept_alert_fatigue",
+            "disable_detection"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "risk_based_alerting",
+            "entity_scoring",
+            "behavioral_baseline"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Risk-based alerting is a hot concept. But I've seen it fail at multiple organizations. What are the failure modes of risk-based alerting, and when would you argue against implementing it? What's the alternative?",
+          "level": 4,
+          "expected_concepts": [
+            "baseline_poisoning",
+            "score_inflation",
+            "lack_of_transparency",
+            "analyst_trust_problem",
+            "cold_start_problem",
+            "model_drift",
+            "explainability_requirement",
+            "hybrid_approach",
+            "deterministic_plus_risk",
+            "human_in_the_loop"
+          ],
+          "red_flags": [
+            "no_criticism",
+            "risk_based_solves_everything",
+            "no_failure_mode_awareness"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests understanding of correlation vs simple matching. A good answer contrasts: single-event rules (bad) vs multi-source correlation with context (good). A 5/5 gives concrete examples of BOTH good and bad rules from real experience, explaining WHY one is better (analyst workflow, actionability, FP rate). A 3/5 knows the theory but examples feel generic.",
+      "strong_answer_markers": [
+        "Gives a concrete bad rule example and explains why it fails",
+        "Gives a concrete good rule example with correlation logic",
+        "Discusses analyst workflow: what does the analyst DO when this fires?",
+        "Mentions context enrichment in the alert itself",
+        "Ties rule quality to operational impact (FP rate, analyst time)"
+      ]
+    },
+    {
+      "id": "de_005",
+      "text": "How do you handle log ingestion and data pipeline reliability for your detection rules? What happens when logs stop flowing?",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "data_pipeline",
+      "expected_concepts": [
+        "log_source_monitoring",
+        "ingestion_delay_detection",
+        "data_quality_checks",
+        "pipeline_health",
+        "siem_capacity_planning",
+        "log_forwarding_architecture"
+      ],
+      "red_flags": [
+        "never_considered_pipeline",
+        "assume_logs_always_flow",
+        "no_monitoring",
+        "assumes_logs_always_arrive_on_time",
+        "never_monitored_ingestion_health",
+        "no_awareness_of_siem_licensing_cost_per_gb",
+        "has_been_surprised_by_a_silent_log_gap",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "log_source_monitoring",
+            "ingestion_delay_detection",
+            "data_quality_checks"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Your Splunk instance is ingesting 2TB per day. You just got a new log source that adds 500GB. Your license is 2.5TB. Walk me through your decision process: what stays, what goes, and how do you handle the tradeoffs?",
+          "level": 2,
+          "expected_concepts": [
+            "license_optimization",
+            "data_tiering",
+            "summary_indexing",
+            "metrics_vs_raw",
+            "archive_strategy",
+            "detection_value_per_log_source",
+            "cost_per_detection",
+            "s3_for_compliance_logs"
+          ],
+          "red_flags": [
+            "just_buy_more_license",
+            "no_prioritization",
+            "keep_everything"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "data_tiering",
+            "detection_value_per_log_source",
+            "cost_per_detection"
+          ],
+          "trigger_type": "concept_match",
+          "question": "The CISO asks you: 'What's the cost per detection for each log source?' How would you calculate this, and how would you use it to make data ingestion investment decisions?",
+          "level": 3,
+          "expected_concepts": [
+            "detection_coverage_per_source",
+            "siem_cost_per_gb",
+            "detection_efficacy_metrics",
+            "true_positive_attribution",
+            "roi_calculation",
+            "opportunity_cost",
+            "alternative_data_sources",
+            "edl_vs_siem_for_specific_sources"
+          ],
+          "red_flags": [
+            "cant_calculate",
+            "no_roi_framework",
+            "gut_feeling_only"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "detection_efficacy_metrics",
+            "roi_calculation",
+            "alternative_data_sources"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Let me push further. Some organizations are moving away from centralized SIEM entirely toward distributed detection at the edge: running detections in the data pipeline before indexing, or using stream processing. What's your take on the future of detection architecture, and what would you build if starting from zero today?",
+          "level": 4,
+          "expected_concepts": [
+            "stream_processing",
+            "kafka_flink",
+            "detection_at_ingest",
+            "data_lake_plus_query_engine",
+            "security_data_lake",
+            "cribl_logstream",
+            "vendor_consolidation_trend",
+            "xdr_architecture",
+            "cost_efficiency",
+            "open_standards_ocsf"
+          ],
+          "red_flags": [
+            "siem_is_fine",
+            "no_awareness_of_alternatives",
+            "no_opinion"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests operational maturity. Many candidates focus on rule writing but ignore the data pipeline that feeds their rules. A strong answer shows they've dealt with pipeline failures, ingestion delays, and data quality issues. A 5/5 describes monitoring THEIR OWN pipeline health and having alerts on log gaps. A 3/5 acknowledges the importance but hasn't built monitoring.",
+      "strong_answer_markers": [
+        "Has personally dealt with a log pipeline failure and its impact",
+        "Monitors data source health proactively (not just when detections fail)",
+        "Understands SIEM capacity planning and cost implications",
+        "Describes specific tools or methods for pipeline monitoring",
+        "Connects pipeline health to detection reliability"
+      ]
+    },
+    {
+      "id": "de_006",
+      "text": "Write me a Sigma rule for detecting Kerberoasting. Explain each field and why you chose it.",
+      "difficulty_weight": 1.25,
+      "level": 1,
+      "category": "rule_writing",
+      "expected_concepts": [
+        "sigma_format",
+        "event_4769",
+        "encryption_type_0x17",
+        "service_ticket_request",
+        "rc4_downgrade",
+        "service_account_targeting",
+        "logsource_definition"
+      ],
+      "red_flags": [
+        "doesnt_know_sigma",
+        "wrong_event_id",
+        "no_encryption_filter",
+        "cannot_produce_sigma_structure",
+        "wrong_event_id_for_kerberoasting",
+        "no_encryption_type_filter",
+        "writes_a_rule_that_would_fire_on_every_service_ticket_request",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "sigma_format",
+            "event_4769",
+            "encryption_type_0x17"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Good. Now convert that Sigma rule to SPL for Splunk and KQL for Microsoft Sentinel. What are the gotchas in translation, and where does the Sigma abstraction break down?",
+          "level": 2,
+          "expected_concepts": [
+            "field_name_mapping",
+            "index_specification",
+            "spl_syntax",
+            "kql_syntax",
+            "sigma_backend_limitations",
+            "field_normalization_differences",
+            "timestamp_format_differences",
+            "testing_after_conversion"
+          ],
+          "red_flags": [
+            "cant_convert",
+            "no_awareness_of_translation_issues",
+            "copy_paste_without_understanding"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "field_name_mapping",
+            "sigma_backend_limitations",
+            "testing_after_conversion"
+          ],
+          "trigger_type": "concept_match",
+          "question": "An attacker is using Rubeus with the /tgtdeleg trick to avoid the RC4 downgrade that your Kerberoasting detection relies on. They're requesting service tickets with AES encryption. Your detection is blind. How do you adapt?",
+          "level": 3,
+          "expected_concepts": [
+            "aes_kerberoasting",
+            "volume_based_detection",
+            "service_ticket_request_anomaly",
+            "user_behavior_baseline",
+            "honey_service_accounts",
+            "spn_enumeration_detection",
+            "ldap_query_monitoring",
+            "detection_layering"
+          ],
+          "red_flags": [
+            "only_detect_rc4",
+            "no_volume_analysis",
+            "no_adaptation_strategy"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "honey_service_accounts",
+            "detection_layering",
+            "service_ticket_request_anomaly"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You're now the detection engineering lead. Build me a detection strategy for the entire credential access tactic (TA0006), not just Kerberoasting. How do you structure the work, what's the coverage model, and how do you prevent the team from writing 50 one-off rules that become unmaintainable?",
+          "level": 4,
+          "expected_concepts": [
+            "technique_taxonomy",
+            "detection_library_architecture",
+            "shared_logic_modules",
+            "parameterized_detections",
+            "detection_catalog",
+            "coverage_scoring",
+            "maintenance_budget",
+            "deprecation_policy",
+            "platform_abstraction_layer"
+          ],
+          "red_flags": [
+            "50_individual_rules",
+            "no_architecture",
+            "no_maintenance_strategy"
+          ]
+        }
+      ],
+      "scoring_guidance": "This is a hands-on technical test. Can they actually WRITE a rule, not just talk about detection? A strong answer produces a Sigma rule structure from memory with correct fields: logsource, detection, filter, level, title. A 5/5 writes the rule AND explains each field choice, including why the specific Event ID and field values matter for Kerberoasting specifically. A 3/5 knows the concept but struggles with exact syntax or event details.",
+      "strong_answer_markers": [
+        "Writes Sigma structure from memory (logsource, detection, filter)",
+        "Correct Event ID: 4769 (not 4768 or 4770)",
+        "Filters on encryption type 0x17 (RC4)",
+        "Explains WHY RC4 is suspicious (Kerberoasting forces downgrade)",
+        "Mentions service account targeting and how to filter noise"
+      ]
+    },
+    {
+      "id": "de_009",
+      "text": "Before we get into the main coding challenge, I want to warm up with a quick code reading exercise. I'm going to show you a short Python snippet. Tell me what you think the output will be, and explain your reasoning.",
+      "difficulty_weight": 0.75,
+      "level": 1,
+      "category": "hands_on_coding",
+      "challenge_data": {
+        "title": "Code Reading - What's the output?",
+        "type": "code",
+        "content": "import re\n\nlog_line = '10.0.0.33 - - [13/Mar/2026:08:15:23 +0000] \"POST /login HTTP/1.1\" 401 512'\n\n# Extract IP address\nip = log_line.split()[0]\nprint(f\"IP: {ip}\")\n\n# Extract HTTP status code\nparts = log_line.split('\"')\nstatus = parts[2].strip().split()[0]\nprint(f\"Status: {status}\")\n\n# Check if failed login\nfailed_codes = [401, 403, 500]\nif int(status) in failed_codes:\n    print(f\"ALERT: Failed login from {ip}\")\nelse:\n    print(\"OK\")\n\n# What about this line?\nips = {}\nips[ip] = ips.get(ip, 0) + 1\nips[ip] = ips.get(ip, 0) + 1\nprint(f\"Count: {ips[ip]}\")"
+      },
+      "expected_concepts": [
+        "string_split",
+        "list_indexing",
+        "f_string_formatting",
+        "dictionary_get_default",
+        "type_casting",
+        "conditional_logic"
+      ],
+      "scoring_guidance": "A 3/10 can read the code but gets the dictionary .get() question wrong (says count=1 instead of 2). A 6/10 traces through correctly but can't explain WHY .get(ip, 0) returns 1 on the second call. A 10/10 traces everything correctly, explains that .get(ip, 0) returns the current value (1) on the second call so the final count is 2, and might note that the regex import is unused.",
+      "strong_answer_markers": [
+        "Correctly identifies IP output as '10.0.0.33'",
+        "Correctly identifies Status as '401'",
+        "Knows 401 is in failed_codes so ALERT prints",
+        "Correctly traces ips.get() to final count of 2",
+        "Notices the unused 're' import",
+        "Explains string split behavior with different delimiters"
+      ],
+      "red_flags": [
+        "Cannot trace basic Python string operations",
+        "Doesn't know what .split() does",
+        "Thinks the count is 1 instead of 2 and can't explain why",
+        "Cannot read f-string syntax",
+        "Doesn't know what 401 means"
+      ],
+      "depth_probes": [
+        {
+          "level": 2,
+          "text": "Good. Now, what would happen if the log line was malformed - say the quotes were missing? Where would this code break, and how would you make it more robust?",
+          "expected_concepts": [
+            "error_handling",
+            "try_except",
+            "input_validation",
+            "defensive_coding"
+          ]
+        },
+        {
+          "level": 3,
+          "text": "If you needed to process 10 million of these log lines, what would you change about this approach? Think about memory, performance, and data structures.",
+          "expected_concepts": [
+            "generator_expressions",
+            "streaming_processing",
+            "collections_counter",
+            "memory_efficiency"
+          ]
+        },
+        {
+          "level": 4,
+          "text": "Design a production log analysis pipeline that can handle 10GB of logs per hour, detect brute force attacks in near-real-time, and alert the SOC. What architecture would you use?",
+          "expected_concepts": [
+            "streaming_architecture",
+            "kafka_or_kinesis",
+            "windowed_aggregation",
+            "alerting_pipeline",
+            "horizontal_scaling"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "de_007",
+      "text": "Parse the access logs in your challenge panel. Extract IPs, count requests per IP, sort descending. Then identify the suspicious IP and explain why.",
+      "difficulty_weight": 1.25,
+      "level": 1,
+      "category": "hands_on_coding",
+      "expected_concepts": [
+        "log_parsing",
+        "regex_or_split",
+        "ip_extraction",
+        "dictionary_counting",
+        "sorting",
+        "suspicious_activity_identification",
+        "brute_force_detection",
+        "post_auth_admin_access"
+      ],
+      "scoring_guidance": "A 3/5 answer writes working code but uses basic string splitting and misses the suspicious activity. A 5/5 answer uses regex or structured parsing, handles edge cases, correctly identifies 10.0.0.33 as suspicious (brute force login followed by admin access and log clearing), and explains the attack chain: failed logins -> successful auth -> admin config access -> user export -> user creation -> log clearing = textbook compromised account or insider threat.",
+      "strong_answer_markers": [
+        "Uses regex pattern like r'(\\d+\\.\\d+\\.\\d+\\.\\d+)' or structured log parsing",
+        "Uses collections.Counter or defaultdict for counting",
+        "Identifies 10.0.0.33 as suspicious",
+        "Explains the full attack chain: brute force -> admin access -> data export -> log clearing",
+        "Mentions this looks like credential stuffing followed by post-compromise activity",
+        "Notes the 401->401->401->200 pattern as brute force indicator"
+      ],
+      "red_flags": [
+        "Cannot write basic Python to parse a text file",
+        "Writes code that wouldn't actually run",
+        "Misses the suspicious IP entirely",
+        "Only counts IPs but can't interpret the security implications",
+        "Doesn't notice the log clearing as anti-forensics"
+      ],
+      "depth_probes": [
+        {
+          "level": 2,
+          "text": "Your script processes the logs. Which IP stands out as the most active and why?",
+          "expected_concepts": [
+            "ip_counting",
+            "sorting"
+          ]
+        },
+        {
+          "level": 2,
+          "text": "What makes that IP suspicious compared to the others?",
+          "expected_concepts": [
+            "suspicious_activity_identification"
+          ]
+        },
+        {
+          "level": 2,
+          "text": "Walk me through the full attack chain you see for 10.0.0.33.",
+          "expected_concepts": [
+            "attack_chain_analysis",
+            "brute_force_detection"
+          ]
+        },
+        {
+          "level": 3,
+          "text": "What do the 401 status codes followed by a 200 tell you about the attacker's method?",
+          "expected_concepts": [
+            "brute_force_detection",
+            "credential_stuffing"
+          ]
+        },
+        {
+          "level": 3,
+          "text": "After the successful login, what did the attacker do next and why is that concerning?",
+          "expected_concepts": [
+            "post_exploitation",
+            "data_exfiltration"
+          ]
+        },
+        {
+          "level": 3,
+          "text": "Why is the /admin/logs/clear request significant from a forensics perspective?",
+          "expected_concepts": [
+            "anti_forensics",
+            "log_clearing"
+          ]
+        },
+        {
+          "level": 3,
+          "text": "How would you handle malformed or incomplete log lines in your script?",
+          "expected_concepts": [
+            "error_handling",
+            "robustness"
+          ]
+        },
+        {
+          "level": 4,
+          "text": "If this log had millions of lines, how would you optimize your parsing for performance?",
+          "expected_concepts": [
+            "code_optimization",
+            "streaming",
+            "generators"
+          ]
+        },
+        {
+          "level": 4,
+          "text": "What detection rule would you write to catch this brute-force-to-exfiltration pattern in real-time?",
+          "expected_concepts": [
+            "detection_engineering",
+            "real_time_detection"
+          ]
+        }
+      ],
+      "challenge_data": {
+        "title": "Apache Access Log (15 lines)",
+        "type": "log",
+        "content": "192.168.1.50 - - [13/Mar/2026:08:15:22 +0000] \"GET /index.html HTTP/1.1\" 200 1024\n10.0.0.33 - - [13/Mar/2026:08:15:23 +0000] \"POST /login HTTP/1.1\" 401 512\n192.168.1.50 - - [13/Mar/2026:08:15:24 +0000] \"GET /admin HTTP/1.1\" 403 256\n10.0.0.33 - - [13/Mar/2026:08:15:25 +0000] \"POST /login HTTP/1.1\" 401 512\n172.16.5.100 - - [13/Mar/2026:08:15:26 +0000] \"GET /api/users HTTP/1.1\" 200 2048\n10.0.0.33 - - [13/Mar/2026:08:15:27 +0000] \"POST /login HTTP/1.1\" 401 512\n10.0.0.33 - - [13/Mar/2026:08:15:28 +0000] \"POST /login HTTP/1.1\" 200 1024\n10.0.0.33 - - [13/Mar/2026:08:15:29 +0000] \"GET /admin/config HTTP/1.1\" 200 4096\n10.0.0.33 - - [13/Mar/2026:08:15:30 +0000] \"GET /admin/users/export HTTP/1.1\" 200 8192\n192.168.1.50 - - [13/Mar/2026:08:16:01 +0000] \"GET /dashboard HTTP/1.1\" 200 2048\n10.0.0.99 - - [13/Mar/2026:08:16:15 +0000] \"GET /api/health HTTP/1.1\" 200 128\n10.0.0.33 - - [13/Mar/2026:08:16:20 +0000] \"POST /admin/users/create HTTP/1.1\" 201 512\n172.16.5.100 - - [13/Mar/2026:08:16:25 +0000] \"DELETE /api/users/15 HTTP/1.1\" 204 0\n10.0.0.33 - - [13/Mar/2026:08:16:30 +0000] \"GET /admin/logs/clear HTTP/1.1\" 200 256\n192.168.1.50 - - [13/Mar/2026:08:17:00 +0000] \"GET /about HTTP/1.1\" 200 1024"
+      }
+    },
+    {
+      "id": "de_008",
+      "text": "You're investigating potential lateral movement. The environment details and available log tables are shown in the challenge data panel on your screen. Write me a KQL query that identifies lateral movement originating FROM WORKSTATION-42. Explain what you're looking for and why.",
+      "difficulty_weight": 1.5,
+      "level": 1,
+      "category": "hands_on_coding",
+      "expected_concepts": [
+        "kql_syntax",
+        "lateral_movement_indicators",
+        "smb_detection",
+        "remote_service_creation",
+        "process_context",
+        "network_correlation",
+        "event_id_4624_type_3",
+        "psexec_or_sc_exe",
+        "time_window"
+      ],
+      "scoring_guidance": "A 3/5 answer writes basic KQL that filters by device name but doesn't correlate across tables or specify lateral movement indicators. A 5/5 answer joins DeviceNetworkEvents with DeviceProcessEvents, filters for SMB (port 445), remote logon type 3, looks for sc.exe/psexec/wmic command lines, uses a time window, and explains why each indicator matters. They might also mention looking for pass-the-hash (NTLM type 3 logons) or remote WMI execution.",
+      "strong_answer_markers": [
+        "Filters DeviceNetworkEvents for RemotePort 445 or 135 from WORKSTATION-42",
+        "Correlates with DeviceProcessEvents for sc.exe, psexec, wmic, powershell remoting",
+        "References Event ID 4624 Logon Type 3 (network logon) with source IP 10.10.5.42",
+        "Uses let statements or join/union for multi-table correlation",
+        "Adds time window with a where clause on Timestamp",
+        "Explains the difference between Type 3 and Type 10 logons for lateral movement",
+        "Mentions looking for parent-child process anomalies on destination hosts"
+      ],
+      "red_flags": [
+        "Cannot write basic KQL syntax",
+        "Doesn't know what lateral movement looks like in logs",
+        "Only searches for one indicator without correlation",
+        "Confuses source and destination in network events",
+        "Writes Splunk SPL when asked for KQL (acceptable if they acknowledge and translate)",
+        "No time scoping on the query"
+      ],
+      "depth_probes": [
+        {
+          "level": 2,
+          "text": "The attacker is now using WMI for lateral movement instead of SMB. How does your query change? What process and network artifacts does WMI lateral movement leave behind?",
+          "expected_concepts": [
+            "wmi_lateral_movement",
+            "wmiprvse_exe",
+            "dcom_port_135",
+            "scrcons_exe",
+            "wmic_process_create"
+          ]
+        },
+        {
+          "level": 3,
+          "text": "You want to build a reusable detection that catches lateral movement regardless of the specific technique. How do you write a behavioral detection that identifies the PATTERN of lateral movement rather than specific tools like PsExec or WMI?",
+          "expected_concepts": [
+            "behavioral_detection",
+            "network_graph_analysis",
+            "anomalous_auth_patterns",
+            "baseline_comparison",
+            "fan_out_detection"
+          ]
+        },
+        {
+          "level": 4,
+          "text": "Design a lateral movement detection strategy for a hybrid environment: 5,000 Windows endpoints, 500 Linux servers, 3 cloud providers (AWS, Azure, GCP). How do you normalize the data, what does your detection logic look like across all three surfaces, and how do you handle the different authentication models?",
+          "expected_concepts": [
+            "cross_platform_detection",
+            "data_normalization",
+            "ocsf_or_ecs",
+            "cloud_auth_models",
+            "assume_role_vs_kerberos",
+            "detection_at_scale"
+          ]
+        }
+      ],
+      "challenge_data": {
+        "title": "Environment Details",
+        "type": "environment",
+        "content": "TARGET ENVIRONMENT\n==================\nOS:          Windows 10 Enterprise\nEDR:         Microsoft Defender for Endpoint\nSIEM:        Microsoft Sentinel\nCompromised: WORKSTATION-42 (IP: 10.10.5.42)\nAttack:      SMB lateral movement + remote service creation\n\nAVAILABLE LOG TABLES\n==================\nDeviceNetworkEvents     - Network connections with process context\nDeviceProcessEvents     - Process creation with command lines  \nDeviceLogonEvents       - Authentication events\nSecurityEvent           - Windows Security Event Log\n                          (Event IDs: 4624, 4625, 4648)\n\nLOGON TYPES\n==================\nType 2  = Interactive (local)\nType 3  = Network (SMB, remote)\nType 10 = RemoteInteractive (RDP)"
+      }
+    }
+  ]
+}

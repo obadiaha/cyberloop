@@ -1,0 +1,616 @@
+{
+  "domain": "threat_intelligence",
+  "display_name": "Threat Intelligence",
+  "description": "Evaluates CTI skills including IOC analysis, TTP mapping, threat actor profiling, intelligence cycle, and CTI feed management. Focused on how TI feeds IR and detection engineering.",
+  "mitre_references": [
+    "TA0001",
+    "TA0002",
+    "TA0003",
+    "TA0004",
+    "TA0005",
+    "TA0006",
+    "TA0007",
+    "TA0008",
+    "TA0009",
+    "TA0010",
+    "TA0011",
+    "TA0040",
+    "TA0043"
+  ],
+  "root_questions": [
+    {
+      "id": "ti_001",
+      "text": "Walk me through how you analyze a new IOC. You receive a suspicious IP address from a peer ISAC member. What's your process?",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "ioc_analysis",
+      "expected_concepts": [
+        "context_gathering",
+        "reputation_lookup",
+        "passive_dns",
+        "whois",
+        "geolocation",
+        "open_source_enrichment",
+        "virustotal",
+        "shodan",
+        "abuse_ipdb",
+        "correlation_with_internal_data"
+      ],
+      "red_flags": [
+        "block_immediately",
+        "no_enrichment",
+        "single_source_check",
+        "no_internal_correlation",
+        "blocks_ip_before_any_analysis",
+        "checks_only_one_source",
+        "no_internal_log_correlation",
+        "treats_all_iocs_as_equally_reliable",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "passive_dns",
+            "virustotal",
+            "correlation_with_internal_data"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Your enrichment shows this IP resolved to 15 different domains over 6 months, several of which are associated with commodity malware C2 infrastructure. But you also see it in your DNS logs, with one workstation making connections daily for the past 3 weeks. How do you assess the situation?",
+          "level": 2,
+          "expected_concepts": [
+            "false_positive_assessment",
+            "shared_hosting_consideration",
+            "cdn_check",
+            "legitimate_service_check",
+            "frequency_analysis",
+            "endpoint_investigation",
+            "threat_actor_infrastructure_patterns",
+            "confidence_scoring"
+          ],
+          "red_flags": [
+            "immediately_block",
+            "ignore_internal_hits",
+            "no_confidence_assessment"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "confidence_scoring",
+            "threat_actor_infrastructure_patterns",
+            "endpoint_investigation"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You've confirmed the workstation is compromised and the IP is part of a threat actor's fast-flux infrastructure. This actor is known to target your industry. How do you pivot from this single IOC to map the threat actor's full infrastructure, and how does this intelligence feed your defensive operations?",
+          "level": 3,
+          "expected_concepts": [
+            "infrastructure_pivoting",
+            "ssl_certificate_analysis",
+            "domain_registration_patterns",
+            "passive_dns_pivots",
+            "maltego_or_analyst_notebook",
+            "diamond_model",
+            "generate_detection_rules",
+            "share_with_isac",
+            "proactive_blocking",
+            "threat_hunting_hypotheses"
+          ],
+          "red_flags": [
+            "stop_at_one_ioc",
+            "no_pivoting",
+            "no_defensive_action",
+            "no_sharing"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "infrastructure_pivoting",
+            "diamond_model",
+            "generate_detection_rules"
+          ],
+          "trigger_type": "concept_match",
+          "question": "IOC-based detection has a fundamental shelf life. You wrote 50 IOC-based detections for this threat actor, and they rotated infrastructure within 48 hours. All 50 are now useless. What's the alternative approach, and how do you build intelligence products that have longer shelf life than IOCs?",
+          "level": 4,
+          "expected_concepts": [
+            "ttp_based_detection",
+            "behavioral_indicators",
+            "attack_pattern_analysis",
+            "campaign_tracking",
+            "ioc_pyramid_of_pain",
+            "ttps_at_top_of_pyramid",
+            "detection_at_technique_level",
+            "threat_actor_tradecraft_profiling",
+            "strategic_intelligence_over_tactical"
+          ],
+          "red_flags": [
+            "more_iocs",
+            "faster_ioc_rotation",
+            "no_behavioral_approach"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests analytical methodology, not just tool knowledge. A strong answer shows a SYSTEMATIC enrichment process with multiple sources AND internal correlation. The key differentiator: checking internal data (did we see this IP in OUR logs?). A 5/5 discusses confidence assessment and what would change their conclusion. A 3/5 runs through enrichment tools without analytical synthesis.",
+      "strong_answer_markers": [
+        "Checks multiple external sources (not just VirusTotal)",
+        "Correlates with internal logs immediately",
+        "Assesses confidence level of the intel",
+        "Considers false positive scenarios (shared hosting, CDN)",
+        "Has a framework for what makes an IOC actionable"
+      ]
+    },
+    {
+      "id": "ti_002",
+      "text": "Explain the intelligence cycle and how you've applied it in a security context. Don't just give me the textbook definition.",
+      "difficulty_weight": 0.75,
+      "level": 1,
+      "category": "intelligence_cycle",
+      "expected_concepts": [
+        "requirements",
+        "collection",
+        "processing",
+        "analysis",
+        "dissemination",
+        "feedback",
+        "practical_application",
+        "stakeholder_requirements"
+      ],
+      "red_flags": [
+        "textbook_only",
+        "no_practical_experience",
+        "skip_requirements_phase",
+        "no_feedback_loop",
+        "lists_phases_without_practical_example",
+        "starts_with_collection_not_requirements",
+        "no_mention_of_stakeholder_feedback",
+        "cti_work_was_just_reading_vendor_reports",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "stakeholder_requirements",
+            "practical_application",
+            "feedback"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Your CISO asks: 'What threat actors are targeting us, and what should we prioritize?' This is your primary intelligence requirement. How do you translate this into a collection plan, and how do you deliver an answer that's actionable, not just a threat landscape PDF?",
+          "level": 2,
+          "expected_concepts": [
+            "priority_intelligence_requirements",
+            "collection_management_framework",
+            "industry_vertical_analysis",
+            "crown_jewel_assessment",
+            "threat_modeling",
+            "actionable_deliverable_format",
+            "regular_briefing_cadence",
+            "specific_recommendations"
+          ],
+          "red_flags": [
+            "generic_threat_landscape",
+            "no_prioritization",
+            "pdf_dump",
+            "no_actionable_output"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "priority_intelligence_requirements",
+            "threat_modeling",
+            "actionable_deliverable_format"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You've identified that APT41 is the most relevant threat actor for your organization based on industry and geography. How do you create a threat actor profile that's useful for your detection engineers, your IR team, and your CISO, knowing each needs different levels of detail?",
+          "level": 3,
+          "expected_concepts": [
+            "multi_audience_products",
+            "tactical_report_for_detections",
+            "operational_report_for_ir",
+            "strategic_brief_for_leadership",
+            "mitre_attck_mapping",
+            "detection_opportunity_matrix",
+            "hunt_hypotheses",
+            "known_tooling",
+            "infrastructure_indicators",
+            "campaign_timeline"
+          ],
+          "red_flags": [
+            "one_report_for_all",
+            "only_ioc_list",
+            "no_detection_guidance",
+            "no_strategic_context"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "multi_audience_products",
+            "tactical_report_for_detections",
+            "detection_opportunity_matrix"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Threat intelligence programs often fail to demonstrate value. Three years in, the CISO asks: 'What has CTI actually prevented or detected that we wouldn't have caught otherwise?' How do you measure CTI program effectiveness, and what would you change about how most organizations run CTI?",
+          "level": 4,
+          "expected_concepts": [
+            "intelligence_gain_loss_assessment",
+            "detection_rules_from_cti",
+            "proactive_hunts_from_cti",
+            "incidents_prevented_attribution",
+            "time_to_detect_improvement",
+            "decision_support_tracking",
+            "challenge_passive_cti",
+            "embedded_analyst_model",
+            "cti_as_force_multiplier",
+            "roi_framework"
+          ],
+          "red_flags": [
+            "cant_measure_value",
+            "count_reports_produced",
+            "no_roi_framework"
+          ]
+        }
+      ],
+      "scoring_guidance": "Separates textbook knowledge from real application. Almost everyone can list the 6 phases. The differentiator is: have they actually APPLIED it? A 5/5 gives a specific example of translating a stakeholder requirement into collection and then an actionable product. A 3/5 recites phases and adds 'we did this at my last job' without specifics.",
+      "strong_answer_markers": [
+        "Goes beyond listing phases to describing real application",
+        "Starts with stakeholder requirements (not collection)",
+        "Gives specific example of a CTI product they produced",
+        "Discusses the feedback loop from consumers back to requirements",
+        "Distinguishes their role from just consuming vendor reports"
+      ]
+    },
+    {
+      "id": "ti_003",
+      "text": "How do you map threat actor activity to MITRE ATT&CK, and how does that mapping drive defensive action?",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "ttp_mapping",
+      "expected_concepts": [
+        "technique_identification",
+        "sub_technique_specificity",
+        "attack_navigator",
+        "layer_files",
+        "detection_gap_analysis",
+        "group_mapping",
+        "software_mapping"
+      ],
+      "red_flags": [
+        "never_used_attck",
+        "only_tactic_level",
+        "no_defensive_connection",
+        "theoretical_only",
+        "only_maps_to_tactic_level",
+        "mapping_produces_heatmap_but_no_action",
+        "never_used_navigator_layers",
+        "treats_attck_as_checkbox_exercise",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "technique_identification",
+            "attack_navigator",
+            "detection_gap_analysis"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You've mapped a threat actor's TTPs and found they heavily use T1059.001 (PowerShell), T1053.005 (Scheduled Tasks), and T1021.001 (RDP). Your ATT&CK coverage map shows you have detections for the first two but nothing for lateral movement via RDP. How do you translate this gap into detection engineering work?",
+          "level": 2,
+          "expected_concepts": [
+            "detection_requirements_document",
+            "data_source_identification",
+            "event_4624_type_10",
+            "rdp_session_analysis",
+            "behavioral_indicators_for_rdp",
+            "detection_engineer_brief",
+            "testing_plan",
+            "sigma_rule_draft"
+          ],
+          "red_flags": [
+            "just_send_the_gap",
+            "no_data_source_analysis",
+            "no_actionable_output"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "detection_requirements_document",
+            "behavioral_indicators_for_rdp",
+            "sigma_rule_draft"
+          ],
+          "trigger_type": "concept_match",
+          "question": "A peer intelligence analyst challenges your mapping. They say mapping to ATT&CK is too rigid: real attacks don't fit neatly into technique boxes, adversary emulation based on ATT&CK creates unrealistic scenarios, and teams over-index on mapped techniques while ignoring unmapped risks. How do you respond?",
+          "level": 3,
+          "expected_concepts": [
+            "valid_criticisms_acknowledged",
+            "framework_limitations",
+            "complement_with_kill_chain",
+            "diamond_model",
+            "custom_taxonomy_when_needed",
+            "attck_as_communication_tool_not_gospel",
+            "practical_value_defense",
+            "unmapped_technique_tracking"
+          ],
+          "red_flags": [
+            "dismiss_criticism",
+            "attck_is_perfect",
+            "no_awareness_of_limitations"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "valid_criticisms_acknowledged",
+            "attck_as_communication_tool_not_gospel",
+            "framework_limitations"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You're designing the TTP analysis methodology for a CTI team of 4 analysts. How do you standardize the mapping process, ensure consistency across analysts, and build institutional knowledge that persists when analysts leave? Include how you handle disagreements about technique classification.",
+          "level": 4,
+          "expected_concepts": [
+            "standard_operating_procedures",
+            "mapping_guidelines",
+            "peer_review_process",
+            "confidence_levels",
+            "evidence_requirements",
+            "knowledge_base_architecture",
+            "analytical_standards",
+            "tradecraft_notes",
+            "dissent_channels",
+            "quality_control"
+          ],
+          "red_flags": [
+            "no_standardization",
+            "one_analyst_decides",
+            "no_documentation"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests both technical mapping AND strategic thinking about ATT&CK. A strong answer goes to sub-technique level and explains how mapping DRIVES defensive action (not just produces a heatmap). A 5/5 acknowledges ATT&CK limitations and when other frameworks complement it. A 3/5 describes Navigator usage without connecting it to defense.",
+      "strong_answer_markers": [
+        "Maps to sub-technique level, not just technique",
+        "Explains how mapping drives specific defensive actions",
+        "Uses Navigator layers for comparison (before/after, actor vs coverage)",
+        "Connects gaps to detection engineering work requests",
+        "Acknowledges limitations of the framework"
+      ]
+    },
+    {
+      "id": "ti_004",
+      "text": "How do you manage threat intelligence feeds? What makes a good feed versus a bad one?",
+      "difficulty_weight": 0.75,
+      "level": 1,
+      "category": "cti_feeds",
+      "expected_concepts": [
+        "feed_evaluation_criteria",
+        "false_positive_rate",
+        "timeliness",
+        "relevance",
+        "context_quality",
+        "stix_taxii",
+        "commercial_vs_osint",
+        "feed_overlap"
+      ],
+      "red_flags": [
+        "accept_all_feeds",
+        "no_evaluation",
+        "quantity_over_quality",
+        "no_format_knowledge",
+        "more_feeds_equals_better_intelligence",
+        "no_feed_evaluation_process",
+        "accepts_all_indicators_at_face_value",
+        "cannot_explain_stix_or_taxii",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "feed_evaluation_criteria",
+            "false_positive_rate",
+            "relevance"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You have 12 threat intel feeds. Your TIP is ingesting 500,000 indicators per day. Your SOC analysts don't trust the intel because they get too many false positive matches. How do you fix this?",
+          "level": 2,
+          "expected_concepts": [
+            "feed_audit",
+            "deduplication",
+            "confidence_scoring",
+            "source_reliability_rating",
+            "timeliness_decay",
+            "industry_relevance_filtering",
+            "indicator_aging",
+            "enrichment_before_alerting",
+            "analyst_feedback_loop"
+          ],
+          "red_flags": [
+            "add_more_feeds",
+            "disable_feeds",
+            "no_scoring",
+            "ignore_analyst_feedback"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "confidence_scoring",
+            "source_reliability_rating",
+            "indicator_aging"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Design an indicator confidence scoring model. An IOC comes from 3 different feeds with different confidence levels. One feed says it's malicious with high confidence, another says medium, and a third says it's only suspicious. How do you compute a composite score, and what factors beyond the feeds affect it?",
+          "level": 3,
+          "expected_concepts": [
+            "weighted_scoring_model",
+            "source_reliability_weight",
+            "corroboration_bonus",
+            "first_seen_last_seen",
+            "indicator_type_weight",
+            "internal_sighting_weight",
+            "decay_function",
+            "threshold_for_action",
+            "admiralty_code"
+          ],
+          "red_flags": [
+            "simple_average",
+            "highest_score_wins",
+            "no_time_factor"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "weighted_scoring_model",
+            "decay_function",
+            "admiralty_code"
+          ],
+          "trigger_type": "concept_match",
+          "question": "The CTI industry has a sharing problem. Everyone wants to receive intelligence but few contribute back. STIX/TAXII adoption is inconsistent, ISACs vary wildly in quality, and most sharing is one-directional. What would you change about how the industry approaches threat intel sharing, and what's holding it back?",
+          "level": 4,
+          "expected_concepts": [
+            "trust_group_models",
+            "traffic_light_protocol",
+            "automated_sharing_barriers",
+            "legal_liability_concerns",
+            "competitive_dynamics",
+            "government_role",
+            "anonymization_for_sharing",
+            "incentive_structures",
+            "sector_specific_sharing",
+            "standards_fragmentation"
+          ],
+          "red_flags": [
+            "sharing_is_fine",
+            "no_industry_awareness",
+            "no_opinion"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests operational CTI maturity. Feed management is where CTI programs succeed or fail. A strong answer evaluates feeds by: FP rate, timeliness, relevance to their threat model, and overlap with other feeds. A 5/5 has culled feeds that weren't delivering value. A 3/5 ingests feeds without evaluation or confidence scoring.",
+      "strong_answer_markers": [
+        "Evaluates feeds by measurable criteria (FP rate, timeliness, relevance)",
+        "Has removed or downweighted feeds that weren't performing",
+        "Discusses indicator confidence scoring",
+        "Understands STIX/TAXII at a practical level",
+        "Differentiates between commercial and OSINT feed value"
+      ]
+    },
+    {
+      "id": "ti_005",
+      "text": "Tell me about a threat actor campaign you've tracked or analyzed. What was the actor, what were they doing, and what did your analysis lead to?",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "campaign_analysis",
+      "expected_concepts": [
+        "specific_example",
+        "actor_identification",
+        "ttp_description",
+        "targets",
+        "infrastructure",
+        "analytical_products",
+        "defensive_outcomes"
+      ],
+      "red_flags": [
+        "no_experience",
+        "only_read_reports",
+        "no_analytical_contribution",
+        "no_defensive_outcome",
+        "describes_a_vendor_report_not_personal_analysis",
+        "no_personal_contribution_identifiable",
+        "analysis_produced_no_defensive_outcome",
+        "cannot_describe_the_ttps_in_detail",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "specific_example",
+            "ttp_description",
+            "defensive_outcomes"
+          ],
+          "trigger_type": "concept_match",
+          "question": "How did you attribute the activity to a specific threat actor, and how confident were you? What's your threshold for attribution, and when is it better to track activity as an uncategorized cluster?",
+          "level": 2,
+          "expected_concepts": [
+            "attribution_methodology",
+            "diamond_model_attribution",
+            "infrastructure_overlap",
+            "code_similarity",
+            "victimology_patterns",
+            "confidence_levels",
+            "uac_uncategorized_clusters",
+            "premature_attribution_risks",
+            "false_flag_awareness"
+          ],
+          "red_flags": [
+            "certain_attribution",
+            "no_methodology",
+            "no_confidence_level",
+            "ignore_false_flags"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "attribution_methodology",
+            "confidence_levels",
+            "false_flag_awareness"
+          ],
+          "trigger_type": "concept_match",
+          "question": "A nation-state actor is deliberately planting false flags: Russian language strings in Chinese malware, infrastructure registered in North Korea, TTPs mimicking a different APT group. How do you navigate attribution in this environment, and when does attribution even matter for defense?",
+          "level": 3,
+          "expected_concepts": [
+            "false_flag_detection_methods",
+            "consistency_analysis",
+            "operational_security_artifacts",
+            "ttp_analysis_over_indicators",
+            "attribution_for_defense_vs_policy",
+            "defender_doesnt_need_attribution",
+            "focus_on_behavior_not_actor",
+            "intelligence_requirement_drives_attribution_depth"
+          ],
+          "red_flags": [
+            "attribution_always_matters",
+            "no_false_flag_methodology",
+            "attribution_at_all_costs"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "false_flag_detection_methods",
+            "defender_doesnt_need_attribution",
+            "intelligence_requirement_drives_attribution_depth"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Here's a controversial take: most corporate CTI teams shouldn't do attribution at all. They don't have the data, the mandate, or the analytical depth. They should focus entirely on detection and prevention, leaving attribution to government agencies and Mandiant-class firms. Agree or disagree, and defend your position.",
+          "level": 4,
+          "expected_concepts": [
+            "nuanced_position",
+            "corporate_cti_scope",
+            "attribution_value_for_prioritization",
+            "resource_allocation_argument",
+            "government_vs_private_sector_roles",
+            "mandiant_crowdstrike_paradigm",
+            "cti_maturity_model",
+            "right_sized_intelligence"
+          ],
+          "red_flags": [
+            "fully_agree_no_nuance",
+            "fully_disagree_no_nuance",
+            "no_opinion"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests real analytical experience. This is the 'show your work' question. A strong answer names a SPECIFIC campaign with details: actor, TTPs, targets, timeline, and WHAT THEY PERSONALLY DID in the analysis. A 5/5 connects their analysis to a defensive outcome (new detection, hunt, briefing). A 3/5 describes a campaign they read about in a vendor report. Watch carefully for 'I analyzed' vs 'I read about'.",
+      "strong_answer_markers": [
+        "Names a specific campaign with actor, TTPs, and timeline",
+        "Describes their personal analytical contribution",
+        "Produced an analytical product from their work",
+        "Analysis led to defensive action (detection, hunt, blocking)",
+        "Discusses confidence and limitations of their analysis"
+      ]
+    }
+  ]
+}

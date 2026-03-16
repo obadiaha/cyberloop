@@ -1,0 +1,233 @@
+{
+  "domain": "detection_engineering",
+  "description": "What detection engineering interviews test: the ability to translate attacker behaviors into durable, high-fidelity detections. Tests technical depth (telemetry, logic, evasion), process maturity (DaC, testing, lifecycle), and coverage strategy (not just rule writing).",
+  "levels": {
+    "junior": {
+      "score_range": [1, 3],
+      "label": "Junior / Associate",
+      "characteristics": [
+        "Writes detections based on IOCs (hashes, IPs, domains) rather than behaviors",
+        "Cannot explain why IOC-based detections decay quickly",
+        "Thinks a detection is done when the alert fires, not when false positives are measured",
+        "Describes detection as 'creating a Splunk search' without understanding alert lifecycle",
+        "Cannot write a Sigma rule from scratch but can modify existing templates",
+        "Does not differentiate between EDR telemetry, SIEM correlation rules, and network signatures",
+        "Knows common attacker tools (Mimikatz, PsExec, Cobalt Strike) by name but cannot describe their specific forensic artifacts",
+        "Cannot map a detection to a MITRE ATT&CK technique without looking it up",
+        "Treats tuning as 'adding exceptions' rather than improving rule precision",
+        "Has no systematic process for measuring detection coverage",
+        "Cannot explain what a base rate fallacy means for alert volume in a large environment",
+        "Thinks 'detection' and 'prevention' are the same concept",
+        "Relies on vendor-supplied rules and has not written custom logic",
+        "Cannot explain what telemetry is required before a detection is possible",
+        "No concept of detection-as-code or version control for rules"
+      ],
+      "example_phrases": [
+        "I'd write a Splunk search for that hash or IP address",
+        "We use the vendor's default rules and tune them when they cause too many alerts",
+        "I've written some custom searches in our SIEM",
+        "I block known bad IPs at the firewall",
+        "I'd look for the Mimikatz strings in the logs",
+        "I check the MITRE ATT&CK website to see what techniques attackers use",
+        "We use Sigma rules that we download from GitHub"
+      ],
+      "red_flags": [
+        "Claims to be a detection engineer but has never written a rule from scratch",
+        "Describes tuning as 'whitelisting everything that alerts'",
+        "Cannot explain why you would NOT fire an alert on every Mimikatz string match",
+        "Thinks high alert volume is a sign of good detection coverage",
+        "Cannot explain what data source is required for a given detection",
+        "Has never measured the false positive rate of a detection they wrote",
+        "Uses 'detection' and 'alert' interchangeably without understanding the pipeline"
+      ],
+      "expected_tools": [
+        "Splunk (basic SPL queries)",
+        "Microsoft Sentinel (basic KQL)",
+        "Sigma (reading/modifying existing rules)",
+        "MITRE ATT&CK Navigator (reading)",
+        "VirusTotal / AbuseIPDB (IOC lookup)"
+      ],
+      "expected_frameworks": [
+        "MITRE ATT&CK (awareness level)",
+        "Basic Cyber Kill Chain awareness"
+      ]
+    },
+    "mid": {
+      "score_range": [4, 6],
+      "label": "Mid-Level",
+      "characteristics": [
+        "Writes detection logic based on behaviors (parent-child process relationships, command-line patterns) not just IOCs",
+        "Can write a functional Sigma rule with correct logsource, detection, and filter sections",
+        "Knows Sysmon Event IDs cold: EID 1 (process creation), EID 3 (network connection), EID 10 (ProcessAccess), EID 11 (file create), EID 22 (DNS query)",
+        "Knows Windows Security Event IDs relevant to detection: 4688, 4624, 4648, 4698, 4697, 4672, 4663",
+        "Can convert a Sigma rule to SIEM-native query using sigma-cli or pySigma",
+        "Understands detection precision vs. recall tradeoff and can articulate it",
+        "Measures false positive rate before deploying a rule to production",
+        "Has a version control workflow for detection rules (Git-based)",
+        "Can perform basic ATT&CK coverage mapping against their rule set",
+        "Writes detections that account for common evasion: base64-encoded commands, renamed binaries, timestomping",
+        "Understands the difference between YARA (file/memory patterns) and Sigma (log-based) and SNORT/Suricata (network)",
+        "Can build a detection pipeline: data source -> normalization -> correlation -> alert -> triage",
+        "Validates detections against test data before deploying",
+        "Knows common LOLBin abuse: certutil, mshta, wscript, regsvr32, rundll32 for execution/download",
+        "Can query Sysmon EID 1 with specific field filters: Image, CommandLine, ParentImage, ParentCommandLine",
+        "Understands why detecting command-line arguments is fragile and what behavioral alternatives exist"
+      ],
+      "example_phrases": [
+        "I wrote a Sigma rule that triggers on PowerShell spawning from Word or Excel - the key fields are ParentImage and Image in Sysmon EID 1",
+        "I deploy rules in dev first, measure the FP rate over a week, then promote to production",
+        "I keep all our detection rules in Git with PR reviews, so we have an audit trail of what changed and why",
+        "The base64 detection was too noisy - I changed it to look for the combination of -enc flag AND unusual parent process",
+        "I used ATT&CK Navigator to map our rule coverage and found we had almost nothing for TA0008 Lateral Movement",
+        "A YARA rule would catch the file on disk, but for fileless attacks I need a Sigma rule against process memory indicators or Sysmon EID 10",
+        "The 4688 event alone isn't enough - you need 'Include command line in process creation events' GPO enabled or Sysmon EID 1"
+      ],
+      "red_flags": [
+        "Writes Sigma rules but cannot explain what 'logsource' category maps to in their specific SIEM",
+        "Claims to measure false positives but cannot explain how (what query, what time window, what threshold)",
+        "Cannot explain why certutil.exe downloading a file is suspicious but legitimate uses also exist",
+        "Has never tested a detection against a real or simulated attack",
+        "Cannot explain the difference between Sysmon EID 10 (process access) and EID 8 (CreateRemoteThread)",
+        "Thinks version control for detection rules is optional or too complex for the team"
+      ],
+      "expected_tools": [
+        "Sysmon (configuration and tuning)",
+        "Sigma + pySigma / sigma-cli",
+        "YARA (writing and testing rules)",
+        "Splunk / Microsoft Sentinel / Elastic (native query writing)",
+        "ATT&CK Navigator (coverage mapping)",
+        "Atomic Red Team (rule testing)",
+        "Git (version control for rules)"
+      ],
+      "expected_frameworks": [
+        "MITRE ATT&CK (technique-to-detection mapping)",
+        "Detection-as-Code principles",
+        "Pyramid of Pain (Bianco) - preferring behavioral detections over IOCs"
+      ]
+    },
+    "senior": {
+      "score_range": [7, 8],
+      "label": "Senior",
+      "characteristics": [
+        "Designs end-to-end detection pipelines: data onboarding, normalization (ECS/OCSF), rule development, testing, deployment, lifecycle management",
+        "Builds a DaC (Detection-as-Code) workflow with CI/CD: rules in Git, tests run automatically, promotion gated on coverage and FP thresholds",
+        "Understands telemetry gaps and advocates for new data sources based on detection coverage analysis",
+        "Writes YARA-L rules for Google Chronicle or custom behavioral rules for CrowdStrike/SentinelOne",
+        "Can reason about attacker evasion for any detection they write: 'here's how an attacker would bypass this, and here's how I'd address it'",
+        "Implements detection coverage metrics: percentage of ATT&CK techniques covered by tested, production-quality rules",
+        "Has built detection for cloud environments: AWS CloudTrail anomalies, Azure AD suspicious sign-ins, GCP API abuse",
+        "Understands the difference between UEBA (behavioral baseline), correlation rules, and threshold-based alerting - and when to use each",
+        "Has opinions on EDR telemetry quality: knows which EDR vendors have gaps in specific technique coverage",
+        "Can explain detection engineering tradeoffs: Sigma portability vs. native query performance, generic vs. environment-specific tuning",
+        "Tests detections using adversary simulation: Atomic Red Team, Caldera, manual red team exercises",
+        "Contributes to or maintains a detection library shared across teams or publicly",
+        "Knows advanced evasion techniques: direct syscalls bypassing EDR hooks, PPL (Protected Process Light) for LSASS protection bypass, ETW (Event Tracing for Windows) tampering",
+        "Can evaluate a detection rule written by someone else and identify gaps, false positive risks, and evasion potential",
+        "Has built or contributed to a detection engineering platform (rule management, testing framework, coverage dashboards)"
+      ],
+      "example_phrases": [
+        "We built a CI/CD pipeline where every Sigma rule gets automatically converted, tested against our log samples, and the ATT&CK coverage delta is shown in the PR",
+        "The EDR vendor's default LSASS dump detection misses direct syscall approaches - I had to write a supplemental rule looking at anomalous LSASS memory reads from non-system processes via EID 10",
+        "I built a detection coverage heatmap against ATT&CK and presented it to the CISO - it showed we had 80% of Initial Access covered but only 20% of Execution, which changed our roadmap priorities",
+        "YARA-L lets me write behavioral rules in Chronicle that I can't express in Sigma - the temporal correlation is much richer",
+        "When a process calls NtReadVirtualMemory directly rather than through the Win32 API, most EDRs miss it because their hooks are at the API layer. I detect it at the kernel telemetry level instead",
+        "I use Atomic Red Team tests in a staging environment before any rule goes to production - if my rule doesn't fire against the atomic, it doesn't ship"
+      ],
+      "red_flags": [
+        "Cannot explain what ETW tampering is or why it matters for detection",
+        "Has never built a DaC pipeline, only written rules manually",
+        "Cannot explain the difference between YARA-L and Sigma",
+        "Claims coverage of a technique but cannot show a tested, validated rule for it",
+        "Has no process for retiring or updating outdated detections",
+        "Cannot name specific telemetry gaps in their current or previous EDR"
+      ],
+      "expected_tools": [
+        "YARA-L (Chronicle)",
+        "pySigma / sigma-cli with custom backends",
+        "Atomic Red Team / Caldera (adversary simulation)",
+        "CrowdStrike Custom IOA rules / SentinelOne STAR rules",
+        "OpenCTI / MISP (threat intel integration into detection)",
+        "GitHub Actions / GitLab CI (DaC pipelines)",
+        "Elastic EQL (Event Query Language)"
+      ],
+      "expected_frameworks": [
+        "Detection Maturity Level (DML) model",
+        "MITRE ATT&CK (navigator, coverage measurement, ATT&CK for Cloud)",
+        "Pyramid of Pain (operationalizing in detection strategy)",
+        "Detection-as-Code principles (versioning, testing, CI/CD)",
+        "OCSF / ECS (log normalization schemas)"
+      ]
+    },
+    "staff": {
+      "score_range": [9, 10],
+      "label": "Staff / Principal",
+      "characteristics": [
+        "Designs the detection engineering program architecture: tooling stack, staffing model, coverage strategy, quality bar",
+        "Defines detection SLAs: time-to-detect for critical techniques, FP rates per tier, rule lifecycle policies",
+        "Has built or led the build of a detection-as-code platform used by multiple analysts or teams",
+        "Contributes to the broader detection community: Sigma rule contributions, blog posts, conference talks, open source tooling",
+        "Evaluates EDR/SIEM vendors from a detection capability perspective, not just features or price",
+        "Designs detection strategy around threat model: knows which threat actors target their organization and prioritizes coverage accordingly",
+        "Drives the transition from reactive (alert on known bad) to proactive (threat model-driven coverage gap analysis)",
+        "Measures detection program ROI: detection coverage improvements, reduction in MTTD, analyst time saved via automation",
+        "Has built multi-cloud detection strategies across AWS, Azure, and GCP",
+        "Can write or guide writing of detection for novel, undisclosed techniques (zero-day class behaviors)",
+        "Understands regulatory requirements that drive detection mandates (PCI DSS, HIPAA, SOX, NERC CIP)",
+        "Has mentored or built a team of detection engineers and designed their career development framework",
+        "Can evaluate the detection quality of a vendor's out-of-the-box rule library",
+        "Designs the feedback loop between IR findings and detection updates: every incident should produce at least one new or improved detection"
+      ],
+      "example_phrases": [
+        "Our detection roadmap is driven by a threat model, not by what ATT&CK techniques sound scary. We mapped our top threat actors, their observed TTPs, and our coverage gaps - that's the backlog",
+        "I designed our DaC platform so that every production rule has a corresponding test case, an ATT&CK mapping, a coverage tier (must-have vs. nice-to-have), and a FP rate measured over 30 days",
+        "When evaluating SIEMs, I care about three things: query language expressiveness for behavioral correlation, data onboarding cost per GB, and native support for schemas like ECS or OCSF",
+        "Every major incident we've had produced at least one gap analysis and three new detection rules. That's the feedback loop. If an incident is closing without new detections, we failed",
+        "I contributed the scheduled task abuse detection module to the sigma-rules project after we saw a gap across multiple ISAC member reports",
+        "We measure detection coverage by MITRE tactic layer, not just total rule count. Having 500 rules is meaningless if 400 of them are for Initial Access and you have nothing for Impact"
+      ],
+      "red_flags": [
+        "Cannot articulate a detection strategy beyond 'more rules is better'",
+        "Has no metrics for detection program quality",
+        "Has never contributed to any public detection resource",
+        "Cannot explain what drives detection prioritization decisions",
+        "Conflates the number of alerts with detection effectiveness"
+      ],
+      "expected_tools": [
+        "Enterprise SIEM platforms (Splunk ES, Sentinel, Chronicle, Elastic)",
+        "EDR at scale (CrowdStrike, SentinelOne, Defender for Endpoint)",
+        "Detection platforms (Panther, Anvilogic, Hunters.ai)",
+        "Threat intelligence integration (OpenCTI, Recorded Future, Mandiant Advantage)",
+        "Custom tooling and automation frameworks"
+      ],
+      "expected_frameworks": [
+        "ATT&CK for Enterprise + Cloud + ICS (program-level coverage)",
+        "SOC Visibility Triad (network, endpoint, identity)",
+        "Detection Engineering Maturity Model",
+        "Threat-informed defense principles",
+        "IR feedback loop into detection lifecycle"
+      ]
+    }
+  },
+  "cross_cutting_signals": {
+    "positive": [
+      "Immediately asks about the data source available before describing a detection",
+      "Distinguishes between 'I can detect this' and 'I've validated this detection against an attack simulation'",
+      "References specific field names and event IDs, not just tool names",
+      "Proactively identifies evasion techniques for detections they describe",
+      "Speaks to false positive rates and how they measure them",
+      "Discusses detection lifecycle (creation, testing, tuning, retirement), not just creation",
+      "Names specific techniques they consider highest priority to detect and why",
+      "References Pyramid of Pain or equivalent framing for detection durability"
+    ],
+    "negative": [
+      "Describes detection entirely in terms of IOC matching (hashes, IPs, domains)",
+      "Cannot write even a basic Sigma rule structure from memory",
+      "Treats high alert volume as a sign of success",
+      "Has never tested a detection against an actual attack simulation",
+      "Cannot name what telemetry a specific detection requires",
+      "Describes tuning entirely as 'adding exclusions'",
+      "Has no version control or lifecycle management for their rules",
+      "Cannot explain what the Pyramid of Pain is or why it matters for detection strategy"
+    ]
+  }
+}

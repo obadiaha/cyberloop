@@ -1,0 +1,571 @@
+{
+  "domain": "behavioral",
+  "display_name": "Behavioral Interview Questions",
+  "description": "Behavioral questions mapped to leadership principles and common interview themes. Uses STAR framework evaluation with follow-up probes designed to test depth of experience.",
+  "themes": [
+    {
+      "id": "bh_conflict",
+      "theme": "conflict_resolution",
+      "display_name": "Conflict Resolution & Disagreement",
+      "leadership_principles": [
+        "have_backbone_disagree_and_commit",
+        "earn_trust"
+      ],
+      "questions": [
+        {
+          "id": "bh_conflict_001",
+          "text": "Tell me about a time you disagreed with a technical decision made by a senior engineer or your manager. What was the decision, what was your position, and what happened?",
+          "difficulty_weight": 1.0,
+          "star_probes": {
+            "situation": [
+              "What was the specific technical decision?",
+              "Who made the decision and what was their role?",
+              "What was the context: timeline, stakes, team dynamics?"
+            ],
+            "task": [
+              "What was your specific responsibility in this situation?",
+              "Why did you feel the need to push back versus going along?"
+            ],
+            "action": [
+              "How did you raise your disagreement? In what forum?",
+              "Did you come with data or just an opinion?",
+              "What did you do when they didn't agree with you initially?",
+              "At what point did you commit to the decision, even if you still disagreed?"
+            ],
+            "result": [
+              "What was the outcome of the decision?",
+              "Were you right or wrong? How did you know?",
+              "What did you learn about when to push back versus when to commit?",
+              "How did this affect your relationship with that person?"
+            ]
+          },
+          "depth_probes": [
+            "You said you disagreed. Walk me through the exact conversation. What words did you use?",
+            "If you were wrong, how did you acknowledge it?",
+            "Would you handle it differently now? Why?",
+            "Have you ever committed to a decision you disagreed with and then it failed? What did you do?"
+          ],
+          "red_flags": [
+            "never_disagrees",
+            "cant_commit_after_disagreement",
+            "only_disagrees_never_commits",
+            "no_data_backing",
+            "says_we_throughout_never_specifying_personal_actions",
+            "cannot_name_the_project_team_or_timeframe",
+            "result_has_no_numbers_or_measurable_outcome",
+            "story_sounds_rehearsed_and_generic",
+            "deflects_to_hypothetical_when_asked_for_real_example",
+            "takes_credit_for_team_outcome_without_specifying_contribution",
+            "no_reflection_on_lessons_learned"
+          ]
+        },
+        {
+          "id": "bh_conflict_002",
+          "text": "Tell me about a time you had a conflict with a teammate that was affecting the work. How did you handle it?",
+          "difficulty_weight": 1.0,
+          "star_probes": {
+            "situation": [
+              "What was the nature of the conflict?",
+              "How was it affecting the team's output?"
+            ],
+            "task": [
+              "What was your role in resolving it?",
+              "Did anyone ask you to resolve it, or did you take initiative?"
+            ],
+            "action": [
+              "What specifically did you do to address the conflict?",
+              "Did you have a direct conversation with the person?",
+              "Did you involve a manager? Why or why not?"
+            ],
+            "result": [
+              "Was the conflict resolved?",
+              "How did the working relationship change?",
+              "What would you do differently?"
+            ]
+          },
+          "depth_probes": [
+            "What was YOUR contribution to the conflict? Were you partly responsible?",
+            "Walk me through the 1:1 conversation you had with this person.",
+            "If you escalated to management, at what point and why?"
+          ],
+          "red_flags": [
+            "always_others_fault",
+            "escalate_immediately",
+            "avoids_direct_conversation",
+            "no_self_reflection",
+            "says_we_throughout_never_specifying_personal_actions",
+            "cannot_name_the_project_team_or_timeframe",
+            "result_has_no_numbers_or_measurable_outcome",
+            "story_sounds_rehearsed_and_generic",
+            "deflects_to_hypothetical_when_asked_for_real_example",
+            "takes_credit_for_team_outcome_without_specifying_contribution",
+            "no_reflection_on_lessons_learned"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bh_failure",
+      "theme": "failure_and_ownership",
+      "display_name": "Failure & Ownership",
+      "leadership_principles": [
+        "ownership",
+        "earn_trust",
+        "deliver_results"
+      ],
+      "questions": [
+        {
+          "id": "bh_failure_001",
+          "text": "Tell me about a time you made a significant mistake at work. Not a small one. Something that had real impact.",
+          "difficulty_weight": 1.0,
+          "star_probes": {
+            "situation": [
+              "What was the project or context?",
+              "What was at stake?"
+            ],
+            "task": [
+              "What were you responsible for?",
+              "Should you have caught this earlier?"
+            ],
+            "action": [
+              "How did you discover the mistake?",
+              "What did you do immediately after discovering it?",
+              "Who did you tell and how quickly?",
+              "What was your remediation plan?"
+            ],
+            "result": [
+              "What was the impact?",
+              "How did leadership react?",
+              "What systemic change resulted from this mistake?",
+              "What did you learn about yourself?"
+            ]
+          },
+          "depth_probes": [
+            "How quickly did you own the mistake versus trying to fix it quietly?",
+            "If you could go back, would you have flagged it sooner? Why didn't you?",
+            "What process or system did you put in place to prevent this class of mistake?",
+            "Tell me about a time a mistake you made led to a new standard or process."
+          ],
+          "red_flags": [
+            "never_made_mistakes",
+            "blame_others",
+            "minimize_impact",
+            "no_learning",
+            "no_systemic_fix",
+            "says_we_throughout_never_specifying_personal_actions",
+            "cannot_name_the_project_team_or_timeframe",
+            "result_has_no_numbers_or_measurable_outcome",
+            "story_sounds_rehearsed_and_generic",
+            "deflects_to_hypothetical_when_asked_for_real_example",
+            "takes_credit_for_team_outcome_without_specifying_contribution",
+            "no_reflection_on_lessons_learned"
+          ]
+        },
+        {
+          "id": "bh_failure_002",
+          "text": "Tell me about a project that failed. What was your role, why did it fail, and what did you do about it?",
+          "difficulty_weight": 1.0,
+          "star_probes": {
+            "situation": [
+              "What was the project and what was the goal?",
+              "What was your role on the project?"
+            ],
+            "task": [
+              "What were you specifically accountable for?",
+              "Were there warning signs you should have acted on earlier?"
+            ],
+            "action": [
+              "When did you recognize it was failing?",
+              "What did you do to try to save it?",
+              "How did you communicate the failure to stakeholders?"
+            ],
+            "result": [
+              "What was the outcome?",
+              "What happened to the team after?",
+              "What would you do differently if you started over?"
+            ]
+          },
+          "depth_probes": [
+            "At what point did you know the project was going to fail? Did you speak up then?",
+            "What was your personal contribution to the failure?",
+            "How did you separate 'we failed' from 'I failed'?"
+          ],
+          "red_flags": [
+            "project_never_fails",
+            "external_blame_only",
+            "no_accountability",
+            "no_retrospective",
+            "says_we_throughout_never_specifying_personal_actions",
+            "cannot_name_the_project_team_or_timeframe",
+            "result_has_no_numbers_or_measurable_outcome",
+            "story_sounds_rehearsed_and_generic",
+            "deflects_to_hypothetical_when_asked_for_real_example",
+            "takes_credit_for_team_outcome_without_specifying_contribution",
+            "no_reflection_on_lessons_learned"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bh_ambiguity",
+      "theme": "ambiguity_and_decision_making",
+      "display_name": "Navigating Ambiguity",
+      "leadership_principles": [
+        "bias_for_action",
+        "are_right_a_lot",
+        "learn_and_be_curious"
+      ],
+      "questions": [
+        {
+          "id": "bh_ambiguity_001",
+          "text": "Tell me about a time you had to make a decision with incomplete information. How did you approach it?",
+          "difficulty_weight": 1.0,
+          "star_probes": {
+            "situation": [
+              "What was the decision?",
+              "What information did you have vs what was missing?",
+              "What was the time pressure?"
+            ],
+            "task": [
+              "Why was it your decision to make?",
+              "Could you have waited for more information? Why didn't you?"
+            ],
+            "action": [
+              "How did you gather what information you could?",
+              "What framework did you use to decide?",
+              "How did you communicate your decision and the uncertainty?",
+              "What was your fallback plan if you were wrong?"
+            ],
+            "result": [
+              "Was the decision right?",
+              "What would have happened if you'd waited?",
+              "How did you evaluate the decision after the fact?"
+            ]
+          },
+          "depth_probes": [
+            "What specifically were you uncertain about, and what was your confidence level?",
+            "How do you generally decide when you have enough information to act?",
+            "Give me an example where waiting would have been the better choice."
+          ],
+          "red_flags": [
+            "always_waits_for_perfect_info",
+            "never_acknowledges_uncertainty",
+            "no_risk_assessment",
+            "no_fallback_plan",
+            "says_we_throughout_never_specifying_personal_actions",
+            "cannot_name_the_project_team_or_timeframe",
+            "result_has_no_numbers_or_measurable_outcome",
+            "story_sounds_rehearsed_and_generic",
+            "deflects_to_hypothetical_when_asked_for_real_example",
+            "takes_credit_for_team_outcome_without_specifying_contribution",
+            "no_reflection_on_lessons_learned"
+          ]
+        },
+        {
+          "id": "bh_ambiguity_002",
+          "text": "Describe a situation where requirements were unclear or changing and you had to deliver anyway. How did you manage it?",
+          "difficulty_weight": 1.0,
+          "star_probes": {
+            "situation": [
+              "What was the project and who were the stakeholders?",
+              "What specifically was ambiguous?"
+            ],
+            "task": [
+              "What did you need to deliver and by when?",
+              "Who was depending on your output?"
+            ],
+            "action": [
+              "How did you clarify requirements?",
+              "What did you do when requirements changed mid-stream?",
+              "How did you keep stakeholders aligned?"
+            ],
+            "result": [
+              "What did you deliver?",
+              "Was the stakeholder satisfied?",
+              "What would you do differently to prevent the ambiguity?"
+            ]
+          },
+          "depth_probes": [
+            "How did you decide what to build first when nothing was clear?",
+            "Did you push back on any requirement changes? When and how?",
+            "How do you balance being flexible with stakeholders versus protecting your team from thrash?"
+          ],
+          "red_flags": [
+            "paralyzed_by_ambiguity",
+            "builds_without_clarifying",
+            "no_stakeholder_management",
+            "no_pushback_on_scope_creep",
+            "says_we_throughout_never_specifying_personal_actions",
+            "cannot_name_the_project_team_or_timeframe",
+            "result_has_no_numbers_or_measurable_outcome",
+            "story_sounds_rehearsed_and_generic",
+            "deflects_to_hypothetical_when_asked_for_real_example",
+            "takes_credit_for_team_outcome_without_specifying_contribution",
+            "no_reflection_on_lessons_learned"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bh_influence",
+      "theme": "cross_team_influence",
+      "display_name": "Cross-Team Influence & Communication",
+      "leadership_principles": [
+        "earn_trust",
+        "insist_on_the_highest_standards",
+        "think_big"
+      ],
+      "questions": [
+        {
+          "id": "bh_influence_001",
+          "text": "Tell me about a time you had to convince another team to change their approach or adopt something from your team. You had no authority over them.",
+          "difficulty_weight": 1.0,
+          "star_probes": {
+            "situation": [
+              "What were the teams and what was the relationship?",
+              "Why did their current approach need to change?"
+            ],
+            "task": [
+              "What were you trying to get them to do?",
+              "Why couldn't you just mandate the change?"
+            ],
+            "action": [
+              "How did you build your case?",
+              "What was your persuasion strategy?",
+              "How did you handle resistance?",
+              "Did you find allies on the other team?"
+            ],
+            "result": [
+              "Did they adopt the change?",
+              "How long did it take?",
+              "What was the impact?",
+              "What would you do differently?"
+            ]
+          },
+          "depth_probes": [
+            "What was the hardest objection you had to overcome?",
+            "If they said no, what was your escalation strategy?",
+            "How do you influence without authority in general?"
+          ],
+          "red_flags": [
+            "always_has_authority",
+            "escalate_to_management_first",
+            "no_persuasion_skills",
+            "force_through_change",
+            "says_we_throughout_never_specifying_personal_actions",
+            "cannot_name_the_project_team_or_timeframe",
+            "result_has_no_numbers_or_measurable_outcome",
+            "story_sounds_rehearsed_and_generic",
+            "deflects_to_hypothetical_when_asked_for_real_example",
+            "takes_credit_for_team_outcome_without_specifying_contribution",
+            "no_reflection_on_lessons_learned"
+          ]
+        },
+        {
+          "id": "bh_influence_002",
+          "text": "Tell me about a time you worked on a cross-functional security initiative. How did you get buy-in from non-security teams?",
+          "difficulty_weight": 1.0,
+          "star_probes": {
+            "situation": [
+              "What was the initiative?",
+              "Which teams needed to participate?",
+              "What was their initial reaction?"
+            ],
+            "task": [
+              "What was your role in driving this?",
+              "What obstacles did you anticipate?"
+            ],
+            "action": [
+              "How did you frame the initiative for non-security audiences?",
+              "Did you make trade-offs to get buy-in?",
+              "How did you handle teams that refused to participate?"
+            ],
+            "result": [
+              "Was the initiative successful?",
+              "What was the measurable impact?",
+              "What would you do differently?"
+            ]
+          },
+          "depth_probes": [
+            "How do you explain security risk to a product manager who just wants to ship features?",
+            "When is it appropriate to frame security as a business enabler versus a risk reducer?",
+            "Give me an example where you had to compromise on security to get something shipped. How did you decide?"
+          ],
+          "red_flags": [
+            "security_is_always_right",
+            "no_empathy_for_other_teams",
+            "no_compromise_ability",
+            "cant_translate_security_to_business",
+            "says_we_throughout_never_specifying_personal_actions",
+            "cannot_name_the_project_team_or_timeframe",
+            "result_has_no_numbers_or_measurable_outcome",
+            "story_sounds_rehearsed_and_generic",
+            "deflects_to_hypothetical_when_asked_for_real_example",
+            "takes_credit_for_team_outcome_without_specifying_contribution",
+            "no_reflection_on_lessons_learned"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bh_prioritization",
+      "theme": "prioritization",
+      "display_name": "Prioritization Under Pressure",
+      "leadership_principles": [
+        "deliver_results",
+        "bias_for_action",
+        "customer_obsession"
+      ],
+      "questions": [
+        {
+          "id": "bh_priority_001",
+          "text": "Tell me about a time you had multiple critical tasks competing for your time and you couldn't do all of them. How did you decide what to do?",
+          "difficulty_weight": 1.0,
+          "star_probes": {
+            "situation": [
+              "What were the competing priorities?",
+              "What was the time constraint?",
+              "Who was depending on each task?"
+            ],
+            "task": [
+              "What criteria did you use to prioritize?",
+              "Who did you consult?"
+            ],
+            "action": [
+              "What did you prioritize and what did you deprioritize?",
+              "How did you communicate the deprioritization to stakeholders?",
+              "Did you delegate anything?"
+            ],
+            "result": [
+              "What was the outcome of your prioritization?",
+              "Was anything dropped that shouldn't have been?",
+              "What did you learn about prioritization?"
+            ]
+          },
+          "depth_probes": [
+            "What framework do you use for prioritization in general?",
+            "Tell me about a time your prioritization was wrong and something important fell through the cracks.",
+            "How do you handle a manager who says everything is P0?"
+          ],
+          "red_flags": [
+            "tries_to_do_everything",
+            "no_communication_of_tradeoffs",
+            "no_framework",
+            "cant_say_no",
+            "says_we_throughout_never_specifying_personal_actions",
+            "cannot_name_the_project_team_or_timeframe",
+            "result_has_no_numbers_or_measurable_outcome",
+            "story_sounds_rehearsed_and_generic",
+            "deflects_to_hypothetical_when_asked_for_real_example",
+            "takes_credit_for_team_outcome_without_specifying_contribution",
+            "no_reflection_on_lessons_learned"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bh_technical_leadership",
+      "theme": "technical_leadership",
+      "display_name": "Technical Leadership & Mentorship",
+      "leadership_principles": [
+        "hire_and_develop_the_best",
+        "dive_deep",
+        "invent_and_simplify"
+      ],
+      "questions": [
+        {
+          "id": "bh_tech_lead_001",
+          "text": "Tell me about a time you had to uplevel a junior team member who was struggling. What was the situation and what did you do?",
+          "difficulty_weight": 1.0,
+          "star_probes": {
+            "situation": [
+              "What was the person struggling with?",
+              "How was it affecting the team?",
+              "How long had it been going on?"
+            ],
+            "task": [
+              "What was your role? Were you their manager or a peer?",
+              "What outcome were you aiming for?"
+            ],
+            "action": [
+              "What specific steps did you take to help them?",
+              "Did you adjust your approach when initial efforts didn't work?",
+              "How did you balance helping them with your own work?"
+            ],
+            "result": [
+              "Did the person improve?",
+              "How did you measure improvement?",
+              "What did you learn about developing people?"
+            ]
+          },
+          "depth_probes": [
+            "What's your philosophy on giving critical feedback?",
+            "How do you handle a situation where someone isn't improving despite your efforts?",
+            "Tell me about someone you mentored who's now more senior than you expected. What did you do right?",
+            "When is it appropriate to manage someone out versus continue investing in their development?"
+          ],
+          "red_flags": [
+            "never_mentored",
+            "only_positive_feedback",
+            "gave_up_quickly",
+            "no_measurement",
+            "does_work_for_them",
+            "says_we_throughout_never_specifying_personal_actions",
+            "cannot_name_the_project_team_or_timeframe",
+            "result_has_no_numbers_or_measurable_outcome",
+            "story_sounds_rehearsed_and_generic",
+            "deflects_to_hypothetical_when_asked_for_real_example",
+            "takes_credit_for_team_outcome_without_specifying_contribution",
+            "no_reflection_on_lessons_learned"
+          ]
+        },
+        {
+          "id": "bh_tech_lead_002",
+          "text": "Describe a time you simplified a complex system or process. What was the complexity, and how did you decide what to cut?",
+          "difficulty_weight": 1.0,
+          "star_probes": {
+            "situation": [
+              "What was the system or process?",
+              "What made it unnecessarily complex?",
+              "What was the impact of the complexity?"
+            ],
+            "task": [
+              "What was your mandate?",
+              "What constraints did you have?"
+            ],
+            "action": [
+              "How did you identify what could be simplified?",
+              "What did you remove or change?",
+              "How did you get buy-in for the simplification?",
+              "What was the hardest thing to cut?"
+            ],
+            "result": [
+              "What was the quantified impact?",
+              "Did you lose any important capability by simplifying?",
+              "How did the team react?"
+            ]
+          },
+          "depth_probes": [
+            "What's your threshold for 'this is too complex'?",
+            "How do you balance simplicity with handling edge cases?",
+            "Tell me about a time you simplified something too much and had to add complexity back."
+          ],
+          "red_flags": [
+            "adds_complexity",
+            "cant_simplify",
+            "no_tradeoff_analysis",
+            "simplifies_without_understanding",
+            "says_we_throughout_never_specifying_personal_actions",
+            "cannot_name_the_project_team_or_timeframe",
+            "result_has_no_numbers_or_measurable_outcome",
+            "story_sounds_rehearsed_and_generic",
+            "deflects_to_hypothetical_when_asked_for_real_example",
+            "takes_credit_for_team_outcome_without_specifying_contribution",
+            "no_reflection_on_lessons_learned"
+          ]
+        }
+      ]
+    }
+  ],
+  "scoring_guidance_global": "BEHAVIORAL SCORING CALIBRATION: Score based on STAR completeness, story specificity, and ownership. 5/5 = Complete STAR with named project, specific actions THEY took (not team), quantified result, and unprompted reflection on what they'd do differently. 4/5 = Complete STAR with good specifics but quantification could be stronger. 3/5 = Mostly complete STAR but vague on actions or results, or says 'we' throughout. 2/5 = Incomplete STAR, hypothetical answer, or clearly rehearsed generic response. 1/5 = Cannot provide a specific example, gives theoretical answer."
+}

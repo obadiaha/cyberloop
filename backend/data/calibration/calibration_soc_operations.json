@@ -1,0 +1,225 @@
+{
+  "domain": "soc_operations",
+  "description": "What SOC operations interviews test: alert triage and investigation speed, telemetry reading, escalation judgment, tool proficiency, shift handoff quality, and process maturity. Also tests resilience under ambiguity - real SOC work rarely comes with clean scenarios.",
+  "levels": {
+    "junior": {
+      "score_range": [1, 3],
+      "label": "Junior / Associate (Tier 1)",
+      "characteristics": [
+        "Follows pre-written runbooks step-by-step without understanding the underlying reasoning",
+        "Can acknowledge an alert but struggles to triage severity without explicit guidance",
+        "Describes alert review as 'checking if it's a true positive or false positive' with no articulated decision framework",
+        "Knows SIEM exists and can navigate dashboards but cannot write queries from scratch",
+        "Cannot explain what a Tier 1 vs Tier 2 analyst should handle differently",
+        "Has a binary view of alerts: malicious or benign, with no nuance for suspicious-but-unconfirmed",
+        "Does not pivot from an initial alert to related events without being told to",
+        "Describes SLA as 'acknowledge within X minutes' without understanding why SLAs exist",
+        "Cannot explain what an analyst should include in an escalation note for Tier 2",
+        "Knows common attacks (phishing, malware) but cannot map them to specific observable indicators",
+        "Treats every alert as equally urgent until told otherwise",
+        "Cannot explain what 'false positive rate' means for their team's alert queue health",
+        "Has no framework for documenting investigation findings in a case management tool",
+        "Cannot explain the difference between a detection, an alert, and an incident",
+        "Does not know what questions to ask a reporting user during a phishing investigation"
+      ],
+      "example_phrases": [
+        "I would look at the alert and follow the runbook",
+        "I'd check VirusTotal to see if the hash is known bad",
+        "I'd escalate it to my senior analyst if I'm not sure",
+        "I usually handle about 30-40 alerts per shift",
+        "I'd block the IP at the firewall if it's malicious",
+        "I close it as a false positive if it looks legitimate",
+        "I'd notify the user's manager if there was suspicious activity on their account"
+      ],
+      "red_flags": [
+        "Claims Tier 2 experience but cannot explain how they would escalate with context",
+        "Says 'I've worked in a SOC for 2 years' but cannot describe their alert workflow with any specifics",
+        "Treats all phishing emails the same regardless of targeting or payload",
+        "Cannot distinguish between a successful login from an unusual location and an actual compromise",
+        "Thinks closing an alert as false positive requires no documentation",
+        "Cannot explain what information a Tier 2 analyst needs from a Tier 1 escalation"
+      ],
+      "expected_tools": [
+        "SIEM dashboards (reading, not writing queries)",
+        "VirusTotal / urlscan.io / AbuseIPDB",
+        "EDR console (basic alert review)",
+        "Ticketing system (ServiceNow, Jira, TheHive)",
+        "Email header analyzer"
+      ],
+      "expected_frameworks": [
+        "Basic NIST incident response phases",
+        "Alert severity tiers (P1-P4 or equivalent)",
+        "Basic phishing identification criteria"
+      ]
+    },
+    "mid": {
+      "score_range": [4, 6],
+      "label": "Mid-Level (Tier 2)",
+      "characteristics": [
+        "Builds their own investigation workflow from an initial alert without prompting",
+        "Writes effective SIEM queries: filters by host, user, time range, specific Event IDs",
+        "Triages with context: considers asset criticality, user role, and business context in severity determination",
+        "Understands alert fatigue and can identify when a rule is generating too many false positives",
+        "Correlates multiple alerts into a single incident narrative",
+        "Pivots from an endpoint alert to network traffic to identity logs to construct a complete picture",
+        "Can analyze a phishing email: headers, URL defanging, attachment type, macro inspection",
+        "Knows logon type codes: Type 2 (interactive), Type 3 (network), Type 10 (RemoteInteractive), Type 7 (unlock)",
+        "Can identify suspicious scheduled tasks from Event ID 4698 with parent process context",
+        "Writes a clear escalation note with: what happened, what evidence was gathered, what was ruled out, recommended next step",
+        "Understands when to contain vs. when to monitor (active vs. dormant threat)",
+        "Can distinguish between a compromised account and a misconfigured one based on behavior patterns",
+        "Knows basic network indicators: unusual external DNS queries, anomalous data volumes, beaconing to new domains",
+        "Has experience with alert triage at scale and developed personal heuristics for prioritization",
+        "Can identify when multiple low-severity alerts form a high-severity pattern"
+      ],
+      "example_phrases": [
+        "I start by looking at the user account involved - is this a service account, a privileged user, or a standard employee? That changes the risk profile completely",
+        "The alert fired on 4624 type 3 logon, but when I pulled the surrounding context I found a 4648 thirty seconds earlier from the same source IP - that's explicit credential use, which elevated the severity",
+        "I never close a phishing ticket without pulling the email headers to check for spoofed 'From' vs 'Reply-To' and confirming whether the URL resolves to a credential harvesting page",
+        "The rule was firing 200 times a day. I queried the SIEM and found 95% of hits were from our update servers running certutil legitimately. I updated the rule to exclude that process tree",
+        "When I escalate to Tier 2 or IR, I include: timeline of events, artifacts I collected, accounts involved, systems impacted, and what I've already ruled out - so they don't duplicate my work",
+        "A single failed login is noise. Twenty failed logins followed by one success from the same IP is an incident. I correlate both before making a call"
+      ],
+      "red_flags": [
+        "Cannot write a KQL or SPL query to pull events for a specific user over a time range",
+        "Escalates everything to Tier 2 without a clear rationale",
+        "Cannot explain the difference between logon type 3 and logon type 10",
+        "Thinks phishing analysis ends at 'check VirusTotal for the URL'",
+        "Has never identified a multi-stage attack from correlated low-severity alerts",
+        "Cannot explain what constitutes an effective escalation note"
+      ],
+      "expected_tools": [
+        "Splunk (SPL queries with stats, eval, lookup)",
+        "Microsoft Sentinel (KQL with let, join, summarize)",
+        "CrowdStrike / SentinelOne / Defender for Endpoint (investigation mode)",
+        "Proofpoint / Microsoft Defender for O365 (email analysis)",
+        "TheHive / XSOAR / ServiceNow (case management)",
+        "Shodan / Censys (external context for IPs)"
+      ],
+      "expected_frameworks": [
+        "NIST SP 800-61 (triage to escalation flow)",
+        "MITRE ATT&CK (technique identification during triage)",
+        "Alert severity framework (risk-based triage)",
+        "Phishing analysis methodology"
+      ]
+    },
+    "senior": {
+      "score_range": [7, 8],
+      "label": "Senior (Tier 2/3 or SOC Lead)",
+      "characteristics": [
+        "Builds and maintains SOC playbooks that reflect real investigation workflows, not just compliance templates",
+        "Mentors Tier 1 analysts and can explain why each step in a runbook exists",
+        "Identifies systematic alert fatigue problems and proposes rule tuning or data quality improvements",
+        "Can build a SIEM dashboard or detection rule without help from a detection engineer",
+        "Performs hypothesis-driven threat hunting to find threats that haven't triggered any alerts",
+        "Has experience with cloud alert triage: Azure AD Conditional Access failures, AWS GuardDuty findings, GCP Security Command Center",
+        "Can correlate identity, network, and endpoint telemetry to build a complete attacker timeline",
+        "Understands SOC metrics and can critique them: MTTA, MTTR, alert volume trends, analyst capacity",
+        "Has experience with insider threat investigations: user behavior analytics, DLP alerts, HR correlation",
+        "Can identify when an incident requires external notification (legal, HR, executive, regulatory)",
+        "Conducts shift handoffs that include active investigations, contextual notes, and recommended follow-up",
+        "Has experience with tuning detection rules to improve signal-to-noise ratio at scale",
+        "Can design triage criteria for a new alert type when no runbook exists yet",
+        "Understands SOAR and can evaluate which playbook steps are safe to automate",
+        "Has led post-incident reviews and turns findings into documented process improvements"
+      ],
+      "example_phrases": [
+        "The playbook said to isolate the host, but the host was a production database. I stopped and looped in the incident commander before acting - automatic containment would have been worse than the attack",
+        "I built a threat hunting query in Sentinel that looked for hosts making DNS requests to newly registered domains - caught a loader that had bypassed our EDR's initial detection",
+        "When I review my team's escalations, I'm checking for three things: did they pivot to correlated events, did they rule out benign explanations, and did they include enough context for Tier 2 to act without re-doing the work",
+        "The MTTA looked fine on paper - 8 minutes average. But when I broke it down by alert type, I found we were fast on easy phishing but averaging 45 minutes on credential abuse, which is the thing that matters most",
+        "I designed our cloud triage runbook after noticing we had no documented procedure for GuardDuty findings - wrote it based on six months of investigation patterns the team had built up informally"
+      ],
+      "red_flags": [
+        "Cannot explain what threat hunting is different from alert triage",
+        "Has never written a playbook from scratch, only followed them",
+        "Cannot explain what SOAR is or name a specific automation they've built",
+        "Does not understand SOC metrics or how to critique them",
+        "Has no experience with cloud environments in the SOC context"
+      ],
+      "expected_tools": [
+        "Advanced SIEM (Splunk ES correlation searches, Sentinel Analytics rules with ML)",
+        "SOAR platforms (Palo Alto XSOAR, Splunk SOAR, Sentinel Automation)",
+        "Threat hunting platforms (CrowdStrike Overwatch, Defender Hunting, Chronicle)",
+        "UEBA tools (Microsoft Sentinel UEBA, Exabeam, LogRhythm)",
+        "Cloud-native alerting: GuardDuty, Defender for Cloud, GCP SCC"
+      ],
+      "expected_frameworks": [
+        "MITRE ATT&CK (triage enrichment and hunting hypotheses)",
+        "SOC Visibility Triad (endpoint + network + identity)",
+        "SOAR playbook design principles",
+        "Threat hunting methodology (hypothesis-based)"
+      ]
+    },
+    "staff": {
+      "score_range": [9, 10],
+      "label": "Staff / SOC Manager / Principal",
+      "characteristics": [
+        "Designs the SOC operating model: staffing ratios, tier structure, escalation matrix, on-call protocol",
+        "Defines and tracks SOC KPIs tied to business risk: reduction in MTTD, analyst handling capacity, detection coverage by threat actor",
+        "Has built or managed the SOC tooling stack: SIEM selection, EDR deployment, SOAR implementation",
+        "Drives SOC automation strategy: defines what to automate, when human judgment is irreplaceable, and manages automation debt",
+        "Manages vendor relationships and SLAs for MDR, MSSP, or threat intelligence providers",
+        "Designs analyst career development paths: Tier 1 to Tier 2 promotion criteria, training programs, certifications",
+        "Has operated through major incidents and can reflect on organizational decisions made under pressure",
+        "Understands regulatory audit requirements for SOC logs and can prepare for a PCI DSS or SOC 2 audit",
+        "Measures and improves analyst mental health and burnout risk alongside performance metrics",
+        "Connects SOC operations to board-level risk conversations: translates analyst workload into business exposure",
+        "Evaluates and onboards new threat intelligence feeds with a clear ROI framework",
+        "Has designed 24x7 SOC coverage models and solved the shift structure problem",
+        "Can critique SIEM architecture and recommend scalability improvements",
+        "Designs tabletop exercises specifically to stress-test SOC response procedures"
+      ],
+      "example_phrases": [
+        "Our SOAR automation handles the top 15 alert types automatically - that's 60% of our alert volume without analyst touch. The humans focus on the ambiguous cases that need judgment",
+        "I track analyst 'decisional accuracy' as a metric - what percentage of their escalations turned into confirmed incidents vs. what percentage were unnecessary escalations. It tells me more than alert throughput",
+        "We moved from a 3-tier SOC to a 2-tier model with dedicated detection engineers and found analyst satisfaction went up and MTTD went down - the tier 3 bottleneck was killing us",
+        "When I evaluate an MSSP, I ask for their detection engineering roadmap and their mean time between detection rule updates. Most can't answer the second question, which tells you a lot",
+        "SOC burnout is a real risk. I monitor analyst alert handling velocity over time - when someone's speed drops 30%, that's a signal, not a performance problem"
+      ],
+      "red_flags": [
+        "Has no SOC metrics beyond alert volume and ticket close rate",
+        "Cannot explain the tradeoffs of different SOC staffing models",
+        "Has never evaluated a SIEM or SOAR vendor",
+        "Cannot speak to analyst career development",
+        "Does not consider analyst wellbeing as part of SOC operations"
+      ],
+      "expected_tools": [
+        "Enterprise SIEM (Splunk ES, Sentinel, Chronicle, Elastic) at admin/architect level",
+        "SOAR platforms (XSOAR, Splunk SOAR) at design level",
+        "Threat intelligence platforms (Recorded Future, Anomali)",
+        "Workforce management tools for 24x7 shift coverage",
+        "GRC platforms (for compliance reporting from SOC data)"
+      ],
+      "expected_frameworks": [
+        "SOC-CMM (SOC Capability Maturity Model)",
+        "NIST CSF (SOC's role in Identify/Detect/Respond)",
+        "SOC visibility triad at program level",
+        "MITRE ATT&CK as program coverage measurement tool",
+        "Regulatory compliance frameworks (PCI DSS, HIPAA, SOX) as they apply to SOC logging requirements"
+      ]
+    }
+  },
+  "cross_cutting_signals": {
+    "positive": [
+      "Describes triage as a structured decision process, not a gut check",
+      "Pivots naturally between data sources (endpoint -> network -> identity) without prompting",
+      "Mentions documenting findings even for false positives",
+      "Considers asset criticality and business context in severity assessment",
+      "Distinguishes between what they know, what they suspect, and what requires more investigation",
+      "References specific queries or commands they would run, not just tool names",
+      "Thinks about attacker objectives and what else they might be doing beyond the initial alert",
+      "Has opinions on how to improve processes they've worked in"
+    ],
+    "negative": [
+      "Describes all investigations as 'checking VirusTotal'",
+      "Cannot construct a coherent pivot chain from an initial alert",
+      "Cannot write a basic SIEM query for their primary tool",
+      "Uses 'suspicious' without being able to articulate what specifically is suspicious",
+      "Treats alert triage and threat hunting as the same activity",
+      "Cannot explain what information they would include in an escalation note",
+      "Has no concept of false positive rate or how it affects team health",
+      "Cannot explain a SOC metric beyond 'number of tickets closed'"
+    ]
+  }
+}

@@ -1,0 +1,234 @@
+{
+  "domain": "digital_forensics",
+  "description": "What digital forensics interviews test: artifact knowledge (Windows, Linux, macOS), evidence handling and chain of custody, tool proficiency, timeline reconstruction, and ability to prove or disprove specific attacker actions from physical artifacts. Tests precision - forensics is about what you can PROVE, not what you suspect.",
+  "levels": {
+    "junior": {
+      "score_range": [1, 3],
+      "label": "Junior / Associate",
+      "characteristics": [
+        "Knows forensics tools by name (Autopsy, FTK, Volatility) but cannot describe a workflow without prompting",
+        "Understands evidence imaging at a conceptual level but cannot explain why write blockers are used",
+        "Cannot explain the difference between a forensic image (bit-for-bit) and a logical copy",
+        "Knows that memory forensics exists but cannot name a single volatility plugin or what it reveals",
+        "Thinks 'deleted file' recovery means running Recuva on the live system",
+        "Cannot distinguish between artifact types: system artifacts vs. user artifacts vs. application artifacts",
+        "Has heard of the Windows Registry as a forensic artifact but cannot name specific keys relevant to investigation",
+        "Cannot explain what prefetch files are or what investigation questions they answer",
+        "Describes forensic process as 'image the drive and look for evidence'",
+        "Does not understand timestamp types (MAC times: Modified, Accessed, Created) or their forensic significance",
+        "Cannot explain chain of custody or why it matters",
+        "Has no understanding of volatile data and the order of volatility",
+        "Does not know what a forensic hash is used for in evidence integrity verification",
+        "Cannot identify suspicious artifacts in a simple case scenario",
+        "Thinks all forensics is Windows-only"
+      ],
+      "example_phrases": [
+        "I'd use Autopsy to analyze the disk image",
+        "You image the drive first so you don't destroy evidence",
+        "I know Volatility is for memory forensics",
+        "I'd look through the files on the disk for anything suspicious",
+        "I'd check the recently accessed files to see what the user was doing",
+        "We'd hash the evidence to preserve its integrity",
+        "I'm familiar with the Windows Registry but I'd need to look up the specific keys"
+      ],
+      "red_flags": [
+        "Claims forensics experience but cannot explain write blocker purpose",
+        "Says 'I'd analyze the evidence' without explaining what artifacts they'd prioritize",
+        "Confuses forensic imaging with backup copy",
+        "Cannot name a single forensic artifact beyond 'event logs'",
+        "Thinks chain of custody is only relevant in legal cases, not internal investigations",
+        "Has never actually run a Volatility plugin against a memory dump",
+        "Does not know what NTFS means or that it's a filesystem relevant to forensics"
+      ],
+      "expected_tools": [
+        "Autopsy (basic navigation)",
+        "FTK Imager (imaging awareness)",
+        "Volatility (knows it exists)",
+        "Recuva or similar (basic file recovery)",
+        "Write blockers (conceptual awareness)"
+      ],
+      "expected_frameworks": [
+        "Basic chain of custody concept",
+        "NIST SP 800-86 (awareness)",
+        "Order of volatility (conceptual)"
+      ]
+    },
+    "mid": {
+      "score_range": [4, 6],
+      "label": "Mid-Level",
+      "characteristics": [
+        "Knows key Windows forensic artifacts and their locations: Prefetch (C:\\Windows\\Prefetch), LNK files (C:\\Users\\<user>\\AppData\\Roaming\\Microsoft\\Windows\\Recent), Shellbags (NTUSER.DAT), Jump Lists, SRUM database",
+        "Can explain what each artifact proves: Prefetch proves execution, LNK proves file access, Shellbags prove folder browsing",
+        "Understands NTFS timestamps (MACE: Modified, Accessed, Created, Entry Modified) and can explain timestomping",
+        "Can run basic Volatility 3 plugins: windows.pslist, windows.cmdline, windows.netscan, windows.malfind",
+        "Understands Windows Registry hives and investigatively relevant keys: SYSTEM, SOFTWARE, NTUSER.DAT, SAM",
+        "Knows common registry forensic locations: UserAssist (run programs), MUICache, RecentDocs, BAM/DAM (background activity)",
+        "Can perform a basic memory analysis: identify injected code with malfind, find network connections with netscan",
+        "Understands what $MFT (Master File Table) contains and can use it to recover deleted file metadata",
+        "Knows the $J (USN Journal) and $LogFile for NTFS transaction tracking",
+        "Can perform timeline analysis using multiple artifact sources and create a coherent narrative",
+        "Understands hash verification for evidence integrity and can explain what a hash mismatch means",
+        "Has analyzed phishing or malware cases end-to-end: email headers, extracted payload, sandbox analysis, persistence identification",
+        "Knows Linux forensic artifacts: /var/log, bash_history, cron jobs, /etc/passwd and /etc/shadow, auth.log, systemd logs",
+        "Can acquire a forensic image using dd, dcfldd, or FTK Imager and verify with MD5/SHA-256",
+        "Understands the difference between live response (triage) and dead-box forensics and when to use each"
+      ],
+      "example_phrases": [
+        "For execution evidence I'd check Prefetch first - each .pf file contains the executable name, run count, and last run time for up to 128 entries",
+        "The LNK file in the user's Recent folder had a created timestamp before the file existed on the suspect machine, which proved the file came from an external source",
+        "I ran volatility's malfind plugin and found a process with executable pages that had no corresponding file on disk - that's a strong indicator of process injection",
+        "The $MFT entry showed the file was created but the NTFS timestamps were from 1970, which is a classic timestomping indicator",
+        "I pulled UserAssist from NTUSER.DAT with RegRipper - the ROT-13 encoded entries showed the attacker ran three specific tools that weren't in the Prefetch directory because they'd been deleted",
+        "Chain of custody started with imaging - I hashed the original drive before and after imaging, documented the hardware write blocker serial number, and stored the image with the original hash in the evidence locker"
+      ],
+      "red_flags": [
+        "Cannot name the location of Prefetch files or what they prove",
+        "Does not know what Shellbags are or what investigative question they answer",
+        "Cannot explain what MACE timestamps are in the NTFS context",
+        "Thinks memory forensics requires a system crash (blue screen)",
+        "Cannot explain what $MFT is without looking it up",
+        "Has never actually performed timeline correlation from multiple artifact sources",
+        "Claims to know Volatility but cannot name a single plugin and what it outputs"
+      ],
+      "expected_tools": [
+        "Volatility 3 (windows.pslist, malfind, netscan, cmdline, dlllist)",
+        "KAPE (targeted artifact collection with modules)",
+        "RegRipper / Registry Explorer (registry forensics)",
+        "MFTECmd / MFT Explorer (NTFS metadata analysis)",
+        "Plaso / log2timeline (timeline creation)",
+        "Autopsy / FTK (full disk examination)",
+        "Eric Zimmermann tools suite (PECmd, LECmd, JLECmd, AppCompatCacheParser)"
+      ],
+      "expected_frameworks": [
+        "NIST SP 800-86 (Guide to Integrating Forensic Techniques)",
+        "RFC 3227 (Guidelines for Evidence Collection and Archiving)",
+        "Order of volatility in live response",
+        "ACPO Good Practice Guide for Digital Evidence (UK context)"
+      ]
+    },
+    "senior": {
+      "score_range": [7, 8],
+      "label": "Senior",
+      "characteristics": [
+        "Can reconstruct a complete attacker timeline from raw artifacts with specific timestamps down to the second",
+        "Identifies anti-forensics techniques and works around them: timestomping, log clearing (EID 1102), prefetch disabling, track covering",
+        "Has performed memory forensics on live systems and knows the risks of volatility change during acquisition",
+        "Knows cloud forensic considerations: AWS S3 access logs, Azure Blob audit, container forensics, ephemeral instances",
+        "Can perform macOS forensics: APFS artifacts, Unified Log (ULS), FSEvents, plist files, spotlight metadata",
+        "Can analyze Linux malware artifacts: crontab persistence, LD_PRELOAD hijacks, /tmp execution, kernel module rootkits",
+        "Has experience with mobile forensics concepts: iOS ATC databases, Android logcat, app sandbox artifacts",
+        "Understands Encase/FTK's evidence file formats (E01, AFF4) and can work with them",
+        "Can identify browser artifacts at investigation depth: Chrome/Firefox SQLite databases, cache, extensions",
+        "Has testified or prepared reports suitable for legal proceedings",
+        "Can perform network forensics: pcap analysis, Zeek logs, reconstructing file transfers from network capture",
+        "Understands Windows volume shadow copies (VSS) and their forensic value for historical artifact recovery",
+        "Has experience with enterprise-scale forensics: Velociraptor, GRR, CrowdStrike for fleet-wide collection",
+        "Can identify indicators of a wiped or overwritten disk and recover evidence despite anti-forensics",
+        "Understands the forensic implications of full-disk encryption (BitLocker keys, memory-based key recovery)"
+      ],
+      "example_phrases": [
+        "I found the attacker had cleared the Security event log (EID 1102), but they forgot about the PowerShell operational logs and the Sysmon logs which gave me the same timeline",
+        "The container had been stopped and replaced, but the orchestration platform retained the previous container logs for 24 hours - I grabbed those immediately before they rotated out",
+        "The macOS Unified Log had the launch daemon activation event at 3:47 AM, which correlated with the external network connection in the Zeek logs 12 seconds later",
+        "VSS had three snapshots from before the ransomware deployed. I recovered the attacker's staging directory from the T-72h snapshot, which contained the exfiltration tool with its original creation timestamp",
+        "BitLocker was enabled but the key was in memory - I took a live memory image first, extracted the FVEK using Volatility's bitlocker plugin, then decrypted the disk offline",
+        "For the legal proceeding I documented every tool, version, hash, and command in the examination log so the methodology could be independently reproduced"
+      ],
+      "red_flags": [
+        "Has never performed forensics on a macOS or Linux system",
+        "Cannot explain how to recover forensic value from a log-cleared system",
+        "Does not know what Volume Shadow Copies are used for in forensics",
+        "Has never prepared a forensic report for legal use",
+        "Cannot explain what Velociraptor is used for in enterprise forensics",
+        "Has no experience with cloud or container forensics"
+      ],
+      "expected_tools": [
+        "Velociraptor (VQL hunting and forensic collection at scale)",
+        "Plaso / log2timeline (cross-platform super-timeline)",
+        "Volatility 3 (advanced plugins: hooks, bitlocker, dumpfiles)",
+        "Eric Zimmermann full suite (PECmd, LECmd, AppCompatCacheParser, RBCmd, WxTCmd)",
+        "Axiom / Nuix (enterprise forensic platforms)",
+        "Wireshark + tshark (pcap analysis)",
+        "macOS: macOS Unified Log viewer, macOS Artifact Parsing Tool (mac_apt)",
+        "Linux: Auditd, journalctl, LiME (memory acquisition)"
+      ],
+      "expected_frameworks": [
+        "SANS DFIR methodology (FOR508, FOR518, FOR572)",
+        "Scientific method in forensics (hypothesis, evidence, conclusion)",
+        "Anti-forensics identification and mitigation",
+        "Legal hold and evidence handling for litigation support",
+        "ATT&CK mapping of forensic findings"
+      ]
+    },
+    "staff": {
+      "score_range": [9, 10],
+      "label": "Staff / Principal",
+      "characteristics": [
+        "Designs the DFIR program architecture: tooling stack, evidence retention policy, legal hold procedures, collection workflows",
+        "Has expert witness experience or has prepared forensic reports that withstood cross-examination",
+        "Develops custom forensic tools or Velociraptor artifacts for novel collection challenges",
+        "Has worked cases involving nation-state actors and understands the operational security implications of the investigation itself",
+        "Can lead forensic investigations across multiple jurisdictions with data sovereignty considerations",
+        "Has designed forensic labs and evidence storage with chain of custody controls",
+        "Contributes to the DFIR community: public tools, blog posts, conference research (e.g., OSDFCon, SANS DFIR Summit)",
+        "Understands regulatory requirements that govern forensic investigations in their sector",
+        "Can evaluate and select forensic platforms for enterprise deployment",
+        "Has designed large-scale forensic collection operations across hundreds or thousands of endpoints",
+        "Understands the intersection of forensics with legal discovery (eDiscovery) and can manage that relationship",
+        "Has investigated insider threat cases from start to legal referral",
+        "Can advise engineering teams on how to build systems that are forensically sound (logging, audit trails)",
+        "Has experience with dark web investigations and open-source intelligence (OSINT) integration into forensics"
+      ],
+      "example_phrases": [
+        "We built a custom Velociraptor artifact to collect the proprietary application logs that no off-the-shelf tool understood - that's now part of our standard collection profile",
+        "The 14 exabytes of data we collected had to go through legal review in three different jurisdictions before we could analyze it. I designed the data segregation workflow so the legal teams could control access by geography",
+        "I testified for six hours about the forensic methodology. The opposing counsel tried to attack chain of custody, but because every step had hash verification and timestamped documentation, we held up",
+        "After the nation-state intrusion, we had to assume the adversary was watching our investigation. We conducted the entire operation out-of-band with dedicated collection infrastructure they hadn't touched",
+        "I built the enterprise evidence retention policy based on litigation hold requirements, regulatory minimums, and storage cost optimization. It saves $400k annually and reduces legal risk"
+      ],
+      "red_flags": [
+        "Has never testified or prepared a forensic report for legal use",
+        "Cannot explain data sovereignty implications for multi-jurisdiction investigations",
+        "Has no experience designing a forensic program from scratch",
+        "Cannot explain what eDiscovery is or how forensics intersects with it",
+        "Has never contributed anything to the DFIR community"
+      ],
+      "expected_tools": [
+        "Enterprise forensic platforms (Magnet Axiom, Nuix, Relativity for eDiscovery)",
+        "Velociraptor (custom artifact development)",
+        "Custom Python/Go tooling for novel collection",
+        "Legal hold and eDiscovery platforms (Reveal, Exterro)",
+        "Evidence management systems"
+      ],
+      "expected_frameworks": [
+        "Daubert Standard / Frye Standard (US forensic evidence admissibility)",
+        "ISO 27037 (Guidelines for evidence identification, collection, acquisition and preservation)",
+        "NIST SP 800-86 (program design level)",
+        "SANS FOR508, FOR518, FOR572, FOR610 (deep expertise in relevant courses)",
+        "ATT&CK for forensic coverage mapping"
+      ]
+    }
+  },
+  "cross_cutting_signals": {
+    "positive": [
+      "Speaks in terms of what an artifact PROVES, not just what it suggests",
+      "Immediately considers evidence preservation before analysis",
+      "Knows specific file paths and registry keys, not just artifact names",
+      "Identifies anti-forensic techniques unprompted when discussing artifacts",
+      "Ties forensic findings back to specific attacker actions (execution, lateral movement, exfiltration)",
+      "Considers what the absence of an artifact means (intentional deletion vs. artifact not applicable)",
+      "Can explain the forensic significance of timestamps: which are reliable and which can be manipulated",
+      "Mentions chain of custody and integrity verification without prompting"
+    ],
+    "negative": [
+      "Describes forensics as 'looking through files for suspicious stuff'",
+      "Cannot name a specific artifact and what it proves",
+      "Has never used Volatility against an actual memory dump",
+      "Thinks forensics only applies to criminal cases",
+      "Cannot explain why write blockers are essential",
+      "Has no concept of timestomping or artifact manipulation",
+      "Thinks deleted files are always recoverable with basic tools",
+      "Cannot explain what the Master File Table is or does"
+    ]
+  }
+}

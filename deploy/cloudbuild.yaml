@@ -1,0 +1,80 @@
+# ============================================================
+# CyberLoop - Cloud Build CI/CD Pipeline
+# ============================================================
+# Builds the backend Docker image, pushes to Artifact Registry,
+# and deploys to Cloud Run.
+#
+# Trigger setup:
+#   gcloud builds triggers create github \
+#     --repo-name=cyberloop \
+#     --repo-owner=YOUR_GITHUB_USER \
+#     --branch-pattern="^main$" \
+#     --build-config=deploy/cloudbuild.yaml
+# ============================================================
+
+substitutions:
+  _REGION: us-central1
+  _REPO: cyberloop
+  _SERVICE_NAME: cyberloop-api
+
+steps:
+  # Step 1: Build Docker image (multi-stage, from project root)
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/api:${SHORT_SHA}'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/api:latest'
+      - '-f'
+      - 'deploy/Dockerfile'
+      - '.'
+
+  # Step 2: Push image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push'
+    waitFor: ['build']
+    args:
+      - 'push'
+      - '--all-tags'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/api'
+
+  # Step 3: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy'
+    waitFor: ['push']
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/api:${SHORT_SHA}'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8080'
+      - '--cpu'
+      - '1'
+      - '--memory'
+      - '1Gi'
+      - '--max-instances'
+      - '3'
+      - '--timeout'
+      - '3600'
+      - '--set-secrets'
+      - 'GOOGLE_API_KEY=google-api-key:latest'
+      - '--session-affinity'
+
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/api:${SHORT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/api:latest'
+
+timeout: '1200s'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

@@ -1,0 +1,215 @@
+{
+  "domain": "soc_operations",
+  "questions": [
+    {
+      "id": "soc_001",
+      "text": "An alert fires for an impossible travel event - a user logged in from New York at 9 AM and from London 20 minutes later. Walk me through your investigation.",
+      "depth": 1,
+      "topic": "alert_triage",
+      "mitre_technique": "T1078",
+      "expected_concepts": {
+        "junior": ["identifies this is suspicious because travel is physically impossible", "would reset the user's password", "would notify the user or manager"],
+        "mid": ["checks if it's actually the same user account: service account? shared account?", "verifies authentication method: is one of these a VPN or proxy that might explain the location", "looks at both logons: what was accessed, MFA status, device fingerprint", "checks for anomalous activity at either location: file access, email sent, lateral movement"],
+        "senior": ["checks if one IP is a VPN exit node, Tor exit node, or known cloud provider (AWS Lambda, Azure) that would explain the apparent travel", "investigates post-authentication activity: what did the London session do? Data access, app usage, email activity?", "checks Azure AD risk score and sign-in risk events if applicable", "looks at whether MFA was satisfied and how: push notification MFA could indicate MFA fatigue attack"],
+        "staff": ["uses this as a detection quality review: why is this a single alert? Impossible travel combined with first-seen device, MFA bypass, or sensitive data access should be higher severity", "considers the investigation workflow: does the analyst know what to do with this alert or is this triage taking too long because the runbook is inadequate?"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "VPN", "probe": "You confirm neither IP is a VPN. Both sessions authenticated with valid MFA. What's your next step?"},
+        {"if_mentioned": "MFA", "probe": "The MFA was satisfied via push notification on both sessions. What does that tell you, and what attack technique should you consider?"},
+        {"if_missed": "post-auth activity", "probe": "You've confirmed the impossible travel is real and not explained by a proxy. What do you investigate next?"},
+        {"if_strong": true, "escalate": "The London session accessed the executive's email and forwarded 400 emails to a Gmail address before being terminated. What's your full response now?"},
+        {"if_weak": true, "simplify": "Before you reset the password, what do you need to understand about these two login sessions?"}
+      ],
+      "interviewer_notes": "Good triage question that tests pivot ability. Junior candidates reset the password immediately (destroying intelligence about what the attacker was doing). Mid-level checks the context before acting. Senior considers MFA fatigue as the attack vector and looks at post-auth activity. The email forwarding escalation tests IR trigger judgment."
+    },
+    {
+      "id": "soc_002",
+      "text": "You're reviewing a Tier 1 analyst's escalation. The note says 'suspicious PowerShell detected on HR workstation'. What's wrong with this escalation and what information is missing?",
+      "depth": 1,
+      "topic": "escalation_quality",
+      "mitre_technique": "T1059.001",
+      "expected_concepts": {
+        "junior": ["recognizes more information is needed", "might ask for the full command", "would say to look at what the PowerShell did"],
+        "mid": ["lists specific missing information: full command line with decoded content, parent process, user account, timestamp, what happened after the execution", "notes there's no severity assessment or business impact consideration", "points out the analyst didn't check for related alerts or events on the same host", "identifies that 'suspicious' is not a specific claim - what exactly is suspicious about it?"],
+        "senior": ["critiques the investigation approach: PowerShell firing is the starting point, not the finding - what did the analyst find after pivoting?", "identifies that a good escalation should include: 'I checked X, Y, Z and ruled out benign explanations A and B, leaving hypothesis C'", "notes the HR context is relevant but unexplored: was this user running an HR tool that legitimately uses PowerShell? Did the analyst check?", "points out the escalation creates work for Tier 2 that Tier 1 should have done"],
+        "staff": ["uses this to identify a training gap: this escalation pattern suggests Tier 1 doesn't know what a good escalation looks like", "designs the coaching response: specific feedback that teaches investigation methodology, not just 'you need more detail'"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "command line", "probe": "The command line shows -EncodedCommand. The Tier 1 analyst included the base64 blob but didn't decode it. What's wrong with stopping there?"},
+        {"if_mentioned": "parent process", "probe": "Why is the parent process specifically important for evaluating a PowerShell alert?"},
+        {"if_missed": "what they ruled out", "probe": "Even if they gathered all the context you listed, what element of investigation rigor is still missing from a good escalation?"},
+        {"if_strong": true, "escalate": "This is the third escalation from the same analyst this week with this same quality problem. How do you address this as a team lead?"},
+        {"if_weak": true, "simplify": "If you were Tier 2 receiving this escalation, what's the first question you'd have to ask Tier 1?"}
+      ],
+      "interviewer_notes": "This question tests SOC analyst quality standards. It reveals whether the candidate understands what a good escalation looks like from both sides. Strong candidates list exactly what should be in the note AND what investigation steps should have been taken before escalation. The Tier 2 perspective is key: don't duplicate Tier 1's work."
+    },
+    {
+      "id": "soc_003",
+      "text": "How do you write a Splunk or Sentinel query to detect brute force attacks on Active Directory accounts?",
+      "depth": 1,
+      "topic": "query_writing",
+      "mitre_technique": "T1110.001",
+      "expected_concepts": {
+        "junior": ["knows brute force means many failed logins", "would look for Event ID 4625", "understands the concept of a threshold"],
+        "mid": ["Splunk: `index=wineventlog EventCode=4625 | stats count by TargetUserName, src_ip | where count > 10 | sort -count`", "or Sentinel KQL: `SecurityEvent | where EventID == 4625 | summarize FailedLogins=count() by TargetUserName, IpAddress | where FailedLogins > 10`", "considers time bucketing: 10 failures in 5 minutes vs. over 24 hours are different threat levels", "looks at the Failure Status/Sub Status codes to distinguish wrong password (0xC000006A) from locked account (0xC0000234) vs. non-existent user (0xC0000064)"],
+        "senior": ["adds correlation with successful logon (4624) after failures: the one successful login that follows many failures", "detects password spray vs. credential stuffing: spray = many users same password (spread across usernames), stuffing = same user many passwords (concentrated on one user)", "considers Kerberos pre-authentication failures (4771) as well as NTLM failures (4625)", "implements threshold tuning based on legitimate login failure baseline for the environment"],
+        "staff": ["designs the detection to account for distributed attacks: same password spray from 50 different IPs evades per-IP threshold detection", "considers detection SLAs: at what failure count do you alert vs. auto-block vs. auto-notify the account owner?"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "threshold", "probe": "How do you set the right threshold? 10 failures might be normal for some service accounts. How do you avoid alerting on that?"},
+        {"if_mentioned": "password spray", "probe": "How does the query for password spray differ from a credential stuffing query? Write the key difference."},
+        {"if_missed": "success after failures", "probe": "Your query detects accounts with 50 failed logins. The actual attack resulted in only 3 failures before a successful login. Would your query catch it?"},
+        {"if_strong": true, "escalate": "The attacker is spraying slowly: 1 attempt per account per hour, spread across 200 source IPs. No per-user or per-IP threshold fires. How do you detect this?"},
+        {"if_weak": true, "simplify": "What Windows Event ID records a failed login attempt and what Splunk field would you use to count them per user?"}
+      ],
+      "interviewer_notes": "The query writing test separates candidates who actually use SIEMs from those who describe them. Require them to write the actual query syntax. Key differentiators: time bucketing, failure reason codes, success-after-failure correlation, and password spray vs. credential stuffing detection logic."
+    },
+    {
+      "id": "soc_004",
+      "text": "You receive an email from an employee reporting they received a suspicious email. Walk me through your phishing investigation process.",
+      "depth": 1,
+      "topic": "phishing_investigation",
+      "mitre_technique": "T1566",
+      "expected_concepts": {
+        "junior": ["check if the link is malicious with VirusTotal or urlscan.io", "block the domain at the proxy", "tell the user not to click links"],
+        "mid": ["pull the full email headers: check From vs. Reply-To, X-Originating-IP, SPF/DKIM/DMARC results", "defang the URL and analyze in a sandbox: urlscan.io, Any.run, or Joe Sandbox", "check if other users received the same email: search email gateway logs by sender, subject, attachment hash", "check if any users clicked by querying proxy or DNS logs for the defanged URL", "check the attachment if present: hash, file type, macro presence, sandbox submission"],
+        "senior": ["identifies the phishing type: credential harvesting, malware delivery, or BEC (no malicious link, just social engineering)", "for credential phishing: immediately checks if any users submitted credentials by querying identity logs for logins from the phishing site's IP range", "looks at email sending infrastructure: WHOIS for registrar and registration date, any associated domains, hosting history", "for targeted phishing: considers whether this is spearphishing - who was targeted and why? What data does this person have access to?"],
+        "staff": ["considers the upstream response: registrar takedown, web host abuse report, ISAC notification", "designs the organizational response: how many users got the email, how many are at risk, what communication goes out and to whom", "evaluates email gateway effectiveness: why didn't this get blocked, and should we tune our rules to catch it next time?"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "SPF DKIM DMARC", "probe": "SPF passes, DKIM passes, DMARC passes. Does that mean the email is legitimate? What attack could pass all three?"},
+        {"if_mentioned": "clicked", "probe": "Proxy logs show 3 users visited the phishing URL. One of them entered credentials. What's your priority and what do you do first?"},
+        {"if_missed": "scope", "probe": "Before you take any action, what do you need to know about who else received this email and whether anyone else clicked?"},
+        {"if_strong": true, "escalate": "The phishing email passed all email security controls, appears to come from a trusted vendor's actual domain, and 15 employees submitted credentials. The CEO is one of them. What changes about your response?"},
+        {"if_weak": true, "simplify": "The user sends you the suspicious email. What's the very first thing you do with it and why?"}
+      ],
+      "interviewer_notes": "Phishing is the most common Tier 1 task. The key differentiators: searching for ALL recipients immediately (scope first), checking for users who clicked, understanding that DMARC pass doesn't mean legitimate (vendor email compromise), and knowing that credential phishing requires immediate identity response, not just URL blocking."
+    },
+    {
+      "id": "soc_005",
+      "text": "How do you distinguish between a compromised account and a misconfigured application that's generating false authentication alerts?",
+      "depth": 2,
+      "topic": "triage_judgment",
+      "mitre_technique": "T1078",
+      "expected_concepts": {
+        "junior": ["looks at whether it seems like a real person or a service account", "would check if the account is doing suspicious things", "might ask the user if they recognize the activity"],
+        "mid": ["behavioral baseline: is this activity consistent with the account's historical pattern", "service accounts don't log in interactively - a service account with interactive logon type 2 is suspicious", "check the device: known corporate device vs. unmanaged device vs. cloud IP address", "check the application: service accounts accessing new systems or resources outside their normal scope"],
+        "senior": ["checks for logon type mismatch: a service account generating NTLM authentication to many systems is a PtH indicator, not a misconfiguration", "compares current behavior against a 90-day baseline of same account: same times, same sources, same targets", "correlates with recent changes: was the application recently updated? New deployment? Configuration change ticket?", "interviews the application owner for context before concluding it's a misconfiguration"],
+        "staff": ["recognizes this as a recurring pattern: if service accounts generate frequent 'false' alerts, the detection needs tuning, not repeated manual investigation", "designs the service account monitoring framework: what service accounts exist, what their expected behavior is, and alerts only on deviation"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "baseline", "probe": "You've established a 90-day baseline. The account started making connections to 50 new systems starting last week. The application team says they deployed a patch. Is this a compromise or a misconfiguration?"},
+        {"if_mentioned": "service account", "probe": "The service account is generating logon Type 3 NTLM authentication to many systems. The application team says this is expected for the new feature. How do you verify that?"},
+        {"if_missed": "application change", "probe": "How do you use your change management system to help distinguish compromise from configuration issue?"},
+        {"if_strong": true, "escalate": "The application team insists it's a misconfiguration. Your analysis shows the account accessed systems it has never touched in 2 years. How do you resolve the disagreement?"},
+        {"if_weak": true, "simplify": "What's the key difference in behavior you'd expect to see from a compromised account versus a misconfigured application making excessive authentication calls?"}
+      ],
+      "interviewer_notes": "This question tests the critical SOC skill of hypothesis formation under ambiguity. The right answer isn't definitive early - it's a structured investigation that builds toward a conclusion. Strong candidates look for behavioral anomalies, correlate with change management, and know when to involve the application owner vs. escalate to IR."
+    },
+    {
+      "id": "soc_006",
+      "text": "Your EDR alerts on a suspicious process on a workstation, but the process has already terminated by the time you investigate. What do you do?",
+      "depth": 2,
+      "topic": "ephemeral_detection",
+      "mitre_technique": "T1059",
+      "expected_concepts": {
+        "junior": ["would look at the EDR alert details", "would scan the host for remaining malware", "would check if the user was affected"],
+        "mid": ["reviews EDR telemetry that was captured at process execution time: command line, parent process, child processes, network connections, file writes", "checks if the process wrote any files that persist: dropped payloads, modified registry, created scheduled tasks", "checks process tree: what spawned this process and what did it spawn", "looks at the timeframe around the process for related events in both EDR and SIEM"],
+        "senior": ["understands that EDR captures telemetry at event time even if the process is gone", "checks for in-memory execution artifacts: injected threads, hollowed processes that may still be running", "hunts for persistence that the process may have installed: scheduled tasks, services, registry run keys created in the same timeframe", "checks for network connections made during the process lifecycle - may still have active C2 even if the process terminated"],
+        "staff": ["uses this as a detection quality evaluation: should this process have been blocked, not just detected, if it's clearly malicious", "considers fleet-wide hunting: was the same process seen on other hosts in the same timeframe (campaign indicator)?"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "persistence", "probe": "You find a scheduled task was created 10 seconds before the process terminated. What does that tell you about the attacker's intent?"},
+        {"if_mentioned": "network connections", "probe": "The EDR shows the process made a connection to an external IP during its execution. That connection is now closed. What do you do with that IP?"},
+        {"if_missed": "in-memory", "probe": "The process terminated but something is still making outbound connections from this host. What's your hypothesis and how would you investigate?"},
+        {"if_strong": true, "escalate": "The EDR shows the process executed encoded PowerShell and then terminated. The encoded content isn't captured in your telemetry. How do you recover what it executed?"},
+        {"if_weak": true, "simplify": "Even though the process is gone, what information did the EDR capture at the time it ran that you can still use?"}
+      ],
+      "interviewer_notes": "Ephemeral process investigation tests understanding that telemetry is captured at event time, not investigation time. The key insight: the process being gone doesn't mean the investigation is over - persistence, network connections, and in-memory artifacts may remain. Strong candidates immediately pivot to persistence hunting."
+    },
+    {
+      "id": "soc_007",
+      "text": "How do you handle alert fatigue on your team? What's your approach when your SOC is generating 1,000 alerts per day but only 10 are real?",
+      "depth": 2,
+      "topic": "alert_fatigue",
+      "mitre_technique": null,
+      "expected_concepts": {
+        "junior": ["acknowledges alert fatigue is a problem", "would try to tune the rules", "would prioritize the high severity alerts"],
+        "mid": ["measures false positive rate per rule type", "identifies the top 5 noisy rules and works with detection engineering to tune them", "implements alert tiering: some alerts are informational and not paged to analysts", "prioritizes based on asset criticality and business impact, not just alert severity field"],
+        "senior": ["tracks analyst metrics: how long does each alert type take to close? High time = poorly written runbook or excessive false positives", "implements SOAR automation for repetitive false positive patterns: auto-close with documentation", "pushes back to detection engineering with data: 'this rule fired 800 times this week and 2 were true positives - needs tuning or suppression'", "considers the base rate problem: 10 true positives in 1,000 alerts means 1% precision - calculates what that means for analyst capacity"],
+        "staff": ["redesigns the detection strategy: the problem isn't volume, it's precision. Moves from quantity to quality", "implements alert tiering with SLAs: P1 (page immediately), P2 (within 30 min), P3 (during business hours), P4 (analyst review when capacity allows)", "measures analyst morale and burnout indicators alongside technical metrics: alert fatigue is a people problem as much as a technical one"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "tuning", "probe": "You tune a rule and reduce false positives from 200/day to 20/day. How do you verify you haven't also suppressed true positives during tuning?"},
+        {"if_mentioned": "SOAR", "probe": "Which alert types are appropriate for SOAR automation to close without analyst review? What criteria would you use?"},
+        {"if_missed": "analyst impact", "probe": "Beyond the technical solution, what's the human cost of 1,000 alerts per day and how does that affect your team?"},
+        {"if_strong": true, "escalate": "After 6 months of tuning, alert volume is down 60% but analyst satisfaction hasn't improved. What's the problem?"},
+        {"if_weak": true, "simplify": "If one rule is generating 500 false positive alerts per day, what's the first thing you do?"}
+      ],
+      "interviewer_notes": "Alert fatigue is a universal SOC challenge. The key differentiators: understanding that tuning is a data-driven process (measure FP rate per rule), that SOAR should handle repetitive false positives, and that alert fatigue is a systemic problem with both technical and human dimensions. The 'satisfaction hasn't improved' escalation tests whether they understand the people side."
+    },
+    {
+      "id": "soc_008",
+      "text": "Describe your process for a shift handoff. What information do you include and why?",
+      "depth": 2,
+      "topic": "soc_process",
+      "mitre_technique": null,
+      "expected_concepts": {
+        "junior": ["would summarize what happened during the shift", "would note any open tickets", "would tell the incoming analyst about anything suspicious"],
+        "mid": ["structured handoff: active investigations with current status and next steps", "any changes to the threat landscape: new IOCs received, alerts spiking, known issues with tools", "escalated tickets and their current status", "context that doesn't appear in ticket notes: 'I spoke to the user and they said X'", "alert queue health: unusual volume, false positive patterns that changed during shift"],
+        "senior": ["documents assumptions and open hypotheses: 'I believe this is X but I couldn't confirm because Y - recommend checking Z'", "tracks ongoing monitoring requests: 'I placed a watchlist on user ABC, it hasn't fired yet, check again in 4 hours'", "flags upcoming events that might affect alerts: maintenance windows, planned deployments, expected spikes", "ensures incoming analyst can take over any active investigation without losing context"],
+        "staff": ["designs the shift handoff template so it captures all the right information systematically", "measures handoff quality: does the incoming shift have enough context to continue smoothly? Tracks re-work caused by poor handoffs"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "open tickets", "probe": "You have 15 open tickets. How do you prioritize which ones to highlight in the handoff vs. just leaving them in the queue?"},
+        {"if_mentioned": "active investigation", "probe": "You're mid-investigation into a suspected compromise when your shift ends. How do you hand it off without losing investigation continuity?"},
+        {"if_missed": "context", "probe": "You documented all the facts but no interpretation. What critical type of information did you leave out of the handoff?"},
+        {"if_strong": true, "escalate": "The outgoing shift's handoff note is always vague: 'handled some alerts, nothing major.' As the team lead, how do you fix this?"},
+        {"if_weak": true, "simplify": "What's the main goal of a shift handoff from the perspective of the incoming analyst?"}
+      ],
+      "interviewer_notes": "Shift handoff quality reveals SOC process maturity. Strong candidates describe structured handoffs that include hypothesis and context, not just fact summaries. The 'mid-investigation handoff' tests whether they've dealt with this real-world challenge. Poor handoffs cause incident context loss - this is a safety-critical process."
+    },
+    {
+      "id": "soc_009",
+      "text": "How do you investigate a potential data exfiltration alert from a DLP tool that flagged a large file upload to an external cloud service?",
+      "depth": 2,
+      "topic": "data_exfiltration",
+      "mitre_technique": "T1567",
+      "expected_concepts": {
+        "junior": ["would block the upload or the service", "would notify the user's manager", "would look at what was uploaded"],
+        "mid": ["identifies the user and their role: do they have a legitimate need to upload to this service?", "checks the file type and name: sensitive designation (PII, IP, financial data)?", "checks if this behavior is part of their normal pattern or anomalous", "looks at what else the user has been doing before the upload: mass file access, downloading to USB, unusual hours"],
+        "senior": ["correlates DLP alert with endpoint activity: when was this file created? Was it downloaded from a sensitive location? Was it compressed?", "looks at the file staging pattern: multiple files moved to a single folder and then uploaded = deliberate exfiltration", "considers legitimate business reason: did this user just start using this service, or is there a business justification?", "reviews DLP policy: is this a misconfiguration (too broad a policy) or a genuine exfiltration?"],
+        "staff": ["evaluates the DLP policy effectiveness: what percentage of DLP alerts are true positives? This informs whether this alert is reliable", "designs the investigation vs. automatic response decision: when should DLP trigger automatic blocking vs. alert-and-investigate?", "considers the privacy implications of investigating the content of an employee's upload"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "user role", "probe": "The user is an engineer in R&D who regularly uses cloud storage tools for work. How does that change your approach?"},
+        {"if_mentioned": "file access", "probe": "Endpoint logs show the user accessed 200 files in the /Engineering/IP directory in the 2 hours before the upload. What does that change?"},
+        {"if_missed": "context before upload", "probe": "What do you look at BEFORE the upload event to understand what the user was doing that led to this?"},
+        {"if_strong": true, "escalate": "This is the third DLP alert from this user in a week, all to different cloud services. Each one individually has a plausible explanation. What's your assessment and what do you do?"},
+        {"if_weak": true, "simplify": "What two things would immediately tell you whether this upload is likely legitimate vs. deliberate exfiltration?"}
+      ],
+      "interviewer_notes": "DLP investigation requires balancing technical analysis, policy evaluation, and business context. The key differentiators: looking at pre-upload behavior (file staging, mass access), understanding that individual events need context to evaluate, and knowing the difference between a DLP policy misconfiguration and genuine exfiltration. The repeat alerts escalation tests pattern recognition."
+    },
+    {
+      "id": "soc_010",
+      "text": "A critical vulnerability is announced with a public PoC exploit that affects software you use. How do you respond from a SOC perspective in the first 24 hours?",
+      "depth": 2,
+      "topic": "vulnerability_response",
+      "mitre_technique": "T1190",
+      "expected_concepts": {
+        "junior": ["would notify the patching team", "would look for patches", "would block known exploit signatures at the firewall"],
+        "mid": ["assesses exposure: which systems run the vulnerable software and are they internet-facing?", "checks for exploitation attempts in logs: specific request patterns, error signatures related to the vulnerability", "implements detection for the PoC exploit indicators while patching is underway", "coordinates with patch management team on remediation timeline"],
+        "senior": ["prioritizes based on exploitability and exposure: CVSSv3 score is a starting point, but internet-facing critical systems get immediate response regardless of score", "builds or deploys a virtual patch: WAF rule, IDS signature, or network-level control that blocks the exploit while the patch is prepared", "hunts for historical exploitation: the vulnerability may have been known to attackers before public disclosure", "tracks patch deployment across all affected systems to measure risk reduction"],
+        "staff": ["runs an executive brief: 'we are exposed on X systems, patch timeline is Y, virtual patch is in place for Z systems, risk is reduced from critical to medium by EOD'", "coordinates the cross-team response: SOC provides monitoring, patching team provides remediation, application owners provide business context on affected systems"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "virtual patch", "probe": "How do you validate that your virtual patch/WAF rule actually blocks the exploit without being so broad that it breaks legitimate traffic?"},
+        {"if_mentioned": "internet-facing", "probe": "The vulnerable system isn't internet-facing. Is it safe to deprioritize patching? What attack path could still reach it?"},
+        {"if_missed": "historical exploitation", "probe": "The CVE was filed 3 months ago but just became public with a PoC. What does the 3-month gap mean for your investigation?"},
+        {"if_strong": true, "escalate": "You find signs of successful exploitation on one server 8 days ago - before the public disclosure. What does this tell you about the threat actor and how does it change your response?"},
+        {"if_weak": true, "simplify": "What's the first thing you need to know to determine how urgently to respond to this vulnerability announcement?"}
+      ],
+      "interviewer_notes": "Vulnerability response from a SOC perspective tests whether candidates understand the detection and monitoring role during a vulnerability event (vs. just the patching role). The pre-disclosure exploitation escalation tests whether candidates understand the concept of 0-day exploitation before public CVE assignment - a critical concept for nation-state and sophisticated actor scenarios."
+    }
+  ]
+}

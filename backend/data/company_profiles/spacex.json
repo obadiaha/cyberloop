@@ -1,0 +1,70 @@
+{
+  "company": "spacex",
+  "display_name": "SpaceX",
+  "interview_style": {
+    "description": "SpaceX systems thinking and first-principles style. Fast-paced, direct, engineering-focused. Values people who can build from scratch and reason about failure modes.",
+    "tone": "Direct, no-nonsense, intellectually intense. Expects you to think on your feet. Comfortable with silence while you think. Will challenge assumptions aggressively but respectfully.",
+    "pacing": "Fast. Moves quickly through topics. If you nail it, they advance to harder questions rapidly. If you stumble, they may rephrase once but won't hand-hold. Typical: 45-60 minutes.",
+    "interviewer_persona": "Senior engineer who builds things. Not a professional interviewer. Cares about whether you can actually do the work, not whether you interview well. May sketch diagrams, ask you to whiteboard. Excited by novel thinking."
+  },
+  "behavioral_emphasis": {
+    "weight": 0.3,
+    "description": "SpaceX cares less about behavioral frameworks and more about demonstrated intensity, resourcefulness, and ability to work under extreme constraints.",
+    "primary_themes": [
+      "first_principles_thinking",
+      "extreme_ownership",
+      "building_under_constraints",
+      "failure_analysis",
+      "velocity_and_iteration"
+    ],
+    "focus_areas": [
+      "How do you handle impossible timelines?",
+      "Tell me about something you built from nothing.",
+      "Describe a time you threw away an approach and started over.",
+      "How do you make decisions when the standard playbook doesn't apply?",
+      "What's the hardest technical problem you've solved?"
+    ]
+  },
+  "technical_emphasis": {
+    "weight": 0.7,
+    "description": "Heavily technical. SpaceX security interviews focus on systems thinking, failure mode analysis, and the ability to reason from first principles about security architecture.",
+    "focus_areas": [
+      "First principles: 'If you were building this from scratch, how would you do it?'",
+      "Failure modes: 'What breaks first? What's the blast radius?'",
+      "Scale thinking: 'How does this work for a global satellite network?'",
+      "Resource constraints: 'You have 1 engineer and 2 weeks.'",
+      "Systems integration: 'How does this security control interact with the rest of the stack?'",
+      "Challenge standard answers: 'Everyone says that. Why is everyone wrong?'"
+    ]
+  },
+  "question_selection_bias": {
+    "technical": {
+      "prefer": ["first_principles_design", "failure_mode_analysis", "systems_architecture", "constraint_based_problem_solving"],
+      "avoid": ["framework_recall", "compliance_focused", "vendor_specific"]
+    },
+    "behavioral": {
+      "prefer": ["building_under_constraints", "failure_and_recovery", "resourcefulness", "extreme_ownership"],
+      "avoid": ["process_following", "committee_decisions", "risk_averse_stories"]
+    }
+  },
+  "scoring_adjustments": {
+    "bonus_for_first_principles": true,
+    "bonus_for_failure_mode_analysis": true,
+    "bonus_for_challenging_premises": true,
+    "penalize_textbook_answers": true,
+    "penalize_risk_averse_thinking": false,
+    "values_velocity": true
+  },
+  "follow_up_patterns": [
+    "Why? Go deeper.",
+    "What breaks first?",
+    "What's the failure mode?",
+    "How does this scale to 10x?",
+    "You have half the time and half the resources. What changes?",
+    "Everyone says that. What would YOU actually do?",
+    "If you were building this from scratch, no legacy constraints, what would it look like?",
+    "What's the simplest version of this that still works?",
+    "What would Elon challenge about this approach?",
+    "How do you know this is the right approach and not just the standard one?"
+  ]
+}

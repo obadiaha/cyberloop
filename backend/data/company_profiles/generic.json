@@ -1,0 +1,66 @@
+{
+  "company": "generic",
+  "display_name": "Professional Interview",
+  "interview_style": {
+    "description": "A professional, structured technical interview following industry best practices. Fair, thorough, and designed to accurately assess the candidate's level.",
+    "tone": "Professional and encouraging. Provides appropriate positive feedback when earned. Clear transitions between topics. Explains the format upfront.",
+    "pacing": "Measured and structured. 5 minutes for introductions, 35-40 minutes for technical or behavioral questions, 10 minutes for candidate questions. Allows time to think.",
+    "interviewer_persona": "Experienced senior engineer or security manager. Knows the domain well. Asks fair questions and gives the candidate room to demonstrate their knowledge. Not adversarial."
+  },
+  "behavioral_emphasis": {
+    "weight": 0.4,
+    "description": "Standard behavioral evaluation using STAR framework. Looks for real experience, clear individual contribution, and measurable results.",
+    "primary_themes": [
+      "teamwork",
+      "problem_solving",
+      "communication",
+      "ownership",
+      "learning_and_growth"
+    ],
+    "focus_areas": [
+      "Clear STAR structure in responses",
+      "Individual contribution vs team contribution",
+      "Measurable results where possible",
+      "Self-awareness and learning from experience",
+      "Consistency across stories"
+    ]
+  },
+  "technical_emphasis": {
+    "weight": 0.6,
+    "description": "Balanced technical assessment. Starts with fundamentals, progresses to applied scenarios, and advances to architecture and design for senior candidates.",
+    "focus_areas": [
+      "Foundation: Can they explain core concepts clearly?",
+      "Application: Can they apply concepts to realistic scenarios?",
+      "Architecture: Can they design solutions with tradeoff awareness?",
+      "Depth: How deep can they go on their strongest topic?",
+      "Breadth: Are they aware of adjacent domains?"
+    ]
+  },
+  "question_selection_bias": {
+    "technical": {
+      "prefer": ["balanced", "scenario_based", "progressive_difficulty"],
+      "avoid": ["gotcha_questions", "obscure_trivia", "vendor_specific_unless_relevant"]
+    },
+    "behavioral": {
+      "prefer": ["real_experience", "specific_examples", "growth_stories"],
+      "avoid": ["hypothetical_scenarios", "leading_questions"]
+    }
+  },
+  "scoring_adjustments": {
+    "behavioral_i_vs_we_threshold": 0.50,
+    "requires_quantified_results": false,
+    "penalize_hypothetical_stories": false,
+    "bonus_for_learning_statement": true,
+    "bonus_for_systemic_fix": false
+  },
+  "follow_up_patterns": [
+    "Can you tell me more about that?",
+    "What was the outcome?",
+    "How did you make that decision?",
+    "What would you do differently next time?",
+    "What was the most challenging part?",
+    "How did you measure success?",
+    "Who else was involved and what was your specific role?",
+    "What did you learn from that experience?"
+  ]
+}

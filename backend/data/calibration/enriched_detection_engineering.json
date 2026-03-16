@@ -1,0 +1,236 @@
+{
+  "domain": "detection_engineering",
+  "questions": [
+    {
+      "id": "de_001",
+      "text": "How would you approach building a detection for credential dumping?",
+      "depth": 1,
+      "topic": "credential_access",
+      "mitre_technique": "T1003",
+      "expected_concepts": {
+        "junior": ["knows what credential dumping is", "mentions LSASS", "might mention Mimikatz by name"],
+        "mid": ["Sysmon EID 10 (ProcessAccess) with GrantedAccess 0x1010 or 0x1410 targeting lsass.exe", "Windows Event ID 4624/4648 for pass-the-hash detection", "mentions SAM database access (reg save HKLM\\SAM)", "knows DCSync generates 4662 events with DS-Replication-Get-Changes rights"],
+        "senior": ["detection-as-code approach with multiple data sources correlated", "handles evasion: direct syscalls bypassing Win32 API hooks, PPL (Protected Process Light) bypass, driver-based dumpers (ProcDump, nanodump)", "false positive tuning: AV products legitimately access LSASS, need to filter by signer or path", "covers all T1003 sub-techniques: .001 (LSASS), .002 (SAM), .003 (NTDS DCSync), .004 (LSA Secrets), .005 (Cached Creds), .006 (DCSync)"],
+        "staff": ["detection coverage strategy across all credential access sub-techniques", "threat model driven prioritization: which sub-technique is most likely given our threat actor profile", "detection efficacy metrics: what percentage of credential dumping attempts would our current rules catch", "advocates for architectural mitigations that complement detection: Credential Guard, LSA Protection"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "LSASS", "probe": "What specific GrantedAccess mask values in Sysmon EID 10 would indicate an LSASS dump attempt vs. legitimate access?"},
+        {"if_mentioned": "Mimikatz", "probe": "What about tools that don't touch LSASS directly, like DCSync? What telemetry would you look for?"},
+        {"if_missed": "Sysmon EID 10", "probe": "What Windows telemetry, specifically which event source and event ID, would catch a process attempting to read LSASS memory?"},
+        {"if_strong": true, "escalate": "An attacker is using a custom kernel driver to read LSASS memory, bypassing all user-mode hooks. Your Sysmon EID 10 rule doesn't fire. What alternative detections exist?"},
+        {"if_weak": true, "simplify": "Let's start simpler. What is credential dumping and why is it a concern for defenders?"}
+      ],
+      "interviewer_notes": "Breadth question. Strong candidates immediately mention multiple T1003 sub-techniques and map each to specific telemetry sources. Weak candidates only know Mimikatz by name. The Sysmon EID 10 specificity (GrantedAccess mask) is a clear mid-to-senior differentiator. PPL bypass and direct syscalls separate senior from mid."
+    },
+    {
+      "id": "de_002",
+      "text": "Write a Sigma rule for detecting PowerShell downloading and executing code in memory.",
+      "depth": 1,
+      "topic": "execution_detection",
+      "mitre_technique": "T1059.001",
+      "expected_concepts": {
+        "junior": ["knows PowerShell is used by attackers", "might describe what the rule would look for conceptually", "knows Sigma is a detection rule format"],
+        "mid": ["writes a valid Sigma rule with correct logsource (windows/sysmon or windows/process_creation), detection, and condition sections", "targets CommandLine field with keywords: -enc, -EncodedCommand, IEX, Invoke-Expression, DownloadString, WebClient", "includes ParentImage filtering to reduce false positives", "knows that CommandLine filtering alone generates high false positives"],
+        "senior": ["addresses the cat-and-mouse problem: attackers can rename PowerShell, use PS remoting, or use PowerShell without powershell.exe (via COM or reflective injection)", "suggests stacking this rule with a network connection (Sysmon EID 3) from the same process for higher confidence", "explains why -enc alone is too broad and the combination of -enc + unusual parent + no digital signature is much higher fidelity", "mentions PowerShell Script Block Logging (EID 4104) as a superior data source for content inspection"],
+        "staff": ["discusses detection pipeline: this rule catches a subset; what complementary rules close the coverage gaps", "discusses the data quality dependency: this rule is useless if PowerShell Script Block Logging isn't enabled", "addresses the platform gap: does this rule convert correctly to your SIEM's native query language via pySigma?"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "Invoke-Expression", "probe": "An attacker uses 'iex' instead of 'Invoke-Expression'. Does your rule catch it? How would you make the rule more robust?"},
+        {"if_mentioned": "4104", "probe": "Script Block Logging gives you the decoded content. What's the downside of relying on EID 4104 vs. process creation events?"},
+        {"if_missed": "false positives", "probe": "This rule would fire on legitimate administrative scripts that use -EncodedCommand. How would you tune it?"},
+        {"if_strong": true, "escalate": "An attacker runs PowerShell commands via WMI without spawning powershell.exe at all. Your Sigma rule doesn't fire. What detection approach covers this?"},
+        {"if_weak": true, "simplify": "What should the logsource section of a Sigma rule for process creation events look like?"}
+      ],
+      "interviewer_notes": "Practical Sigma rule writing tests real detection engineering competency. A mid-level candidate should produce a functional (if imperfect) Sigma rule. Watch for: correct logsource category (sysmon or process_creation), proper YAML structure, and field names matching the log source. Strong candidates immediately discuss false positive tuning and alternative evasions."
+    },
+    {
+      "id": "de_003",
+      "text": "How would you detect lateral movement via Pass-the-Hash?",
+      "depth": 1,
+      "topic": "lateral_movement",
+      "mitre_technique": "T1550.002",
+      "expected_concepts": {
+        "junior": ["knows what pass-the-hash is conceptually", "might mention NTLM authentication", "knows it involves reusing credential hashes"],
+        "mid": ["Event ID 4624 with Logon Type 3 and NTLM authentication (specifically looking for network logon with NtLmSsp package)", "Event ID 4648 for explicit credential logon from the source", "anomaly: high-value accounts making network logons to many hosts in short timeframe", "knows PtH produces a null LUID in the session and can be correlated"],
+        "senior": ["Event ID 4624 Type 3 where AuthenticationPackageName is NTLM but Account Domain is empty - indicator of PtH", "correlation rule: 4624 Type 3 NTLM + 5145 (network share access) on same destination from same source within short timeframe", "behavioral detection: a workstation making Type 3 NTLM logons to many different machines is anomalous", "knows Kerberos Overpass-the-Hash/Pass-the-Ticket as evasion: forces Kerberos to avoid NTLM-based detections"],
+        "staff": ["network-level detection: Zeek SMB logs showing authentication without prior DNS query (indicates direct IP use, common in PtH)", "detection strategy: NTLM must be restricted in modern environments; PtH at scale means NTLM is still enabled where it shouldn't be", "compensating control: Credential Guard blocks PtH entirely - detection should be supplemented by configuration enforcement"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "Event ID 4624", "probe": "What specific fields in the 4624 event would differentiate a PtH logon from a normal NTLM network logon?"},
+        {"if_mentioned": "NTLM", "probe": "An attacker switches to Kerberos authentication to avoid your NTLM-based PtH detection. What new detection would you build?"},
+        {"if_missed": "correlation", "probe": "A single 4624 Type 3 event isn't very useful for detecting PtH at scale. What correlation logic would make this detection meaningful?"},
+        {"if_strong": true, "escalate": "Your detection fires 200 times a day. Most are legitimate admin activity. Walk me through the tuning process to reduce that to 5 high-confidence alerts per day."},
+        {"if_weak": true, "simplify": "What Windows Event ID records successful logon events, and how would you filter it to focus on network logons?"}
+      ],
+      "interviewer_notes": "PtH detection is a classic detection engineering challenge with significant tuning complexity. The specific 4624 field differentiators (AuthenticationPackageName=NTLM, null Account Domain) separate mid from junior. The Kerberos evasion pivot and the correlation logic discussion separate senior from mid."
+    },
+    {
+      "id": "de_004",
+      "text": "How do you build detections for persistence mechanisms? Walk me through the most important ones to cover.",
+      "depth": 1,
+      "topic": "persistence_detection",
+      "mitre_technique": "T1547",
+      "expected_concepts": {
+        "junior": ["knows persistence means attackers maintain access", "might mention registry run keys", "knows scheduled tasks are used for persistence"],
+        "mid": ["Registry run keys: HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run (Sysmon EID 12/13 for registry events)", "Scheduled tasks: EID 4698 (task created), look for tasks with suspicious actions or high-privilege execution", "Services: EID 4697 (service installed), filter for unsigned services or unusual binary paths", "Startup folder modification (Sysmon EID 11 for file creation in startup paths)", "knows each technique has a different event source and requires separate detection logic"],
+        "senior": ["WMI subscriptions (T1546.003): Event Consumer + Filter + Binding - Sysmon EIDs 19/20/21", "BITS jobs (T1197): bitsadmin or PowerShell BITS module creating persistent download jobs", "COM hijacking (T1546.015): HKCU registry keys overriding legitimate COM objects", "Boot/Logon Autostart Execution via AppCert DLLs, AppInit DLLs (requires kernel telemetry or Sysmon EID 7 image loads)", "DLL hijacking detection: new DLL created in application directories without corresponding installer activity"],
+        "staff": ["persistence coverage matrix: map all T1547 sub-techniques to specific detection rules and identify gaps", "prioritizes by attacker usage: WMI subscriptions and scheduled tasks are most common in ransomware precursor activity", "advocates for automated persistence baselining: known-good snapshot vs. current state comparison"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "scheduled tasks", "probe": "What specific fields in Event ID 4698 would you look at to distinguish a malicious scheduled task from a legitimate one?"},
+        {"if_mentioned": "WMI subscriptions", "probe": "WMI subscriptions are notoriously difficult to detect. Walk me through the three event IDs involved and what each captures."},
+        {"if_missed": "WMI", "probe": "What persistence mechanism is commonly used by advanced threat actors because it's often missed by defenders who only check registry and scheduled tasks?"},
+        {"if_strong": true, "escalate": "An attacker uses COM hijacking to achieve user-level persistence with no new files or registry keys under their user's hive. What telemetry would catch this?"},
+        {"if_weak": true, "simplify": "Name the three most common persistence mechanisms you'd prioritize detecting and why."}
+      ],
+      "interviewer_notes": "Persistence detection breadth reveals the depth of a detection engineer's ATT&CK coverage. WMI subscription knowledge (Sysmon EIDs 19/20/21) is a strong senior indicator. Junior candidates know registry/scheduled tasks. Mid should add services and startup folders. Senior should cover WMI and BITS. COM hijacking is staff-level."
+    },
+    {
+      "id": "de_005",
+      "text": "Explain how you would set up a detection-as-code pipeline. What are the key components?",
+      "depth": 1,
+      "topic": "dac_pipeline",
+      "mitre_technique": null,
+      "expected_concepts": {
+        "junior": ["knows detection rules should be versioned", "understands the concept of code review for rules", "might describe a basic Git workflow"],
+        "mid": ["Git repository as source of truth for all detection rules", "CI/CD pipeline: automated linting (valid Sigma syntax), conversion to target SIEM format using pySigma/sigma-cli", "automated testing: rules run against sample log data or a test environment", "PR review process with at least one other detection engineer before merge", "deployment via pipeline rather than manual copy-paste into SIEM"],
+        "senior": ["ATT&CK coverage delta in PRs: show what technique coverage changes with this rule", "false positive rate measurement: automated comparison against production log baseline before deployment", "staging environment: deploy to dev/staging first, measure FP rate over 7 days, then promote to production", "rule metadata: each rule has MITRE mapping, data source requirements, confidence tier, and detection owner", "alert triage feedback loop: analyst dispositions feed back to rule quality metrics"],
+        "staff": ["platform design: how do you manage rules across multiple SIEM backends simultaneously", "detection backlog management: priority scoring for new rules based on threat coverage gaps", "metrics dashboard: coverage by tactic, FP rate per rule, time-to-detection for test simulations", "detection debt: lifecycle management for outdated rules, sunset criteria, migration when platform changes"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "Sigma", "probe": "How do you handle Sigma rules that don't convert cleanly to your target SIEM's query language? What's the process for rules that require native queries?"},
+        {"if_mentioned": "testing", "probe": "What does your test data set look like? How do you create test cases for a rule before you have real attack data?"},
+        {"if_missed": "ATT&CK coverage", "probe": "Your pipeline merges the rule. How do you know whether the merged rule actually improves your organization's detection coverage?"},
+        {"if_strong": true, "escalate": "Your DaC pipeline deploys a rule that causes 500 false positives per hour in production and crashes the on-call analyst. How do you prevent this from happening and how do you handle it when it does?"},
+        {"if_weak": true, "simplify": "What problem does a detection-as-code approach solve compared to manually managing rules directly in your SIEM?"}
+      ],
+      "interviewer_notes": "DaC pipeline design is the distinguishing capability of mature detection engineering programs. Mid-level should describe the basic Git + CI/CD structure. Senior should describe the test-before-deploy flow and ATT&CK coverage measurement. Staff should speak to multi-SIEM management and detection lifecycle governance."
+    },
+    {
+      "id": "de_006",
+      "text": "How would you detect command-and-control (C2) beaconing in your network telemetry?",
+      "depth": 1,
+      "topic": "c2_detection",
+      "mitre_technique": "T1071",
+      "expected_concepts": {
+        "junior": ["would block known bad IPs or domains", "knows C2 means command and control", "might mention looking for suspicious network connections"],
+        "mid": ["beaconing detection: look for hosts making regular interval connections to external IPs (statistical analysis of connection frequency)", "DNS-based C2: unusually long DNS queries, high query frequency to new domains, DNS TXT record queries", "HTTP C2: look for regular intervals, unusual User-Agent strings, connections to IPs with no reverse DNS, high entropy paths", "JA3/JA3S fingerprinting for TLS C2 traffic"],
+        "senior": ["statistical analysis: calculates variance in connection intervals, low variance = automated beaconing", "domain generation algorithms (DGA): high-entropy domain names, no historical DNS resolution history, registered recently", "protocol tunneling (T1071.001 vs .004): HTTP(S) vs DNS C2 have different detection approaches", "domain fronting (T1090.004): CDN-based C2 that routes through legitimate domains like Cloudflare or AWS"],
+        "staff": ["at-scale detection architecture: passive DNS, zeek logs, NetFlow all feeding a behavioral analytics platform", "threshold calibration: what interval granularity is reliable for beaconing detection without destroying performance", "evasion-aware detection: C2 frameworks now jitter beacons to defeat interval analysis - what's the next detection approach"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "beaconing interval", "probe": "Modern C2 frameworks like Cobalt Strike add jitter to their beacons. How does that affect your interval-based detection?"},
+        {"if_mentioned": "JA3", "probe": "What is a JA3 fingerprint and what does it capture that traditional IP/domain blocking misses?"},
+        {"if_missed": "DNS", "probe": "An attacker is using DNS to communicate with their C2. There's no outbound HTTP or HTTPS traffic at all. How would you detect this?"},
+        {"if_strong": true, "escalate": "The attacker is using domain fronting over HTTPS through a major CDN. The destination in TLS SNI is a legitimate CDN hostname. How do you detect or block this?"},
+        {"if_weak": true, "simplify": "What would regular, automated network traffic to the same external IP look like in network logs, and why is that suspicious?"}
+      ],
+      "interviewer_notes": "C2 detection tests both technical depth and analytical thinking. The beacon jitter response separates good from great: the answer is to use statistical variance (standard deviation) rather than exact interval matching, and to look at payload sizes and timing distributions. Domain fronting is a staff-level concept."
+    },
+    {
+      "id": "de_007",
+      "text": "How do you measure the effectiveness of your detection program? What metrics do you track?",
+      "depth": 2,
+      "topic": "detection_metrics",
+      "mitre_technique": null,
+      "expected_concepts": {
+        "junior": ["number of rules/detections", "number of alerts fired", "alert response time"],
+        "mid": ["false positive rate per rule and overall", "ATT&CK technique coverage percentage", "mean time to detect for simulated attacks", "rule deployment rate (how many new rules per sprint/quarter)"],
+        "senior": ["detection coverage by MITRE tactic (not just technique count but validated, tested coverage)", "mean time to detect for real incidents vs. simulations", "rule quality score: FP rate + last-tested date + coverage tier", "detection debt: rules that haven't been reviewed in 90+ days", "analyst alert handling time: how long does each alert type take to triage"],
+        "staff": ["business risk reduction metric: what percentage of relevant threat actor techniques are covered", "ROI calculation: analyst time saved by automated detections vs. cost of maintaining them", "program-level coverage vs. peer benchmarks (if available through ISAC data)", "detection-to-incident ratio: how many detections lead to confirmed incidents vs. noise"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "ATT&CK coverage", "probe": "You say you cover 40% of ATT&CK techniques. But ATT&CK has hundreds of techniques. How do you prioritize WHICH 40% matters most?"},
+        {"if_mentioned": "false positive rate", "probe": "What false positive rate is acceptable for a high-severity detection vs. a medium-severity one? How do you set that threshold?"},
+        {"if_missed": "tested", "probe": "You have 300 detection rules. How do you know which ones would actually fire if an attacker used the technique they're designed to detect?"},
+        {"if_strong": true, "escalate": "Your CISO wants to know: are we getting better at detection? Design a single metric that answers that question clearly and honestly."},
+        {"if_weak": true, "simplify": "If I have 1,000 alerts per day and 10 of them are real incidents, what does that tell me about my detection program?"}
+      ],
+      "interviewer_notes": "Metrics questions reveal program maturity thinking. Junior candidates cite activity metrics (rule count, alert volume) that measure work not effectiveness. Senior candidates cite outcome metrics (FP rate, MTTD, validated coverage). The 'are we getting better' escalation tests whether they can think about a single north-star metric."
+    },
+    {
+      "id": "de_008",
+      "text": "How do you write a detection for suspicious scheduled task creation that minimizes false positives?",
+      "depth": 2,
+      "topic": "persistence_detection",
+      "mitre_technique": "T1053.005",
+      "expected_concepts": {
+        "junior": ["knows scheduled tasks can be used for persistence", "would look for Event ID 4698", "might look at the task name"],
+        "mid": ["Event ID 4698 for task creation - critical fields: TaskName, TaskContent (XML), SubjectUserName", "filters for tasks running from temp or user-writable directories", "looks for tasks running encoded commands or scripts", "correlates with the creator: svchost.exe creating tasks is normal, cmd.exe is suspicious", "knows that Task Scheduler logs are in Microsoft-Windows-TaskScheduler/Operational"],
+        "senior": ["analyzes task XML content: look for Actions containing suspicious binaries, encoded commands, or TEMP path execution", "correlates task creation time with preceding suspicious activity (process creation, download activity)", "uses statistical baselining: flags tasks created outside business hours or by unusual principals", "knows that tasks can be created by legitimate software during installation - need to baseline and exclude installer processes using digital signature verification", "looks for tasks that survive reboot (triggers include Boot, Logon) with unusual executables"],
+        "staff": ["automated task baselining: compare current task inventory against known-good baseline, alert on new entries", "looks at the schtasks.exe and COM-based task creation (which bypasses schtasks.exe entirely and doesn't require EID 4698)", "designs a detection that is robust to task name randomization (common attacker technique)"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "4698", "probe": "How do you tune out the noise from legitimate software creating scheduled tasks during installation?"},
+        {"if_mentioned": "TaskContent", "probe": "What specific fields in the scheduled task XML would you examine to determine if a task is malicious?"},
+        {"if_missed": "creator process", "probe": "Two scheduled tasks are created: one by msiexec.exe and one by cmd.exe. Which is more suspicious and why?"},
+        {"if_strong": true, "escalate": "An attacker creates a scheduled task with a legitimate-looking name like 'Windows Update Check' running from System32. Your rule filtering for temp directory paths misses it. What additional logic would catch this?"},
+        {"if_weak": true, "simplify": "What Windows Event ID records when a scheduled task is created, and where are those logs stored?"}
+      ],
+      "interviewer_notes": "Scheduled task detection is a practical, real-world question every detection engineer should be able to answer. The key differentiators: knowing to look at the TaskContent XML (not just the name), the creator process, and the execution path. COM-based task creation evasion is a strong senior indicator."
+    },
+    {
+      "id": "de_009",
+      "text": "How would you approach writing detections for a new cloud environment you've never deployed detections in before (e.g., moving from on-prem to AWS)?",
+      "depth": 2,
+      "topic": "cloud_detection",
+      "mitre_technique": "T1078.004",
+      "expected_concepts": {
+        "junior": ["would look for existing rules online", "knows cloud logs exist (CloudTrail)", "would research what's available"],
+        "mid": ["starts with CloudTrail for AWS: understands it's the equivalent of Windows Event Logs for API actions", "enables data events for S3 and Lambda (not enabled by default)", "knows key API calls to monitor: IAM changes, new role assumptions, EC2 metadata queries, new user creation", "maps on-prem ATT&CK coverage to cloud ATT&CK to understand which techniques need new detections"],
+        "senior": ["identifies the unique attack surface of cloud: IAM abuse, instance metadata service (IMDS), public resource misconfigurations, cross-account access", "understands the logging gap: CloudTrail management events don't cover data-plane operations without explicit configuration", "builds detections around privilege escalation paths specific to AWS IAM: assume-role chaining, PassRole abuse, policy attachment", "knows MITRE ATT&CK for Cloud and which techniques are cloud-specific vs. cross-platform"],
+        "staff": ["designs the cloud detection architecture: CloudTrail -> CloudWatch -> Security Hub -> SIEM pipeline", "addresses the multi-account detection problem: organizations with 100+ AWS accounts need centralized log aggregation", "evaluates native AWS detection (GuardDuty) vs. custom SIEM detections and designs a complementary strategy"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "CloudTrail", "probe": "CloudTrail is enabled. What specific event names would you search for to detect an attacker performing reconnaissance after initial access?"},
+        {"if_mentioned": "IAM", "probe": "What IAM-related API calls would indicate privilege escalation in AWS?"},
+        {"if_missed": "data events", "probe": "CloudTrail is logging. An attacker exfiltrates data from S3. Is CloudTrail capturing that? Why or why not?"},
+        {"if_strong": true, "escalate": "An attacker uses EC2 instance metadata service (IMDSv1) to steal IAM credentials. What events would this generate in CloudTrail and how would you detect the subsequent use of those stolen credentials?"},
+        {"if_weak": true, "simplify": "What is the AWS equivalent of Windows Event Logs when it comes to recording API activity?"}
+      ],
+      "interviewer_notes": "Cloud detection knowledge is increasingly required. The critical differentiator: knowing that CloudTrail data events are NOT enabled by default (huge gap for S3 exfiltration). IMDSv1 SSRF as a credential theft vector is a strong senior indicator. Multi-account detection architecture is staff-level."
+    },
+    {
+      "id": "de_010",
+      "text": "A red team report shows they achieved initial access, lateral movement, and domain admin in 4 hours without triggering a single alert. How do you respond as the detection engineer?",
+      "depth": 2,
+      "topic": "detection_gaps",
+      "mitre_technique": null,
+      "expected_concepts": {
+        "junior": ["would add new rules based on the red team's findings", "would review what they did and try to detect it next time", "understands this is a significant gap"],
+        "mid": ["asks for the red team's full technique list and maps to ATT&CK", "checks why existing rules didn't fire: wrong telemetry source, tuned out, rule misconfiguration, or genuine coverage gap", "identifies which data sources were missing that would have enabled detection", "prioritizes highest-impact gaps first: initial access and domain admin escalation are most critical"],
+        "senior": ["distinguishes between three failure types: 1) no rule exists, 2) rule exists but didn't fire (telemetry gap or rule misconfiguration), 3) rule fired but was tuned to silent/informational", "for each technique: writes or updates a specific rule, validates it against the red team's provided evidence/commands, and tests before deploying", "proposes architectural remediations: Sysmon deployment gaps, missing log sources, misconfigured audit policies", "schedules follow-up red team validation to confirm new rules fire against the same techniques"],
+        "staff": ["uses this as a program evaluation input: 4-hour domain admin with no alerts indicates systemic detection program failure, not just coverage gaps", "designs a continuous validation process so red team exercises aren't the only way to discover these gaps (use Atomic Red Team or BAS tools)", "presents gap analysis to CISO with risk quantification: 4-hour MTTD means the attacker had X hours of free movement"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "ATT&CK mapping", "probe": "You've mapped their techniques to ATT&CK. Walk me through the detection logic you'd write for the lateral movement technique they used."},
+        {"if_mentioned": "data sources", "probe": "The red team moved laterally via WMI and your logs don't show it. What needs to change in your logging configuration?"},
+        {"if_missed": "rule failure analysis", "probe": "Before writing new rules, how do you confirm whether rules for these techniques existed and simply didn't fire, versus there were genuinely no rules?"},
+        {"if_strong": true, "escalate": "The red team tells you they specifically designed their operation to avoid all your detection rules by reviewing your Sigma rule repository (which was public on GitHub). What does this tell you and what do you change?"},
+        {"if_weak": true, "simplify": "If the red team used PowerShell to move laterally and your PowerShell detection didn't fire, what are the possible reasons?"}
+      ],
+      "interviewer_notes": "This scenario tests the detection improvement mindset. Strong candidates immediately ask why existing rules didn't fire (three failure modes) before jumping to writing new rules. The Sigma repo being public GitHub is a real scenario and reveals whether candidates think about operational security for their defensive tools."
+    },
+    {
+      "id": "de_011",
+      "text": "How do you write YARA rules effectively? Walk me through building one for a piece of malware you've analyzed.",
+      "depth": 2,
+      "topic": "malware_detection",
+      "mitre_technique": "T1587.001",
+      "expected_concepts": {
+        "junior": ["knows YARA is for malware detection", "understands YARA uses strings and conditions", "might describe a simple string match rule"],
+        "mid": ["understands YARA structure: meta, strings, condition sections", "uses multiple string types: text strings, hex patterns, regex", "applies modifiers: nocase, wide (for Unicode), fullword to reduce false positives", "understands the condition logic: all of them, any of them, N of them for flexible matching", "knows to target specific strings that are unique to the malware, not common Windows API calls"],
+        "senior": ["focuses on code structure: compile-time invariants (encryption key constants, custom hash algorithms) that survive recompilation", "avoids brittle strings: packed malware changes strings; focus on unpacked code patterns", "knows how to write YARA for memory scanning vs. file scanning (different use cases)", "uses YARA modules: pe module for PE structure analysis (imports, sections, entry point), elf for Linux binaries", "tests rules against clean samples (benign) and malicious samples to measure specificity"],
+        "staff": ["designs YARA rule deployment strategy: where to run them (EDR, email gateway, SIEM, sandbox, memory scanner)", "manages YARA rule library: versioning, testing infrastructure, performance impact assessment", "understands YARA rule performance: complex regex and large string sets impact scan speed significantly"]
+      },
+      "follow_ups": [
+        {"if_mentioned": "strings", "probe": "You identify a unique string in the malware. How do you verify this string won't generate false positives against legitimate software?"},
+        {"if_mentioned": "packed", "probe": "The malware is UPX-packed. All your string matches are gone after packing. What's your strategy?"},
+        {"if_missed": "pe module", "probe": "Two samples from the same malware family have completely different strings after each recompile. What YARA approach would catch both variants?"},
+        {"if_strong": true, "escalate": "The malware author knows you're using YARA rules. They automate recompilation to change all strings between deployments but keep the same core functionality. What's your long-term detection strategy?"},
+        {"if_weak": true, "simplify": "What is the basic structure of a YARA rule, and what are the three main sections?"}
+      ],
+      "interviewer_notes": "YARA rule quality is a strong differentiator. Mid-level writes functional but brittle rules (string-based). Senior understands code-structure-based matching that survives recompilation. The pe module for import hash and structure analysis is a key senior concept. The 'malware author knows your rules' escalation tests adaptive thinking."
+    }
+  ]
+}

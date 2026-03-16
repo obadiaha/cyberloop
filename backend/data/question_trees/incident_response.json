@@ -1,0 +1,705 @@
+{
+  "domain": "incident_response",
+  "display_name": "Incident Response & Triage",
+  "description": "Evaluates IR workflow knowledge from initial alert triage through containment, eradication, recovery, and post-incident review.",
+  "mitre_references": [
+    "TA0001",
+    "TA0002",
+    "TA0003",
+    "TA0005",
+    "TA0008",
+    "TA0010",
+    "TA0040"
+  ],
+  "root_questions": [
+    {
+      "id": "ir_001",
+      "text": "You get paged at 2 AM. Your SIEM has fired a high-severity alert: a domain controller is making outbound DNS requests to a known C2 domain. Walk me through your first 30 minutes.",
+      "difficulty_weight": 1.25,
+      "level": 1,
+      "category": "initial_triage",
+      "expected_concepts": [
+        "validate_alert",
+        "check_false_positive",
+        "identify_scope",
+        "isolate_host",
+        "preserve_evidence",
+        "engage_oncall",
+        "ticket_creation"
+      ],
+      "red_flags": [
+        "immediately_reimage",
+        "ignore_and_go_back_to_sleep",
+        "only_block_domain",
+        "no_evidence_preservation",
+        "treats_dc_same_as_any_workstation",
+        "blocks_the_domain_and_goes_back_to_sleep",
+        "no_evidence_preservation_before_containment",
+        "investigates_alone_without_escalating",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "validate_alert",
+            "check_false_positive"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Good. You validated the alert. Now you see the DC has been resolving this C2 domain every 90 seconds for the past 6 hours. The DNS requests contain encoded subdomains that look like base64. What does this pattern tell you, and what's your next move?",
+          "level": 2,
+          "expected_concepts": [
+            "dns_exfiltration",
+            "dns_tunneling",
+            "data_staging",
+            "check_payload_size",
+            "network_capture",
+            "ioc_extraction",
+            "lateral_movement_check"
+          ],
+          "red_flags": [
+            "only_block_dns",
+            "no_packet_capture",
+            "assume_single_host"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "dns_exfiltration",
+            "dns_tunneling",
+            "lateral_movement_check"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You confirm DNS exfiltration has been active for 6 hours from the DC. Legal is asking you: what data could have left? The DC handles authentication for 4,000 users. How do you scope the potential data exposure, and what's your containment decision tree?",
+          "level": 3,
+          "expected_concepts": [
+            "ntds_dit_exposure",
+            "krbtgt_compromise",
+            "golden_ticket_risk",
+            "bandwidth_calculation",
+            "network_flow_analysis",
+            "forensic_image_before_containment",
+            "coordinated_containment",
+            "legal_notification_timeline",
+            "credential_reset_strategy"
+          ],
+          "red_flags": [
+            "no_forensic_image",
+            "reset_one_password",
+            "no_legal_engagement",
+            "underestimate_dc_compromise"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "ntds_dit_exposure",
+            "golden_ticket_risk",
+            "coordinated_containment"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Let me push on your containment strategy. You have 4 DCs across 3 sites, Active Directory is potentially fully compromised, and the business says they can't tolerate more than 2 hours of downtime. How do you architect the recovery? What's your position on krbtgt double-reset timing, and what would you challenge about the standard playbook here?",
+          "level": 4,
+          "expected_concepts": [
+            "krbtgt_double_reset_timing",
+            "dc_rebuild_vs_restore",
+            "ad_forest_recovery",
+            "trust_boundary_analysis",
+            "golden_ticket_lifetime",
+            "staged_recovery",
+            "business_continuity_tradeoff",
+            "challenge_2hr_downtime_assumption"
+          ],
+          "red_flags": [
+            "single_krbtgt_reset",
+            "restore_from_backup_only",
+            "no_staged_approach"
+          ]
+        }
+      ],
+      "scoring_guidance": "The 2 AM pager test. Tests both technical triage AND operational maturity. A strong answer has a clear sequence: validate -> scope -> preserve -> contain -> escalate. A 5/5 addresses the DOMAIN CONTROLLER specifically: DC compromise means AD compromise means everything is in scope. They show urgency calibrated to asset criticality. A 3/5 follows a generic IR process without recognizing the DC-specific implications.",
+      "strong_answer_markers": [
+        "Recognizes DC compromise = potential AD-wide compromise immediately",
+        "Validates alert before containment (not reactive)",
+        "Preserves evidence BEFORE containment actions",
+        "Engages on-call chain, doesn't solo it",
+        "Creates ticket/documentation from minute one",
+        "Mentions DNS C2 specifically and what that implies (data exfil capability)"
+      ]
+    },
+    {
+      "id": "ir_002",
+      "text": "Tell me about your approach to evidence collection during an active incident. What do you collect first and why?",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "evidence_collection",
+      "expected_concepts": [
+        "order_of_volatility",
+        "memory_first",
+        "live_response",
+        "disk_image",
+        "network_logs",
+        "chain_of_custody",
+        "documentation"
+      ],
+      "red_flags": [
+        "shutdown_first",
+        "no_memory_collection",
+        "no_chain_of_custody",
+        "skip_documentation",
+        "would_power_off_the_machine_first",
+        "no_memory_collection_mentioned",
+        "cannot_name_specific_acquisition_tools",
+        "no_integrity_verification_at_any_step",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "order_of_volatility",
+            "memory_first"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You mentioned order of volatility. You're on a Linux server running in AWS EC2 and you suspect a kernel-level rootkit. Walk me through your memory acquisition strategy. What tools are you using and what pitfalls are you watching for?",
+          "level": 2,
+          "expected_concepts": [
+            "lime_module",
+            "volatility3",
+            "avml",
+            "kernel_module_verification",
+            "memory_smear",
+            "ec2_ebs_snapshot",
+            "instance_metadata",
+            "avoid_installing_tools_on_compromised_host"
+          ],
+          "red_flags": [
+            "use_memdump_on_rootkitted_host",
+            "trust_kernel_tools",
+            "no_integrity_check"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "lime_module",
+            "volatility3",
+            "avoid_installing_tools_on_compromised_host"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Good instinct on not trusting the compromised kernel. But now you need the memory dump and you can't trust LiME loaded on this host. What's your alternative approach, and how do you validate that what you captured is trustworthy?",
+          "level": 3,
+          "expected_concepts": [
+            "ebs_snapshot_approach",
+            "hibernation_file",
+            "crash_dump",
+            "sidecar_analysis",
+            "hash_verification",
+            "separate_analysis_workstation",
+            "trusted_binary_from_removable_media",
+            "hypervisor_level_acquisition"
+          ],
+          "red_flags": [
+            "no_validation_strategy",
+            "trust_local_tools_anyway"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "hypervisor_level_acquisition",
+            "ebs_snapshot_approach"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Let's zoom out. You're designing the IR evidence collection playbook for an organization running 2,000 EC2 instances across 3 AWS accounts. How do you architect automated evidence collection that scales, preserves chain of custody, and doesn't require SSHing into compromised hosts?",
+          "level": 4,
+          "expected_concepts": [
+            "aws_step_functions",
+            "lambda_automation",
+            "ebs_snapshot_pipeline",
+            "ssm_agent_for_live_response",
+            "forensic_account_isolation",
+            "s3_write_once_bucket",
+            "cloudtrail_integrity",
+            "automated_hash_chain",
+            "forensic_vpc"
+          ],
+          "red_flags": [
+            "manual_only_approach",
+            "no_automation_consideration"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests forensic fundamentals. Order of volatility is the baseline. A strong answer goes beyond the textbook: explains WHY memory first (what's lost on poweroff), names specific tools with version awareness, and discusses integrity verification. A 5/5 addresses the tension between speed and thoroughness in a live incident. A 3/5 recites the order but hasn't done it under real time pressure.",
+      "strong_answer_markers": [
+        "Explains order of volatility with reasoning, not just listing",
+        "Names specific tools: FTK Imager, WinPMEM, AVML, LiME",
+        "Discusses hash verification at each step",
+        "Addresses the practical challenge of doing this during a live incident",
+        "Mentions chain of custody from the first moment"
+      ]
+    },
+    {
+      "id": "ir_003",
+      "text": "A user reports they clicked a link in a phishing email about 4 hours ago. They don't remember what happened after that. What's your triage process?",
+      "difficulty_weight": 1.25,
+      "level": 1,
+      "category": "phishing_triage",
+      "expected_concepts": [
+        "email_header_analysis",
+        "url_analysis",
+        "endpoint_check",
+        "credential_compromise_check",
+        "browser_history",
+        "proxy_logs",
+        "sandbox_url",
+        "scope_other_recipients"
+      ],
+      "red_flags": [
+        "only_reset_password",
+        "no_endpoint_check",
+        "ignore_other_recipients",
+        "no_url_detonation",
+        "only_resets_the_one_users_password",
+        "no_scoping_to_other_recipients",
+        "doesnt_check_proxy_logs",
+        "assumes_phishing_equals_malware_only",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "scope_other_recipients",
+            "email_header_analysis",
+            "url_analysis"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Your email gateway shows the same phishing email went to 340 users. 47 clicked the link based on proxy logs. The landing page was a credential harvester mimicking your SSO portal. What's your escalation and containment plan now?",
+          "level": 2,
+          "expected_concepts": [
+            "mass_password_reset",
+            "session_token_revocation",
+            "mfa_status_check",
+            "idp_log_review",
+            "oauth_token_audit",
+            "conditional_access_enforcement",
+            "user_communication_plan",
+            "ioc_blocking"
+          ],
+          "red_flags": [
+            "only_reset_47_passwords",
+            "no_session_revocation",
+            "no_mfa_check",
+            "ignore_oauth_tokens"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "session_token_revocation",
+            "oauth_token_audit",
+            "idp_log_review"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You discover that 3 of the 47 users who entered credentials had MFA disabled. One of them is a finance director. Azure AD sign-in logs show successful logins from an IP in Eastern Europe within 15 minutes of credential entry, and the attacker created inbox forwarding rules. Now what?",
+          "level": 3,
+          "expected_concepts": [
+            "bec_investigation",
+            "inbox_rule_audit",
+            "mail_flow_trace",
+            "financial_fraud_check",
+            "wire_transfer_hold",
+            "legal_notification",
+            "threat_actor_persistence_check",
+            "azure_ad_audit_log_deep_dive",
+            "conditional_access_named_locations"
+          ],
+          "red_flags": [
+            "only_remove_forwarding_rules",
+            "no_financial_fraud_check",
+            "no_legal_engagement"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "bec_investigation",
+            "financial_fraud_check",
+            "threat_actor_persistence_check"
+          ],
+          "trigger_type": "concept_match",
+          "question": "This incident exposed a gap: your org had no way to detect inbox forwarding rule creation at scale. After containment, how would you architect the detection and response capability to prevent this class of attack from succeeding again? Think beyond just a SIEM rule.",
+          "level": 4,
+          "expected_concepts": [
+            "detection_engineering_feedback_loop",
+            "unified_audit_log_monitoring",
+            "automated_inbox_rule_review",
+            "conditional_access_hardening",
+            "token_lifetime_policy",
+            "phishing_resistant_mfa",
+            "tabletop_exercise",
+            "process_change_not_just_technical"
+          ],
+          "red_flags": [
+            "only_write_siem_rule",
+            "no_process_improvement",
+            "no_mfa_upgrade_discussion"
+          ]
+        }
+      ],
+      "scoring_guidance": "Phishing is the most common IR scenario. Tests whether they think in terms of SCOPE (not just the one user). A strong answer immediately asks: who else got this email? A 5/5 covers: email analysis, endpoint triage, credential compromise check, scope to all recipients, and proactive blocking. A 3/5 focuses only on the reporting user without scoping.",
+      "strong_answer_markers": [
+        "Immediately scopes to other recipients (not just the reporter)",
+        "Checks for credential compromise, not just malware",
+        "Analyzes URL/attachment in sandbox",
+        "Reviews proxy logs for who else visited the URL",
+        "Considers session token theft, not just password compromise"
+      ]
+    },
+    {
+      "id": "ir_004",
+      "text": "Describe how you handle containment decisions. When do you isolate a host versus monitoring it, and who's involved in that decision?",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "containment_strategy",
+      "expected_concepts": [
+        "risk_assessment",
+        "business_impact",
+        "evidence_preservation",
+        "stakeholder_communication",
+        "monitoring_value",
+        "attacker_awareness",
+        "containment_types"
+      ],
+      "red_flags": [
+        "always_isolate_immediately",
+        "never_involve_business",
+        "no_evidence_consideration",
+        "solo_decision",
+        "always_isolate_no_exceptions",
+        "makes_containment_decision_alone",
+        "no_consideration_of_evidence_loss_from_containment",
+        "no_business_impact_assessment",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "risk_assessment",
+            "monitoring_value",
+            "attacker_awareness"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You're dealing with an APT that's been in your environment for 3 months. You've identified 4 compromised hosts but suspect there are more. The threat actor has shown they redeploy quickly when assets are burned. Make the case for your containment approach: do you go loud or stay quiet?",
+          "level": 2,
+          "expected_concepts": [
+            "coordinated_containment",
+            "simultaneous_action",
+            "threat_intel_collection",
+            "deception_technology",
+            "honeypots",
+            "monitor_for_additional_c2",
+            "map_full_scope_first",
+            "burn_rate_assessment"
+          ],
+          "red_flags": [
+            "isolate_4_hosts_immediately",
+            "no_scope_assessment",
+            "alert_attacker_prematurely"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "coordinated_containment",
+            "map_full_scope_first",
+            "simultaneous_action"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You've decided on coordinated containment. You have 12 confirmed compromised hosts across 3 business units, a C-suite briefing in 2 hours, and legal counsel wants to know if this is a reportable breach under GDPR. Walk me through your containment execution plan, including the communication workflow.",
+          "level": 3,
+          "expected_concepts": [
+            "containment_war_room",
+            "role_assignment",
+            "simultaneous_network_isolation",
+            "pre_staged_clean_images",
+            "communication_plan",
+            "legal_parallel_track",
+            "gdpr_72hr_notification",
+            "executive_brief_template",
+            "forensic_preservation_before_containment"
+          ],
+          "red_flags": [
+            "sequential_containment",
+            "no_legal_coordination",
+            "no_communication_plan"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "containment_war_room",
+            "gdpr_72hr_notification",
+            "forensic_preservation_before_containment"
+          ],
+          "trigger_type": "concept_match",
+          "question": "After this incident, your CISO asks you to redesign the containment playbook. The current one failed because it took 3 months to detect and 48 hours to contain. What would you change architecturally, not just procedurally? Challenge any assumptions in the current IR model.",
+          "level": 4,
+          "expected_concepts": [
+            "assume_breach_architecture",
+            "microsegmentation",
+            "zero_trust_network",
+            "automated_containment_triggers",
+            "deception_grid",
+            "threat_hunting_program",
+            "mean_time_to_contain_metrics",
+            "ir_retainer_assessment",
+            "challenge_perimeter_model"
+          ],
+          "red_flags": [
+            "only_improve_playbook_steps",
+            "no_architectural_thinking",
+            "no_metrics"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests decision-making under uncertainty. The isolate-vs-monitor question has no single right answer. A strong answer shows FRAMEWORK for the decision: risk assessment, business impact, evidence value, and stakeholder input. A 5/5 articulates when monitoring is MORE valuable than containment (intelligence gathering) and when the risk is too high to wait. A 3/5 always isolates or always monitors without nuance.",
+      "strong_answer_markers": [
+        "Presents a decision framework, not a single answer",
+        "Considers business impact of isolation",
+        "Discusses the intelligence value of monitoring",
+        "Involves stakeholders in the decision (not solo)",
+        "Names specific factors that change the decision"
+      ]
+    },
+    {
+      "id": "ir_005",
+      "text": "Tell me about a post-incident review you've led or participated in. What was the format, what came out of it, and how did you ensure the recommendations actually got implemented?",
+      "difficulty_weight": 1.0,
+      "level": 1,
+      "category": "post_incident",
+      "expected_concepts": [
+        "blameless_postmortem",
+        "timeline_reconstruction",
+        "root_cause_analysis",
+        "lessons_learned",
+        "action_items",
+        "follow_up_tracking",
+        "stakeholder_participation"
+      ],
+      "red_flags": [
+        "blame_individuals",
+        "no_action_items",
+        "no_follow_up",
+        "skip_postmortem",
+        "postmortems_produce_documents_nobody_reads",
+        "no_action_item_tracking",
+        "blames_individuals_in_the_review",
+        "skips_postmortem_because_too_busy",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "blameless_postmortem",
+            "root_cause_analysis",
+            "action_items"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You ran the postmortem. Leadership agreed on 8 action items. Three months later, only 2 have been completed. The rest are 'in progress' or blocked by other teams. How do you handle this?",
+          "level": 2,
+          "expected_concepts": [
+            "executive_sponsorship",
+            "risk_register_tracking",
+            "deadline_accountability",
+            "cross_team_dependency_management",
+            "prioritization_framework",
+            "escalation_path",
+            "metrics_reporting"
+          ],
+          "red_flags": [
+            "accept_it",
+            "no_escalation",
+            "no_tracking_mechanism"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "executive_sponsorship",
+            "risk_register_tracking",
+            "escalation_path"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Let's go deeper. You've noticed a pattern: the same class of vulnerability or detection gap has appeared in 3 incidents over 12 months. Each postmortem identified it, each had action items, but the systemic issue persists. How do you break this cycle?",
+          "level": 3,
+          "expected_concepts": [
+            "systemic_root_cause",
+            "organizational_change",
+            "risk_quantification",
+            "ciso_business_case",
+            "process_vs_technology_fix",
+            "metrics_trend_analysis",
+            "cultural_factors",
+            "resource_allocation_argument"
+          ],
+          "red_flags": [
+            "write_another_postmortem",
+            "blame_other_teams",
+            "no_systemic_analysis"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "systemic_root_cause",
+            "risk_quantification",
+            "organizational_change"
+          ],
+          "trigger_type": "concept_match",
+          "question": "You've been asked to present to the board on IR program maturity. They want to know: are we getting better? How would you measure and present IR program effectiveness over time? What metrics would you use, and what would you deliberately NOT measure?",
+          "level": 4,
+          "expected_concepts": [
+            "mttd_mttr_trends",
+            "detection_coverage_growth",
+            "false_positive_ratio",
+            "tabletop_exercise_results",
+            "recurrence_rate",
+            "team_retention",
+            "avoid_vanity_metrics",
+            "incidents_per_severity_trend",
+            "automation_percentage"
+          ],
+          "red_flags": [
+            "only_count_incidents",
+            "no_trend_analysis",
+            "vanity_metrics_only"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests leadership and process maturity. A strong answer describes a SPECIFIC postmortem they led with concrete outcomes. Look for: blameless culture, actionable items with owners and deadlines, and FOLLOW-UP on implementation. A 5/5 addresses the hardest part: getting action items actually completed after the urgency fades. A 3/5 describes the meeting format but not the follow-through.",
+      "strong_answer_markers": [
+        "Describes a specific postmortem from experience",
+        "Blameless approach emphasized",
+        "Action items had owners, deadlines, and tracking",
+        "Discusses follow-up and completion tracking",
+        "Lessons actually changed something (new detection, new process)"
+      ]
+    },
+    {
+      "id": "ir_006",
+      "text": "You discover a rogue process on a workstation that's beaconing to an IP address not in any threat intel feed. CrowdStrike didn't flag it. How do you investigate?",
+      "difficulty_weight": 1.25,
+      "level": 1,
+      "category": "unknown_threat_investigation",
+      "expected_concepts": [
+        "process_tree_analysis",
+        "network_connection_review",
+        "file_hash_check",
+        "virustotal",
+        "sandbox_analysis",
+        "parent_process",
+        "persistence_check",
+        "user_context"
+      ],
+      "red_flags": [
+        "trust_crowdstrike_missed_it",
+        "only_check_virustotal",
+        "kill_process_immediately",
+        "trusts_edr_negative_and_closes_the_case",
+        "kills_the_process_before_investigating",
+        "only_checks_virustotal_hash",
+        "no_persistence_mechanism_check",
+        "says_we_for_everything_without_specifying_personal_contribution",
+        "no_specific_numbers_or_metrics_when_describing_outcomes",
+        "describes_textbook_process_without_real_experience_examples"
+      ],
+      "depth_probes": [
+        {
+          "trigger_concepts": [
+            "process_tree_analysis",
+            "persistence_check",
+            "sandbox_analysis"
+          ],
+          "trigger_type": "concept_match",
+          "question": "The binary is packed, not on VT, has no digital signature, and was dropped via a scheduled task created 2 weeks ago. The parent process was powershell.exe with an encoded command. Walk me through your dynamic and static analysis approach.",
+          "level": 2,
+          "expected_concepts": [
+            "deobfuscate_powershell",
+            "any_run_sandbox",
+            "pe_analysis",
+            "strings_analysis",
+            "import_table",
+            "behavioral_indicators",
+            "yara_rule_creation",
+            "memory_analysis_of_process"
+          ],
+          "red_flags": [
+            "no_deobfuscation",
+            "skip_static_analysis",
+            "no_behavioral_analysis"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "deobfuscate_powershell",
+            "yara_rule_creation",
+            "behavioral_indicators"
+          ],
+          "trigger_type": "concept_match",
+          "question": "Your analysis shows this is a custom implant with keylogging, screenshot capture, and encrypted C2 over HTTPS to a bulletproof hosting provider. This isn't commodity malware. How does your investigation and response change knowing this is targeted?",
+          "level": 3,
+          "expected_concepts": [
+            "apt_assumptions",
+            "opsec_considerations",
+            "scope_expansion",
+            "threat_intel_sharing",
+            "isac_notification",
+            "hunting_for_variants",
+            "network_indicators",
+            "c2_infrastructure_mapping",
+            "external_ir_firm_consideration"
+          ],
+          "red_flags": [
+            "treat_as_commodity_malware",
+            "no_scope_expansion",
+            "no_external_engagement"
+          ]
+        },
+        {
+          "trigger_concepts": [
+            "apt_assumptions",
+            "c2_infrastructure_mapping",
+            "hunting_for_variants"
+          ],
+          "trigger_type": "concept_match",
+          "question": "This scenario exposed that your EDR missed a custom implant and your threat intel feeds had zero coverage. If you could redesign your detection architecture to catch this class of threat, what would it look like? What's the fundamental limitation of signature and IOC-based detection, and how do you address it?",
+          "level": 4,
+          "expected_concepts": [
+            "behavioral_detection",
+            "anomaly_baseline",
+            "ueba",
+            "network_detection_and_response",
+            "deception_technology",
+            "threat_hunting_program",
+            "detection_engineering_maturity",
+            "hypothesis_driven_hunting",
+            "attack_surface_reduction"
+          ],
+          "red_flags": [
+            "more_signatures",
+            "more_feeds",
+            "no_behavioral_approach"
+          ]
+        }
+      ],
+      "scoring_guidance": "Tests investigation skills for UNKNOWN threats (no signature, no intel). A strong answer shows systematic methodology: process tree, network connections, persistence, user context. The key insight: EDR missing it doesn't mean it's benign. A 5/5 has a structured investigation methodology that works regardless of the threat type. A 3/5 relies too heavily on tools and gets stuck when the tool doesn't flag it.",
+      "strong_answer_markers": [
+        "Doesn't trust the EDR's negative result",
+        "Systematic investigation: process, network, persistence, user",
+        "Uses multiple analysis methods (static + dynamic + behavioral)",
+        "Considers the full process tree, not just the suspicious process",
+        "Documents findings as they investigate"
+      ]
+    }
+  ]
+}

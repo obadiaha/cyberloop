@@ -1,0 +1,240 @@
+{
+  "domain": "incident_response",
+  "description": "What incident response interviews test: ability to contain, investigate, and recover from security incidents. Tests both procedural knowledge (NIST/SANS frameworks) and hands-on technical depth (how you actually triage, hunt, and write reports).",
+  "levels": {
+    "junior": {
+      "score_range": [1, 3],
+      "label": "Junior / Associate",
+      "characteristics": [
+        "Knows the phases of incident response by name but cannot explain the decision logic between phases",
+        "Describes IR process as linear and sequential rather than iterative",
+        "Relies exclusively on automated alerts; does not proactively hunt for undetected activity",
+        "Cannot articulate the difference between an incident and an event without prompting",
+        "Identifies indicators from pre-existing detection rules but cannot generate new hypotheses",
+        "Refers to 'looking at logs' without specifying which logs, which fields, or which time window",
+        "Scoping is tool-driven: 'I run a Splunk search' rather than thinking about attacker objectives",
+        "Containment strategy defaults to immediately isolating machines without considering business impact",
+        "Cannot explain why you would NOT isolate an endpoint during some investigations",
+        "Documentation is an afterthought; does not mention chain of custody or evidence integrity",
+        "Confuses eradication with containment",
+        "Uses vague language: 'malicious activity,' 'suspicious behavior' without specifics",
+        "Knows Splunk or a SIEM by name but cannot write a query from scratch",
+        "Familiarity with IOCs (hashes, IPs) but no understanding of IOC decay or pivoting",
+        "Cannot describe a post-incident review process or what lessons learned actually produces"
+      ],
+      "example_phrases": [
+        "I would escalate to my manager and we would follow the playbook",
+        "I'd look at the SIEM to see if there were any alerts",
+        "We'd isolate the infected machine so it can't spread",
+        "I'd check if the antivirus found anything",
+        "I know the IR phases are preparation, identification, containment, eradication, recovery, and lessons learned",
+        "I would document everything in a ticket",
+        "We'd reset the user's password to be safe",
+        "I would check VirusTotal for the hash"
+      ],
+      "red_flags": [
+        "Claims 'senior' experience but cannot name specific Event IDs for common attacks",
+        "Says 'I've handled many incidents' but cannot walk through a single one with technical specificity",
+        "Knows NIST SP 800-61 by name but cannot describe what's actually in it",
+        "Describes IR only from a management perspective when asked for technical detail",
+        "Mentions 'using a runbook' as an answer to every technical question",
+        "Cannot explain why timestamps matter or how log timestamps can be manipulated",
+        "Thinks all incidents require full disk imaging before any analysis can begin"
+      ],
+      "expected_tools": [
+        "Splunk (basic searches)",
+        "VirusTotal",
+        "TheHive or similar ticketing/case management",
+        "Wireshark (basic pcap reading)",
+        "Windows Event Viewer"
+      ],
+      "expected_frameworks": [
+        "NIST SP 800-61 (phases by name)",
+        "Basic MITRE ATT&CK awareness (knows it exists)"
+      ]
+    },
+    "mid": {
+      "score_range": [4, 6],
+      "label": "Mid-Level",
+      "characteristics": [
+        "Can triage an alert and immediately ask scoping questions: blast radius, patient zero, initial vector",
+        "Writes functional SIEM queries without help; filters by field, time, and specific event IDs",
+        "Knows specific Windows Event IDs: 4624, 4625, 4648, 4688, 4698, 4672 and what each proves",
+        "Can explain logon types (2=interactive, 3=network, 10=remote interactive) and why they matter",
+        "Understands difference between scheduled task persistence (4698) and service persistence (4697)",
+        "Pivots between artifacts: process creation leads to network connections leads to DNS queries",
+        "Uses MITRE ATT&CK to map observed behaviors to techniques, not just as a checklist",
+        "Can explain why you collect volatile data (memory, running processes, network connections) before disk",
+        "Knows the 'order of volatility' and applies it during live response",
+        "Understands containment tradeoffs: network isolation vs. port blocking vs. account disable",
+        "Has performed phishing investigations: header analysis, URL detonation, attachment sandbox",
+        "Can extract useful data from a PowerShell transcript log or 4104 (script block logging) event",
+        "Familiar with common attacker tools: PsExec, Cobalt Strike, Mimikatz, and their forensic artifacts",
+        "Knows what a C2 beacon looks like in network traffic (beaconing intervals, JA3/JA3S)",
+        "Can write a basic incident timeline and communicate findings to non-technical stakeholders",
+        "Understands basic malware persistence: registry run keys, scheduled tasks, services, WMI subscriptions"
+      ],
+      "example_phrases": [
+        "First I want to understand scope: how many systems, is this still active, and what's the potential blast radius",
+        "I'd pivot from the initial alert by looking at 4688 events around the same time window on that host",
+        "Before isolating I'd capture volatile data - running processes, network connections, memory if possible",
+        "The PowerShell logging showed the encoded command, I decoded it and it was a stager calling out to a C2",
+        "I mapped the attacker's actions to MITRE - initial access was T1566.001, they moved laterally via T1021.002",
+        "The beaconing interval was suspiciously regular, every 300 seconds, which is a Cobalt Strike default",
+        "I correlated the 4624 type 3 logon with a 5140 share access event to confirm lateral movement"
+      ],
+      "red_flags": [
+        "Talks about MITRE ATT&CK mapping but cannot map a specific observed behavior to a technique ID",
+        "Says 'I'd image the disk' as the first response to an active intrusion on a production server",
+        "Cannot explain the difference between persistence via run key vs. scheduled task vs. service",
+        "Confuses Sigma rules with YARA rules",
+        "Claims to do threat hunting but describes it as reviewing existing SIEM alerts",
+        "Mentions JA3/JA3S without being able to explain what it is"
+      ],
+      "expected_tools": [
+        "Splunk / Microsoft Sentinel / Elastic",
+        "CrowdStrike Falcon / SentinelOne / Defender for Endpoint",
+        "Velociraptor or KAPE for endpoint collection",
+        "Volatility (basic memory analysis)",
+        "Autopsy or FTK Imager",
+        "MISP or similar for IOC management",
+        "sandbox (Any.run, Joe Sandbox, Cuckoo)"
+      ],
+      "expected_frameworks": [
+        "NIST SP 800-61 (practical application, not just phases)",
+        "MITRE ATT&CK (technique mapping during IR)",
+        "Lockheed Martin Cyber Kill Chain (for attacker lifecycle)",
+        "SANS PICERL process"
+      ]
+    },
+    "senior": {
+      "score_range": [7, 8],
+      "label": "Senior",
+      "characteristics": [
+        "Can scope an entire intrusion from a single alert by reasoning about attacker objectives and likely pivots",
+        "Builds incident response playbooks that account for edge cases and failure modes, not just happy paths",
+        "Leads tabletop exercises and can identify where existing playbooks will break under real conditions",
+        "Writes detection content from IR findings: turns IOCs and TTPs into durable SIEM/EDR detections",
+        "Can distinguish between a nation-state intrusion, ransomware operator, and opportunistic script kiddie from artifact patterns alone",
+        "Understands advanced attacker techniques: living-off-the-land (LOLBins), fileless malware, BYOVD",
+        "Can hunt for C2 via behavioral indicators (beaconing, DNS tunneling, unusual parent-child process trees)",
+        "Performs memory forensics beyond basics: heap scanning, finding injected code, identifying hooks",
+        "Has managed multi-system intrusions and knows how to coordinate investigation across teams",
+        "Understands log source gaps and knows what an attacker can do that won't appear in standard telemetry",
+        "Can recover deleted forensic artifacts using $MFT, VSS, or Windows Shadow Copies",
+        "Communicates the business risk of an incident in terms executives understand",
+        "Can scope for data exfiltration: knows where staging directories appear, what DLP logs show, how to detect staged ZIP archives",
+        "Has performed cloud incident response (AWS CloudTrail, Azure Activity Log, GCP Audit Logs)",
+        "Understands legal and regulatory notification requirements during an incident (GDPR 72hr, SEC 4-day)",
+        "Can write forensically sound containment strategies that preserve evidence integrity"
+      ],
+      "example_phrases": [
+        "The attacker used WMI subscriptions for persistence - that's subtle because most playbooks only check registry run keys and scheduled tasks",
+        "I look at the parent-child process tree first. When I see Word spawning PowerShell, that's the story right there",
+        "We scoped it by looking at lateral movement artifacts across all DCs - 4769 Kerberos tickets for sensitive systems from the compromised account",
+        "We found the attacker had disabled Windows Defender's real-time protection via Group Policy three days before the ransomware deployed",
+        "The exfil happened over HTTPS to a legitimate cloud storage provider - we found it via unusual outbound data volume on the DLP logs, not the firewall",
+        "I correlated memory artifacts from Volatility with disk artifacts from KAPE - the in-memory process had no on-disk counterpart, which confirmed process injection",
+        "Before we issued the containment order, we made sure we'd already extracted enough evidence to reconstruct the timeline - you only get one shot at live data"
+      ],
+      "red_flags": [
+        "Focuses only on technical remediation without mentioning stakeholder communication or legal requirements",
+        "Has never led or built a playbook from scratch",
+        "Cannot explain BYOVD (Bring Your Own Vulnerable Driver) or why it defeats EDR",
+        "Describes 'advanced' hunting as searching for known bad hashes",
+        "Has no opinion on which detection gaps concern them most in their previous environment"
+      ],
+      "expected_tools": [
+        "Velociraptor (VQL queries for fleet hunting)",
+        "Volatility 3 / Rekall (memory forensics)",
+        "KAPE (targeted artifact collection)",
+        "CyberChef (decode/decode/pivot)",
+        "Elastic SIEM / Splunk ES (correlation rules)",
+        "Cloud-native tools: CloudTrail Insights, Defender for Cloud",
+        "Zeek / Suricata (network detection)",
+        "FleetDM / OSQuery (live endpoint querying)"
+      ],
+      "expected_frameworks": [
+        "NIST SP 800-61 (contributing to, not just following)",
+        "MITRE ATT&CK (navigator layers, coverage mapping)",
+        "SANS FOR508 / FOR610 methodologies",
+        "IR retainer and third-party coordination experience",
+        "Chain of custody and legal hold procedures"
+      ]
+    },
+    "staff": {
+      "score_range": [9, 10],
+      "label": "Staff / Principal",
+      "characteristics": [
+        "Designs the IR program: defines retainer strategy, escalation matrix, communication trees, legal counsel integration",
+        "Measures IR effectiveness with metrics: MTTD, MTTR, detection coverage by MITRE technique, recurrence rate",
+        "Has opinions on IR platform architecture: SOAR vs. SIEM-native vs. case management, and articulates the tradeoffs",
+        "Drives post-incident review process that results in measurable improvements, not just lessons-learned documents",
+        "Can evaluate and select IR vendors: knows what questions to ask a retainer firm in an RFP",
+        "Has managed IR during regulatory investigations or legal proceedings",
+        "Understands incident classification taxonomies (VERIS, ENISA, CISA incident severity) and why they matter for reporting",
+        "Has responded to supply chain attacks, insider threats, and cloud-native attacks as distinct categories with distinct playbooks",
+        "Designs chaos engineering exercises and red team engagements specifically to stress-test IR capabilities",
+        "Can speak to IR maturity models and where an organization sits on the capability spectrum",
+        "Has contributed to public IR knowledge: threat intelligence sharing (ISACs, STIX/TAXII), public disclosures, industry reports",
+        "Understands systemic organizational failures that enable incidents: identity hygiene, patching cadence, architecture decisions",
+        "Has managed crisis communication during a major incident: coordinating with PR, legal, executives, and regulators simultaneously",
+        "Knows when to call in a third party vs. handle in-house and has managed those handoffs",
+        "Can design IR automation (SOAR playbooks, orchestration) that reduces toil without creating automation debt"
+      ],
+      "example_phrases": [
+        "Our MTTD was 4 days for a sophisticated intrusion - after the post-incident review, we redesigned our detection around lateral movement rather than initial access, and got it to under 8 hours",
+        "The retainer agreement needs to address data jurisdiction clauses before you need it - I've seen incident response stall because the vendor couldn't legally process EU data",
+        "We built the IR program around VERIS for classification so we could actually trend our incident types year-over-year and justify budget",
+        "The question isn't whether to automate containment - it's which containment actions are safe to automate and which require human judgment. Getting that wrong is worse than not automating",
+        "I had to brief the board at 2am with an honest assessment of breach scope - the discipline is knowing the difference between what you know, what you suspect, and what you don't know yet",
+        "After the supply chain incident we redesigned our detection to focus on anomalous behavior from trusted software, not just known-bad IOCs",
+        "We contributed our TTPs to the relevant ISAC under the TLP framework so other organizations could defend against the same threat actor"
+      ],
+      "red_flags": [
+        "Has no metrics for IR program effectiveness",
+        "Cannot describe what 'good' looks like for MTTD or MTTR in their sector",
+        "Has never designed a playbook from scratch, only followed existing ones",
+        "Conflates IR program maturity with the sophistication of individual analysts",
+        "Cannot explain VERIS or why incident classification matters beyond ticketing"
+      ],
+      "expected_tools": [
+        "SOAR platforms (Palo Alto XSOAR, Splunk SOAR, Microsoft Sentinel Automation)",
+        "Threat intelligence platforms (MISP, Anomali, Recorded Future)",
+        "GRC and case management integration (ServiceNow, Archer)",
+        "Cloud-native security: AWS Security Hub, Azure Sentinel, GCP Chronicle",
+        "STIX/TAXII for intel sharing"
+      ],
+      "expected_frameworks": [
+        "NIST CSF (Detect/Respond/Recover functions)",
+        "VERIS (Vocabulary for Event Recording and Incident Sharing)",
+        "SANS IR Maturity Model",
+        "MITRE ATT&CK (program-level coverage measurement)",
+        "Legal frameworks: GDPR Article 33, SEC cybersecurity disclosure rules, HIPAA Breach Notification"
+      ]
+    }
+  },
+  "cross_cutting_signals": {
+    "positive": [
+      "Immediately asks scoping questions before describing actions",
+      "Speaks in specifics: exact Event IDs, exact tool names, exact field names",
+      "Describes incidents they personally investigated with specific technical details",
+      "Acknowledges what they didn't know and how they figured it out",
+      "Considers attacker perspective when designing investigation approach",
+      "Discusses tradeoffs between actions (e.g., isolation vs. evidence preservation)",
+      "Mentions documentation and chain of custody without being prompted",
+      "References a specific failure or lesson they learned from an incident",
+      "Connects tactical finding to strategic attacker objective"
+    ],
+    "negative": [
+      "Describes IR process purely from a procedural/compliance perspective with no technical depth",
+      "Uses vague language when asked for specifics ('I'd look at the logs')",
+      "Cannot recall a specific incident they personally worked",
+      "Treats MITRE ATT&CK as a checkbox compliance exercise",
+      "Describes all incidents as following the same linear playbook",
+      "Never mentions business impact or stakeholder communication",
+      "Immediate answer to every containment question is 'isolate the machine'",
+      "Cannot explain why a specific artifact proves a specific attacker action"
+    ]
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "domain": "threat_intelligence",
+  "description": "What threat intelligence interviews test: the ability to collect, analyze, and operationalize intelligence about threats. Tests framework fluency (ATT&CK, Diamond Model, Kill Chain), analytical rigor (distinguishing fact from inference), and operational integration (how intelligence actually changes defensive posture).",
+  "levels": {
+    "junior": {
+      "score_range": [1, 3],
+      "label": "Junior / Associate CTI Analyst",
+      "characteristics": [
+        "Understands threat intelligence as a concept but cannot distinguish between raw data, information, and finished intelligence",
+        "Knows IOCs exist (IPs, domains, hashes) but uses them interchangeably without understanding their decay rates",
+        "Familiar with MITRE ATT&CK as a reference but cannot map an observed behavior to a specific technique ID",
+        "Cannot distinguish between strategic, operational, tactical, and technical intelligence",
+        "Describes threat intelligence as 'monitoring for bad IPs and domains'",
+        "Cannot explain the intelligence cycle: planning, collection, processing, analysis, dissemination, feedback",
+        "Has used threat intelligence platforms for IOC lookup but not for threat actor profiling",
+        "Cannot explain the difference between a threat actor, a threat group, and a campaign",
+        "Has heard of STIX/TAXII but cannot explain what they are or how they're used",
+        "Cannot explain why a VirusTotal hit is NOT sufficient intelligence",
+        "Does not understand the concept of intelligence confidence levels or uncertainty communication",
+        "Confuses OSINT with cyber threat intelligence",
+        "Cannot explain what TLP (Traffic Light Protocol) is used for in intelligence sharing",
+        "Has no understanding of adversary attribution and its difficulty",
+        "Thinks all threat intelligence is about technical indicators"
+      ],
+      "example_phrases": [
+        "I monitor OSINT feeds for IOCs and block them in our firewalls",
+        "I use VirusTotal and other tools to check if something is malicious",
+        "I've used MITRE ATT&CK to look up techniques",
+        "I subscribe to threat intel feeds and import the indicators",
+        "I look at threat reports from vendors to understand what attackers are doing",
+        "We block IPs from threat intelligence feeds at the perimeter",
+        "I know APT groups are sophisticated attackers from nation states"
+      ],
+      "red_flags": [
+        "Claims CTI experience but cannot explain the difference between tactical and strategic intelligence",
+        "Thinks threat intelligence is the same as collecting IOCs from feeds",
+        "Cannot explain TLP classifications or why they exist",
+        "Does not understand why an IP address becomes useless as an IOC within days",
+        "Thinks MITRE ATT&CK attribution means identifying which country launched an attack",
+        "Cannot explain what a STIX object represents",
+        "Has no framework for assessing intelligence source reliability"
+      ],
+      "expected_tools": [
+        "VirusTotal / OTX AlienVault (IOC lookup)",
+        "MITRE ATT&CK Navigator (reading layer files)",
+        "MISP (basic IOC consumption)",
+        "OSINT tools: Shodan, Maltego (awareness level)"
+      ],
+      "expected_frameworks": [
+        "MITRE ATT&CK (awareness)",
+        "Basic Cyber Kill Chain awareness",
+        "TLP classifications"
+      ]
+    },
+    "mid": {
+      "score_range": [4, 6],
+      "label": "Mid-Level CTI Analyst",
+      "characteristics": [
+        "Understands the intelligence cycle and can apply it to a real intelligence requirement",
+        "Distinguishes between tactical (IOCs), operational (TTPs, campaign tracking), and strategic (threat actor motivations, targeting) intelligence",
+        "Understands IOC decay: IP addresses decay in hours, domains in days, tool hashes in weeks, TTPs decay slowly",
+        "Can apply the Diamond Model to analyze an intrusion: adversary, capability, infrastructure, victim",
+        "Can map observed behaviors to specific MITRE ATT&CK techniques and sub-techniques",
+        "Has produced a finished intelligence report with confidence assessments and source citations",
+        "Understands how to structure STIX 2.1 objects: threat actors, malware, attack patterns, indicators",
+        "Can pivot on infrastructure: IP -> ASN -> hosting provider -> co-hosted domains -> related campaigns",
+        "Knows common threat actor categories: financially motivated (FIN groups), nation-state (APT groups), hacktivists",
+        "Understands attribution challenges and can explain why definitive attribution is rare",
+        "Has experience consuming and contributing to threat intelligence platforms (MISP, OpenCTI)",
+        "Can write intelligence requirements (PIRs/IRs) that are specific and answerable",
+        "Knows common malware families and their associated threat actors: Emotet (TA542), Cobalt Strike (used by multiple actors)",
+        "Has performed OSINT investigations using Shodan, Censys, RiskIQ/PassiveTotal, Maltego",
+        "Understands the difference between technical indicators and behavioral indicators in terms of detection durability"
+      ],
+      "example_phrases": [
+        "The Diamond Model helped me connect what initially looked like two separate incidents - same infrastructure ASN and a TTP overlap with previously attributed APT29 activity",
+        "This IP is going to be useless in 48 hours - it's rotating C2 infrastructure. The durable intelligence is the user agent string and the beacon interval pattern, which we mapped to T1071.001",
+        "I wrote a Priority Intelligence Requirement asking specifically about threat actors targeting financial services firms that use a specific legacy software stack - that's answerable. 'What are APTs doing?' is not",
+        "The confidence level on the attribution is low - three TTPs overlap with known actor X, but the infrastructure has no clear overlap, and TTPs are shared between multiple groups. I reported it as 'consistent with' not 'attributed to'",
+        "We built a MISP event cluster for the campaign, linked the indicators to the STIX attack patterns, and shared it with the ISAC under TLP:GREEN",
+        "Pivoting on the registrar from the initial phishing domain found 14 related domains registered in the same 72-hour window, giving us proactive blocking before the campaign launched against us"
+      ],
+      "red_flags": [
+        "Cannot explain the Diamond Model or apply it to an example",
+        "Has never written a finished intelligence report",
+        "Thinks attribution means identifying the exact hacker's name",
+        "Cannot explain what PIR stands for or how to write one",
+        "Has never pivoted on infrastructure beyond a single IOC lookup",
+        "Cannot distinguish between a Cobalt Strike beacon and proprietary APT tooling from traffic patterns",
+        "Does not understand confidence levels or how to communicate analytic uncertainty"
+      ],
+      "expected_tools": [
+        "MISP or OpenCTI (threat intelligence platform)",
+        "Shodan / Censys / Fofa (infrastructure research)",
+        "RiskIQ / PassiveTotal / SecurityTrails (passive DNS and historical infrastructure)",
+        "Maltego (OSINT pivoting and graphing)",
+        "ATT&CK Navigator (threat actor mapping)",
+        "STIX/TAXII clients",
+        "Recorded Future or similar TIP for enrichment"
+      ],
+      "expected_frameworks": [
+        "MITRE ATT&CK (technique mapping at analysis depth)",
+        "Diamond Model of Intrusion Analysis",
+        "Lockheed Martin Cyber Kill Chain",
+        "Intelligence Cycle (Planning, Collection, Processing, Analysis, Dissemination, Feedback)",
+        "TLP (Traffic Light Protocol)",
+        "STIX 2.1 object model"
+      ]
+    },
+    "senior": {
+      "score_range": [7, 8],
+      "label": "Senior CTI Analyst",
+      "characteristics": [
+        "Produces strategic intelligence products consumed by executives and board-level leadership",
+        "Leads threat actor tracking programs: maintains dossiers on threat actors relevant to the organization, tracks campaigns over time",
+        "Has conducted intrusion attribution analysis with documented reasoning chains and confidence assessments",
+        "Applies structured analytic techniques: Analysis of Competing Hypotheses (ACH), Devil's Advocate analysis",
+        "Understands the difference between attribution and identification - and why conflating them is dangerous",
+        "Has contributed intelligence to ISACs or government partners (FS-ISAC, H-ISAC, CISA)",
+        "Designs intelligence collection plans with specific sources, collection methods, and gap analysis",
+        "Can evaluate a vendor threat intelligence report and identify what's analysis vs. what's speculation",
+        "Understands big four intelligence tradecraft: key assumptions check, alternative futures, indicators and warnings",
+        "Has experience with counter-intelligence: recognizing when an adversary is manipulating your intelligence collection",
+        "Integrates threat intelligence into detection engineering: converts finished intel into Sigma rules, ATT&CK layers, or EDR custom rules",
+        "Tracks threat actor evolution over time and identifies when TTPs shift - important for detection refresh",
+        "Has experience in a sector-specific context: financial sector, healthcare, energy, government",
+        "Can design and execute a threat intelligence-driven red team use case",
+        "Has built intelligence-sharing relationships with peer organizations, law enforcement, or government agencies"
+      ],
+      "example_phrases": [
+        "I use Analysis of Competing Hypotheses when attribution is ambiguous - list all hypotheses, identify the diagnostically useful evidence for each, and force yourself to explain what evidence would disprove your preferred hypothesis",
+        "The threat actor pivoted their infrastructure every 72 hours - traditional IOC sharing was useless. I changed our collection to focus on behavioral fingerprints: the custom HTTP header, the certificate subject fields, the specific JA3 hash combination",
+        "The vendor report said 'APT40 with high confidence' but cited three TTPs that are used by at least six different Chinese state-sponsored groups. I assessed it as 'likely Chinese state-sponsored' with the caveat that the 'APT40' attribution was not supported by the evidence presented",
+        "I presented the board with a geo-political risk assessment of nation-state targeting of our sector. The strategic intelligence product connected their motivation (disrupting financial infrastructure during political tensions) to specific operational patterns we'd observed over 18 months",
+        "We saw the actor shift from spearphishing to supply chain compromise after two of their spearphishing campaigns were publicly attributed. That TTP evolution told us our detection strategy needed to follow - I updated our ATT&CK coverage and triggered a supply chain security review"
+      ],
+      "red_flags": [
+        "Has never produced a strategic intelligence product",
+        "Cannot explain ACH (Analysis of Competing Hypotheses) or apply it",
+        "Has never contributed to an ISAC or external intelligence sharing",
+        "Attributes threat actors without articulating confidence levels or competing hypotheses",
+        "Has never integrated threat intelligence findings into detection content",
+        "Cannot evaluate a vendor's attribution claim critically"
+      ],
+      "expected_tools": [
+        "Maltego with advanced transforms",
+        "OpenCTI / MISP with custom object types",
+        "Recorded Future / Mandiant Advantage / Intel 471",
+        "Network scanning and infrastructure analysis: Shodan API, Censys API, custom scripts",
+        "Structured analytic technique worksheets (ACH, SAT)",
+        "ATT&CK Navigator (custom layers for threat actor tracking)"
+      ],
+      "expected_frameworks": [
+        "Intelligence community tradecraft (structured analytic techniques)",
+        "Diamond Model (advanced application: activity threads, activity groups)",
+        "MITRE ATT&CK for Threat Intelligence (Group profiles, campaign tracking)",
+        "Kill Chain (targeting model and intelligence-driven defense)",
+        "STIX 2.1 / TAXII 2.1 (at developer/integration level)",
+        "TLP and PAP (Permissible Actions Protocol) for intelligence sharing"
+      ]
+    },
+    "staff": {
+      "score_range": [9, 10],
+      "label": "Staff / CTI Program Lead",
+      "characteristics": [
+        "Designs and leads the CTI program: requirements gathering, collection architecture, analyst workflow, product dissemination",
+        "Manages threat intelligence platform architecture and integration with SOC, IR, and detection engineering",
+        "Has government intelligence background or government partnership experience at the senior coordination level",
+        "Drives intelligence requirements from business stakeholders: translates business risk into intelligence collection priorities",
+        "Has published open-source threat research (blog posts, conference papers, public malware analysis)",
+        "Manages relationships with commercial threat intelligence vendors and evaluates their programs with rigor",
+        "Contributes to the development of the threat intelligence field: FIRST frameworks, ATT&CK contributions, CTI standards bodies",
+        "Has experience producing intelligence for M&A risk assessment, geopolitical risk, and strategic decision-making",
+        "Designs CTI metrics: intelligence actionability rate, indicator quality scoring, time from collection to operationalization",
+        "Has led joint investigations with law enforcement, government agencies, or IR retainer firms",
+        "Can build a threat-informed defense program: connecting CTI to red team prioritization, detection coverage, and IR playbook development",
+        "Understands the economics of threat intelligence: when to buy commercial intel vs. build in-house collection",
+        "Has experience communicating cyber threat intelligence to non-technical executives and board members"
+      ],
+      "example_phrases": [
+        "Our CTI program's primary customers are the detection team and the IR team - everything we produce has an explicit 'so what' and a recommended action. Reports nobody acts on aren't intelligence, they're research",
+        "I track our intelligence actionability rate: what percentage of finished products resulted in a detection update, an IR action, or a business decision. We target 70% and are at 65% currently",
+        "When evaluating commercial vendors, I ask for their collection methodology and how they handle source deconfliction. Most can't answer that. If they can't explain their sources, I can't assess their confidence",
+        "We designed the CTI program around our threat model, not around what threat actors are interesting. Ransomware operators targeting healthcare are boring to write about but they're what actually threatens us",
+        "I briefed the M&A team on cyber risk for three acquisition targets - the threat intelligence gave them leverage to negotiate a security remediation clause into one deal and kill another entirely based on active compromise indicators we found during due diligence"
+      ],
+      "red_flags": [
+        "Has no metrics for CTI program effectiveness",
+        "Cannot explain how intelligence should integrate with detection and IR teams",
+        "Has never evaluated a commercial threat intelligence vendor",
+        "Cannot explain how CTI supports a threat-informed defense program",
+        "Has no experience communicating CTI to executive or board-level audiences"
+      ],
+      "expected_tools": [
+        "Enterprise TIP: Recorded Future, Mandiant Advantage, MISP at admin level",
+        "Custom collection infrastructure: honeypots, domain monitoring, dark web monitoring",
+        "STIX/TAXII at integration and architecture level",
+        "Visualization tools: Maltego, custom graph databases (Neo4j)",
+        "OSINT automation platforms"
+      ],
+      "expected_frameworks": [
+        "Intelligence community standards (ICD 203, ICD 206 for analytic standards)",
+        "ATT&CK Threat Intelligence use case (threat group tracking, campaign analysis)",
+        "Diamond Model (program level: activity threads across campaigns over time)",
+        "CTI program maturity models",
+        "Threat-Informed Defense (MITRE Center for Threat-Informed Defense)",
+        "FIRST frameworks: TLP, CSIRT, Vulnerability Disclosure"
+      ]
+    }
+  },
+  "cross_cutting_signals": {
+    "positive": [
+      "Distinguishes between what they know, what they assess, and what they don't know",
+      "Communicates confidence levels when making intelligence judgments",
+      "Immediately asks 'for whom' when asked about intelligence - considers the consumer",
+      "Explains what intelligence is actionable and what is just interesting",
+      "Uses 'consistent with' rather than 'attributed to' when evidence is incomplete",
+      "References specific threat groups by their actual tracked names (APT29, FIN7, TA543) not vague labels",
+      "Understands that TTPs are more durable intelligence than IOCs",
+      "Connects intelligence to specific defensive actions (detections, IR playbooks, network blocks)"
+    ],
+    "negative": [
+      "Describes threat intelligence exclusively as collecting and blocking IOCs",
+      "Uses 'Russia' or 'China' as an attribution answer without any evidence chain",
+      "Cannot distinguish between tactical, operational, and strategic intelligence",
+      "Does not understand TLP or why intelligence sharing requires access controls",
+      "Thinks the Diamond Model is about diamonds or gemstones (no conceptual understanding)",
+      "Cannot explain what the intelligence cycle is",
+      "Has never produced a finished intelligence product",
+      "Cannot articulate why IOC-based intelligence decays quickly"
+    ]
+  }
+}
