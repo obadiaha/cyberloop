@@ -69,8 +69,8 @@ Cloud Run: FastAPI + Google ADK
 ### 1. Clone and configure
 
 ```bash
-git clone https://github.com/obadiaha/cyberinterviewer.git
-cd cyberinterviewer
+git clone https://github.com/obadiaha/cyberloop.git
+cd cyberloop
 cp .env.example .env
 # Edit .env and add your GEMINI_API_KEY
 ```
