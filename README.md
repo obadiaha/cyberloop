@@ -41,7 +41,7 @@ Cloud Run: FastAPI + Google ADK
         │
         ├──► /run-code (sandboxed Python execution, 10s timeout)
         │
-        └──► Cloud Firestore / Cloud Storage / Secret Manager
+        └──► Cloud Firestore (session persistence)
 ```
 
 ---
@@ -58,9 +58,8 @@ Cloud Run: FastAPI + Google ADK
 | Code Editor | Monaco Editor (@monaco-editor/react) |
 | Audio | WebAudio API + AudioWorklet (PCM16) |
 | Database | Cloud Firestore |
-| Storage | Cloud Storage |
 | Hosting | Cloud Run |
-| Secrets | Secret Manager |
+| CI/CD | Cloud Build + Artifact Registry |
 
 ---
 
@@ -159,9 +158,7 @@ The agent advances when you demonstrate depth, skips levels if you answer compre
 |---------|---------|
 | **Cloud Run** | Backend API + frontend hosting |
 | **Cloud Firestore** | Session state, scores, report cards |
-| **Cloud Storage** | Question trees, scoring rubrics |
-| **Secret Manager** | API key storage |
-| **Cloud Build** | Container builds |
+| **Cloud Build** | Container builds from source |
 | **Artifact Registry** | Docker image storage |
 
 ---
